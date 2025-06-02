@@ -1,0 +1,14 @@
+.idea
+frontend/node_modules
+backend/photoapp/auth
+backend/.virtualenvs/
+
+# Django stuff:
+*.log
+backend/photoapp/db.sqlite3
+backend/photoapp/photoapp
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
