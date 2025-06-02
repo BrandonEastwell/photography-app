@@ -1,6 +1,5 @@
 .idea
 frontend/node_modules
-backend/photoapp/auth
 backend/.virtualenvs/
 
 # Django stuff:
