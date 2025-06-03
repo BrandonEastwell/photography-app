@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse, JsonResponse
-from django.contrib.auth import get_user_model
 
 env = environ.Env()
 
@@ -65,7 +64,7 @@ def login_user(req):
     user.last_login = datetime.datetime.now()
     user.save()
 
-    token = jwt.encode({ "username": user.id }, env("JWT_SECRET"), algorithm="HS256")
+    token = jwt.encode({ "user_id": user.id }, env("JWT_SECRET"), algorithm="HS256")
     print(str(token))
 
     response.set_cookie(key="AUTH_TOKEN", value=str(token), max_age=env('AUTH_TOKEN_AGE'), samesite="Strict", httponly=True)
