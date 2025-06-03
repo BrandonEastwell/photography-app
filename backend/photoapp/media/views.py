@@ -1,14 +1,12 @@
-import os
-
 import jwt
 from django.http import JsonResponse, HttpRequest
 from PIL import Image
-from PIL.ExifTags import TAGS
-from backend.photoapp.media.models import Photo
+from PIL.ExifTags import TAGS, GPSTAGS
+from backend.photoapp.media.models import Photo, Camera, Lens
+from django.contrib.gis.geos import Point, MultiPoint
 
 import environ
 env = environ.Env()
-
 
 def image_upload(req):
     if req.method != "POST":
@@ -26,7 +24,7 @@ def image_upload(req):
     image = Image.open(image_file)
     exif_data = image.getexif()
 
-    required_tags = ["Make", "Model"]
+    required_tags = ["Make", "Model", "GPSInfo"]
     image_tags = {
         "Make": None,
         "Model": None,
@@ -57,5 +55,27 @@ def image_upload(req):
     if len(missing_tags) > 0:
         return JsonResponse( { "missing_tags": missing_tags, "error": "Missing tags from image" }, status=400 )
 
-    photo = Photo.objects.create(user_id=user_data["user_id"], image=image_file)
+    gps_info = {}
+    for key in image_tags["GPSInfo"]:
+            decode = GPSTAGS.get(key, key)
+            gps_info[decode] = image_tags["GPSInfo"][key]
 
+    gps_lat = Point(gps_info['GPSLatitude'])
+    gps_lon = Point(gps_info['GPSLongitude'])
+
+    camera_model = Camera.objects.get(camera_model=image_tags["Model"])
+    if camera_model is None:
+        camera_model = Camera.objects.create(camera_model=image_tags["Model"], camera_make=image_tags["Make"])
+
+
+    photo = Photo.objects.create(user_id=user_data["user_id"], image=image_file)
+    photo.camera = camera_model
+    photo.location = MultiPoint(gps_lat, gps_lon)
+    photo.f_stop = image_tags['FNumber']
+    photo.flash = image_tags['Flash']
+    photo.focal_length = image_tags['FocalLength']
+    photo.aperture = image_tags['ApertureValue']
+    photo.ISO = image_tags['ISOSpeedRatings']
+    photo.created_at = image_tags['DateTimeOriginal']
+    photo.shutter = image_tags['ShutterSpeedValue']
+    photo.save()
