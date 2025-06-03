@@ -6,6 +6,7 @@ backend/.virtualenvs/
 *.log
 backend/photoapp/db.sqlite3
 backend/photoapp/photoapp
+backend/photoapp/.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
