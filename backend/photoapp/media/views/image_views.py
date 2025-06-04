@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import jwt
 from django.http import JsonResponse, HttpRequest, HttpResponseNotAllowed
 from PIL import Image
@@ -26,7 +27,7 @@ class ImagesView(View):
     # flash
     # aperture
 
-    # URL params e.g. /images?sort=ascending&filters=true&location=44.4647452,7.3553838&limit=20&page=1
+    # URL params e.g. /images?sort_by_popularity=trending&sort_by_time=this_week&filters=true&location=44.4647452,7.3553838&limit=20&page=1
     def get(self, req):
         filters = req.GET.get("filters")
         if not filters:
@@ -46,10 +47,9 @@ class ImagesView(View):
         }
 
         SORT_FIELDS_TIME = {
-            "this_week",
-            "this_month",
-            "this_year",
-            "all_time"
+            "this_week": datetime.now() - timedelta(weeks=1),
+            "this_month": datetime.now() - timedelta(weeks=4),
+            "this_year": datetime.now() - timedelta(weeks=56),
         }
 
         SORT_FIELDS_POPULARITY = {
@@ -58,17 +58,21 @@ class ImagesView(View):
             "top",
         }
 
-        max_distance = 1000
-        distance = 2
-        while distance < max_distance:
-            filtered_by_location = Photo.objects.filter(location__distance_lte=(filter_options["location"], D(m=distance))).values("id", "image", "user_id").order_by()[:items_limit]
-            if filtered_by_location.count() == items_limit:
-                break
-            distance *= 2
+        images = Photo.objects.all()
 
+        if filter_options["location"]:
+            max_distance = 1000
+            distance = 2
+            while distance < max_distance:
+                images = Photo.objects.filter(location__distance_lte=(filter_options["location"], D(m=distance))).values("id", "image", "user_id")
+                if images.count() == items_limit:
+                    break
+                distance *= 2
 
-
-
+        sort_by_time = req.GET.get("sort_by_time")
+        time = SORT_FIELDS_TIME[sort_by_time]
+        if time:
+            images = images.filter(uploaded_at__gte=time)
 
 
 def get_location(coordinates):

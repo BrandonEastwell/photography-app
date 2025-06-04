@@ -3,9 +3,6 @@ import datetime
 from django.contrib.gis.db import models as geomodels
 from django.db import models
 
-def cur_time():
-    return datetime.datetime.now()
-
 class Camera(models.Model):
     id = models.AutoField(primary_key=True)
     camera_make = models.CharField(max_length=25, blank=False)
@@ -29,5 +26,5 @@ class Photo(models.Model):
     aperture = models.DecimalField(null=True)
     flash = models.BooleanField(default=False)
     taken_at = models.DateTimeField()
-    uploaded_at = models.DateTimeField(default=cur_time())
+    uploaded_at = models.DateTimeField(auto_now_add=True)
     total_votes = models.IntegerField(default=0, null=False)
