@@ -1,18 +1,90 @@
 import jwt
-from django.http import JsonResponse, HttpRequest
+from django.http import JsonResponse, HttpRequest, HttpResponseNotAllowed
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
+from django.views import View
+from django.contrib.gis.measure import D
+
 from backend.photoapp.media.models import Photo, Camera, Lens
 from django.contrib.gis.geos import Point, MultiPoint
 
 import environ
 env = environ.Env()
 
-def image_upload(req):
-    if req.method != "POST":
-        return JsonResponse( { "error": "Request method invalid." }, status=405 )
 
-    encoded_jwt = HttpRequest.COOKIES.get("AUTH_TOKEN")
+class ImagesView(View):
+    def post(self, req):
+        image_upload(req)
+
+    # Filter options
+    # location
+    # camera
+    # lens
+    # ISO
+    # shutter_speed
+    # focal_length
+    # flash
+    # aperture
+
+    # URL params e.g. /images?sort=ascending&filters=true&location=44.4647452,7.3553838&limit=20&page=1
+    def get(self, req):
+        filters = req.GET.get("filters")
+        if not filters:
+            # if no filters applied, return content based on users gear
+            # if no user gear found, return any content
+
+        items_limit = req.GET.get("limit")
+        filter_options = {
+            "location": get_location(req.GET.get("location")),
+            "camera": req.GET.get("camera"),
+            "lens": req.GET.get("lens"),
+            "ISO": req.GET.get("ISO"),
+            "shutter_speed": req.GET.get("shutter_speed"),
+            "focal_length": req.GET.get("focal_length"),
+            "flash": req.GET.get("flash"),
+            "aperture": req.GET.get("aperture")
+        }
+
+        SORT_FIELDS_TIME = {
+            "this_week",
+            "this_month",
+            "this_year",
+            "all_time"
+        }
+
+        SORT_FIELDS_POPULARITY = {
+            "trending",
+            "newest",
+            "top",
+        }
+
+        max_distance = 1000
+        distance = 2
+        while distance < max_distance:
+            filtered_by_location = Photo.objects.filter(location__distance_lte=(filter_options["location"], D(m=distance))).values("id", "image", "user_id").order_by()[:items_limit]
+            if filtered_by_location.count() == items_limit:
+                break
+            distance *= 2
+
+
+
+
+
+
+def get_location(coordinates):
+    if coordinates is None:
+        return JsonResponse( { "error": "You must have a location set" }, status=404 )
+
+    lat_str, lon_str = coordinates.split(",")
+    latitude = float(lat_str.strip())
+    longitude = float(lon_str.strip())
+
+    return Point(latitude, longitude)
+
+
+
+def image_upload(req):
+    encoded_jwt = req.COOKIES.get("AUTH_TOKEN")
     if encoded_jwt is None:
         return JsonResponse( { "error": "You must be logged in to upload photos" }, status=404 )
 
@@ -67,12 +139,16 @@ def image_upload(req):
     if camera_model is None:
         camera_model = Camera.objects.create(camera_model=image_tags["Model"], camera_make=image_tags["Make"])
 
+    lens_model = Lens.objects.get(lens_model=image_tags["LensModel"])
+    if lens_model is None:
+        lens_model = Lens.objects.create(lens_model=image_tags["LensModel"])
 
     photo = Photo.objects.create(user_id=user_data["user_id"], image=image_file)
     photo.camera = camera_model
+    photo.lens = lens_model
     photo.location = MultiPoint(gps_lat, gps_lon)
     photo.f_stop = image_tags['FNumber']
-    photo.flash = image_tags['Flash']
+    photo.flash = image_tags['Flash'] not in (0, None)
     photo.focal_length = image_tags['FocalLength']
     photo.aperture = image_tags['ApertureValue']
     photo.ISO = image_tags['ISOSpeedRatings']

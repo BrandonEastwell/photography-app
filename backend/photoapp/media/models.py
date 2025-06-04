@@ -1,5 +1,10 @@
+import datetime
+
 from django.contrib.gis.db import models as geomodels
 from django.db import models
+
+def cur_time():
+    return datetime.datetime.now()
 
 class Camera(models.Model):
     id = models.AutoField(primary_key=True)
@@ -8,20 +13,21 @@ class Camera(models.Model):
 
 class Lens(models.Model):
     id = models.AutoField(primary_key=True)
-    lens_make = models.CharField(max_length=25, blank=False)
     lens_model = models.CharField(max_length=25, blank=False, unique=True, db_index=True)
 
 class Photo(models.Model):
     id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey('accounts.CustomUser', on_delete=models.CASCADE)
+    user_id = models.ForeignKey('accounts.CustomUser', on_delete=models.CASCADE, null=False)
     image = models.ImageField(upload_to='photos/', null=False, blank=False)
-    location = geomodels.MultiPointField(geography=True, null=True, blank=True)
+    location = geomodels.MultiPointField(geography=True, null=False, blank=True)
     camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)
     lens = models.ForeignKey(Lens, on_delete=models.SET_NULL, null=True)
-    f_stop = models.CharField(max_length=25, blank=False)
-    ISO = models.IntegerField(blank=False)
-    shutter_speed = models.DecimalField(blank=False)
-    focal_length = models.DecimalField(blank=False)
-    aperture = models.DecimalField(blank=False)
+    f_stop = models.CharField(max_length=25, null=True)
+    ISO = models.IntegerField(null=True)
+    shutter_speed = models.DecimalField(null=True)
+    focal_length = models.DecimalField(null=True)
+    aperture = models.DecimalField(null=True)
     flash = models.BooleanField(default=False)
-    created_at = models.DateTimeField()
+    taken_at = models.DateTimeField()
+    uploaded_at = models.DateTimeField(default=cur_time())
+    total_votes = models.IntegerField(default=0, null=False)

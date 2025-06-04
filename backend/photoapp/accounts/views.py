@@ -6,13 +6,13 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 
 env = environ.Env()
 
 def create_user(req):
     if req.method != "POST":
-        return JsonResponse( { "error": "Request method invalid." }, status=405 )
+        return HttpResponseNotAllowed(["POST"])
 
     data = req.POST
     first_name = data.get('firstName')
@@ -39,7 +39,7 @@ def create_user(req):
 
 def login_user(req):
     if req.method != "POST":
-        return JsonResponse( { "error": "Request method invalid." }, status=405 )
+        return HttpResponseNotAllowed(["POST"])
 
     login_attempts = req.COOKIES["LOGIN_ATTEMPTS"]
     if login_attempts >= 10:
@@ -73,4 +73,4 @@ def login_user(req):
 
 def logout_user(req):
     if req.method != "POST":
-        return JsonResponse( { "error": "Request method invalid." }, status=405 )
+        return HttpResponseNotAllowed(["POST"])
