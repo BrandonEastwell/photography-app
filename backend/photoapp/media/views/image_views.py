@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import jwt
+from django.db.models import Case, When, Value, Q, Sum, IntegerField
 from django.http import JsonResponse, HttpRequest, HttpResponseNotAllowed
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
@@ -17,28 +18,48 @@ class ImagesView(View):
     def post(self, req):
         image_upload(req)
 
-    # Filter options
-    # location
-    # camera
-    # lens
-    # ISO
-    # shutter_speed
-    # focal_length
-    # flash
-    # aperture
-
     # URL params e.g. /images?sort_by_popularity=trending&sort_by_time=this_week&filters=true&location=44.4647452,7.3553838&limit=20&page=1
     def get(self, req):
+        SORT_FIELDS_TIME = {
+            "this_week": datetime.now() - timedelta(weeks=1),
+            "this_month": datetime.now() - timedelta(weeks=4),
+            "this_year": datetime.now() - timedelta(weeks=56),
+        }
+        SORT_FIELDS_POPULARITY = {
+            "trending",
+            "top",
+        }
+
         filters = req.GET.get("filters")
         if not filters:
             # if no filters applied, return content based on users gear
             # if no user gear found, return any content
 
         items_limit = req.GET.get("limit")
+        images = Photo.objects.all()
+
+        # Sort photos by location
+        location = get_location(req.GET.get("location")),
+        if location:
+            max_distance = 1000
+            distance = 2
+            while distance < max_distance:
+                images = Photo.objects.filter(location__distance_lte=(location, D(m=distance)))
+                if images.count() >= items_limit:
+                    break
+                distance *= 2
+
+        # Sort photos by time period
+        sort_by_time = req.GET.get("sort_by_time")
+        time = SORT_FIELDS_TIME[sort_by_time]
+        if time:
+            images = images.filter(uploaded_at__gte=time)
+
+
+        # TODO Filter options need to be sanitized + check if lens and camera exist in DB (predefined options)
         filter_options = {
-            "location": get_location(req.GET.get("location")),
-            "camera": req.GET.get("camera"),
-            "lens": req.GET.get("lens"),
+            "camera__model": req.GET.get("camera"),
+            "lens__model": req.GET.get("lens"),
             "ISO": req.GET.get("ISO"),
             "shutter_speed": req.GET.get("shutter_speed"),
             "focal_length": req.GET.get("focal_length"),
@@ -46,33 +67,32 @@ class ImagesView(View):
             "aperture": req.GET.get("aperture")
         }
 
-        SORT_FIELDS_TIME = {
-            "this_week": datetime.now() - timedelta(weeks=1),
-            "this_month": datetime.now() - timedelta(weeks=4),
-            "this_year": datetime.now() - timedelta(weeks=56),
-        }
+        conditions = []
+        for field, value in filter_options.items():
+            if value:
+                if field == "camera__model":
+                    conditions.append(When(Q(camera__model=value), then=Value(4)))
+                elif field == "lens__model":
+                    conditions.append(When(Q(lens__model=value), then=Value(4)))
+                elif field == "ISO":
+                    # ISO Bucket match
+                    conditions.append(When(Q(ISO__lte=value+100) & Q(ISO__gte=value-100), then=value(3)))
+                elif field == "focal_length":
+                    conditions.append(When(Q(focal_length=value), then=Value(3)))
+                elif field == "shutter_speed":
+                    # ISO Bucket match
+                    conditions.append(When(Q(shutter_speed__lte=value+(value/2)) & Q(shutter_speed__gte=value-(value/2)), then=value(2)))
+                else:
+                    conditions.append(When(Q(**{field: value}), then=Value(1)))
 
-        SORT_FIELDS_POPULARITY = {
-            "trending",
-            "newest",
-            "top",
-        }
+        if conditions:
+            images.annotate(relevance=Sum(
+                Case(*conditions, output_field=IntegerField())
+            )).order_by("-relevance")
 
-        images = Photo.objects.all()
 
-        if filter_options["location"]:
-            max_distance = 1000
-            distance = 2
-            while distance < max_distance:
-                images = Photo.objects.filter(location__distance_lte=(filter_options["location"], D(m=distance))).values("id", "image", "user_id")
-                if images.count() == items_limit:
-                    break
-                distance *= 2
 
-        sort_by_time = req.GET.get("sort_by_time")
-        time = SORT_FIELDS_TIME[sort_by_time]
-        if time:
-            images = images.filter(uploaded_at__gte=time)
+
 
 
 def get_location(coordinates):
