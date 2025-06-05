@@ -38,7 +38,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "accounts",
+    'corsheaders',
+    'accounts',
     'storages',
     'media',
     'django.contrib.gis',
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -59,6 +61,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOW_CREDENTIALS = True
+# change to https://app.example.com in production settings
+CORS_ORIGIN_WHITELIST = [env("CORS_ORIGIN")]
+CSRF_TRUSTED_ORIGINS = [env("CORS_ORIGIN")]
 
 ROOT_URLCONF = 'photoapp.urls'
 
@@ -94,7 +101,6 @@ DATABASES = {
 }
 
 # AWS S3 Storage Config
-
 AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")

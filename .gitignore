@@ -4,7 +4,6 @@ backend/.virtualenvs/
 
 # Django stuff:
 *.log
-backend/photoapp/db.sqlite3
 backend/photoapp/photoapp
 backend/photoapp/.env
 
