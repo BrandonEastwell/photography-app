@@ -13,88 +13,6 @@ from django.contrib.gis.geos import Point, MultiPoint
 import environ
 env = environ.Env()
 
-
-class ImagesView(View):
-    def post(self, req):
-        image_upload(req)
-
-    # URL params e.g. /images?sort_by_popularity=trending&sort_by_time=this_week&filters=true&location=44.4647452,7.3553838&limit=20&page=1
-    def get(self, req):
-        SORT_FIELDS_TIME = {
-            "this_week": datetime.now() - timedelta(weeks=1),
-            "this_month": datetime.now() - timedelta(weeks=4),
-            "this_year": datetime.now() - timedelta(weeks=56),
-        }
-        SORT_FIELDS_POPULARITY = {
-            "trending",
-            "top",
-        }
-
-        filters = req.GET.get("filters")
-        if not filters:
-            # if no filters applied, return content based on users gear
-            # if no user gear found, return any content
-
-        items_limit = req.GET.get("limit")
-        images = Photo.objects.all()
-
-        # Sort photos by location
-        location = get_location(req.GET.get("location")),
-        if location:
-            max_distance = 1000
-            distance = 2
-            while distance < max_distance:
-                images = Photo.objects.filter(location__distance_lte=(location, D(m=distance)))
-                if images.count() >= items_limit:
-                    break
-                distance *= 2
-
-        # Sort photos by time period
-        sort_by_time = req.GET.get("sort_by_time")
-        time = SORT_FIELDS_TIME[sort_by_time]
-        if time:
-            images = images.filter(uploaded_at__gte=time)
-
-
-        # TODO Filter options need to be sanitized + check if lens and camera exist in DB (predefined options)
-        filter_options = {
-            "camera__model": req.GET.get("camera"),
-            "lens__model": req.GET.get("lens"),
-            "ISO": req.GET.get("ISO"),
-            "shutter_speed": req.GET.get("shutter_speed"),
-            "focal_length": req.GET.get("focal_length"),
-            "flash": req.GET.get("flash"),
-            "aperture": req.GET.get("aperture")
-        }
-
-        conditions = []
-        for field, value in filter_options.items():
-            if value:
-                if field == "camera__model":
-                    conditions.append(When(Q(camera__model=value), then=Value(4)))
-                elif field == "lens__model":
-                    conditions.append(When(Q(lens__model=value), then=Value(4)))
-                elif field == "ISO":
-                    # ISO Bucket match
-                    conditions.append(When(Q(ISO__lte=value+100) & Q(ISO__gte=value-100), then=value(3)))
-                elif field == "focal_length":
-                    conditions.append(When(Q(focal_length=value), then=Value(3)))
-                elif field == "shutter_speed":
-                    # ISO Bucket match
-                    conditions.append(When(Q(shutter_speed__lte=value+(value/2)) & Q(shutter_speed__gte=value-(value/2)), then=value(2)))
-                else:
-                    conditions.append(When(Q(**{field: value}), then=Value(1)))
-
-        if conditions:
-            images.annotate(relevance=Sum(
-                Case(*conditions, output_field=IntegerField())
-            )).order_by("-relevance")
-
-
-
-
-
-
 def get_location(coordinates):
     if coordinates is None:
         return JsonResponse( { "error": "You must have a location set" }, status=404 )
@@ -105,6 +23,98 @@ def get_location(coordinates):
 
     return Point(latitude, longitude)
 
+def sort_media_by_location(query_set, location, items_min):
+    max_distance = 1000
+    distance = 2
+    while distance < max_distance:
+        query_set = query_set.objects.filter(location__distance_lte=(location, D(m=distance)))
+        if query_set.count() >= items_min:
+            break
+        distance *= 2
+    return query_set
+
+def sort_media_by_time(query_set, time_period):
+    SORT_FIELDS_TIME = {
+        "this_week": datetime.now() - timedelta(weeks=1),
+        "this_month": datetime.now() - timedelta(weeks=4),
+        "this_year": datetime.now() - timedelta(weeks=56),
+    }
+
+    # Sort photos by time period
+    time = SORT_FIELDS_TIME[time_period]
+    if time:
+        query_set = query_set.filter(uploaded_at__gte=time)
+        return query_set
+
+def get_filters_from_url(req):
+    # TODO Filter options need to be sanitized + check if lens and camera exist in DB (predefined options)
+    filter_options = {
+        "camera__model": req.GET.get("camera"),
+        "lens__model": req.GET.get("lens"),
+        "ISO": req.GET.get("ISO"),
+        "shutter_speed": req.GET.get("shutter_speed"),
+        "focal_length": req.GET.get("focal_length"),
+        "flash": req.GET.get("flash"),
+        "aperture": req.GET.get("aperture")
+    }
+
+    return filter_options
+
+def sort_media_by_exif(query_set, filters):
+    # Sort photos by EXIF data
+    conditions = []
+    for field, value in filters.items():
+        if value:
+            if field == "camera__model":
+                conditions.append(When(Q(camera__model=value), then=Value(4)))
+            elif field == "lens__model":
+                conditions.append(When(Q(lens__model=value), then=Value(4)))
+            elif field == "ISO":
+                # ISO Bucket match
+                conditions.append(When(Q(ISO__lte=value+100) & Q(ISO__gte=value-100), then=value(3)))
+            elif field == "focal_length":
+                conditions.append(When(Q(focal_length=value), then=Value(3)))
+            elif field == "shutter_speed":
+                # ISO Bucket match
+                conditions.append(When(Q(shutter_speed__lte=value+(value/2)) & Q(shutter_speed__gte=value-(value/2)), then=value(2)))
+            else:
+                conditions.append(When(Q(**{field: value}), then=Value(1)))
+
+    if conditions:
+        query_set.annotate(relevance=Sum(
+            Case(*conditions, output_field=IntegerField())
+        ))
+        return query_set.order_by("-relevance", "-total_votes")
+
+
+class ImagesView(View):
+    def post(self, req):
+        return image_upload(req)
+
+    # URL params e.g. /images?sort_by_popularity=trending&sort_by_time=this_week&location=44.4647452,7.3553838&limit=20&page=1
+    def get(self, req):
+        SORT_FIELDS_POPULARITY = {
+            "relevance",
+            "trending",
+            "top",
+        }
+
+        items_limit = req.GET.get("limit")
+        images = Photo.objects.all()
+
+        # Sort photos by location
+        location = get_location(req.GET.get("location"))
+        if location:
+            images = sort_media_by_location(images, location, items_limit)
+
+        # Sort photos by time period
+        time_period = req.GET.get("sort_by_time")
+        images = sort_media_by_time(images, time_period)
+
+        # Sort photos by EXIF data
+        filter_options = get_filters_from_url(req)
+        images = sort_media_by_exif(images, filter_options)
+        return JsonResponse(images[:items_limit], status=200)
 
 
 def image_upload(req):
