@@ -7,7 +7,7 @@ from PIL.ExifTags import TAGS, GPSTAGS
 from django.views import View
 from django.contrib.gis.measure import D
 
-from backend.photoapp.media.models import Photo, Camera, Lens
+from ..models import Photo, Camera, Lens
 from django.contrib.gis.geos import Point, MultiPoint
 
 import environ

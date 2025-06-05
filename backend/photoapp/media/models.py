@@ -1,5 +1,3 @@
-import datetime
-
 from django.contrib.gis.db import models as geomodels
 from django.db import models
 
@@ -21,9 +19,9 @@ class Photo(models.Model):
     lens = models.ForeignKey(Lens, on_delete=models.SET_NULL, null=True)
     f_stop = models.CharField(max_length=25, null=True)
     ISO = models.IntegerField(null=True)
-    shutter_speed = models.DecimalField(null=True)
-    focal_length = models.DecimalField(null=True)
-    aperture = models.DecimalField(null=True)
+    shutter_speed = models.CharField(max_length=10, null=True)
+    focal_length = models.IntegerField(null=True)
+    aperture = models.DecimalField(max_digits=4, decimal_places=2, null=True)
     flash = models.BooleanField(default=False)
     taken_at = models.DateTimeField()
     uploaded_at = models.DateTimeField(auto_now_add=True)

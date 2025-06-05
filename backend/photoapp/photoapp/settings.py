@@ -21,6 +21,8 @@ environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal310.dll"
+GEOS_LIBRARY_PATH = r"C:\OSGeo4W\bin\geos_c.dll"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -32,8 +34,6 @@ SECRET_KEY = 'django-insecure-o5)9cyx=@62omlu&bp3=w8xo*jfy2m-a^og+8n&936-&$+^(*8
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Application definition
 
@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'photoapp.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'photoapp_db',
         'USER': 'admin',
         'PASSWORD': 'password',
@@ -95,9 +95,9 @@ DATABASES = {
 
 # AWS S3 Storage Config
 
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
 
 AWS_S3_REGION_NAME = 'eu-west-2'
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
@@ -126,6 +126,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
