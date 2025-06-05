@@ -1,41 +1,44 @@
 import datetime
+import logging
 
 import environ
 import jwt
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 env = environ.Env()
 
 def create_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    data = req.POST
-    first_name = data.get('firstName')
-    last_name = data.get('lastName')
-    username = data.get('username')
-    password = data.get('password')
-
-    user_exists = User.objects.get(username)
-    if user_exists:
-        return JsonResponse( { "error": "Username already exists" }, status=401 )
-
     try:
-        validate_password(password)
-    except ValidationError:
-        return JsonResponse( { "error": ValidationError }, status=401 )
+        data = req.POST
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        username = data.get('username')
+        password = data.get('password')
 
-    user = User.objects.create_user(username, password)
-    user.first_name = first_name
-    user.last_name = last_name
-    user.date_joined = datetime.datetime.now()
-    user.save()
+        user_exists = User.objects.filter(username=username).exists()
+        if user_exists:
+            return JsonResponse( { "error": "Username already exists" }, status=401 )
 
-    return JsonResponse( { "message": "Successfully registered account" })
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            return JsonResponse( { "error": e.error_list[0].message }, status=401 )
+
+        User.objects.create_user(first_name=first_name, last_name=last_name, username=username, password=password)
+
+        return JsonResponse( { "message": "Successfully registered account" })
+
+    except Exception as e:
+        logging.exception(e)
+        return JsonResponse({ "error": "Internal Server Error" }, status=500)
 
 def login_user(req):
     if req.method != "POST":
