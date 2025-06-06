@@ -64,8 +64,8 @@ MIDDLEWARE = [
 
 CORS_ALLOW_CREDENTIALS = True
 # change to https://app.example.com in production settings
-CORS_ORIGIN_WHITELIST = [env("CORS_ORIGIN")]
-CSRF_TRUSTED_ORIGINS = [env("CORS_ORIGIN")]
+CORS_ORIGIN_WHITELIST = [env("ORIGIN")]
+CSRF_TRUSTED_ORIGINS = [env("ORIGIN")]
 
 ROOT_URLCONF = 'photoapp.urls'
 

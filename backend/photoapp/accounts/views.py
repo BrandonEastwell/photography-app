@@ -1,10 +1,12 @@
+import datetime
+import json
 import logging
 import environ
 import jwt
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
@@ -43,41 +45,54 @@ def login_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
+    # Checks for a JWT
     jwt_token = req.COOKIES.get("AUTH_TOKEN")
     if jwt_token is not None:
         return JsonResponse({ "message": "You are already logged in to an account." }, status=200)
 
+    # Validates login attempts
     login_attempts = req.COOKIES.get("LOGIN_ATTEMPTS")
-    if login_attempts is not None and login_attempts >= 10:
+    if login_attempts is not None and int(login_attempts) >= 10:
         return JsonResponse({ "error": "Too many login attempts, try again later." }, status=400)
 
     try:
-        response = HttpResponse()
+        response = HttpResponse(content_type="application/json")
         username = req.POST.get('username')
         password = req.POST.get('password')
 
         user = authenticate(username=username, password=password)
         if user is None:
             if login_attempts is None:
-                response.set_cookie(key="LOGIN_ATTEMPTS", value="1", max_age=env('LOGIN_COOLDOWN'), samesite="Strict", httponly=True)
+                response.set_cookie(key="LOGIN_ATTEMPTS", value="1", max_age=int(env('LOGIN_COOLDOWN')), samesite="Strict", httponly=True)
             else:
-                response.set_cookie(key="LOGIN_ATTEMPTS", value=str(int(login_attempts)+1), max_age=env('LOGIN_COOLDOWN'), samesite="Strict", httponly=True)
+                response.set_cookie(key="LOGIN_ATTEMPTS", value=str(int(login_attempts)+1), max_age=int(env('LOGIN_COOLDOWN')), samesite="Strict", httponly=True)
 
-            response.content({ "error": "Invalid username or password" })
+            response.write(json.dumps({ "error": "Invalid username or password.", "login_attempts": str(login_attempts) }))
             response.status_code = 401
             return response
 
+        token = jwt.encode({ "user_id": user.id, "exp": datetime.datetime.now() + datetime.timedelta(minutes=15) }, env("JWT_SECRET"), algorithm="HS256")
+        response.set_cookie(key="AUTH_TOKEN", value=str(token), max_age=int(env('AUTH_TOKEN_AGE')), samesite="Strict", httponly=True)
+        response.write(json.dumps({ "message": "You have successfully logged in." }))
+        response.delete_cookie("LOGIN_ATTEMPTS")
+
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])
-
-        token = jwt.encode({ "user_id": user.id }, env("JWT_SECRET"), algorithm="HS256")
-
-        response.set_cookie(key="AUTH_TOKEN", value=str(token), max_age=int(env('AUTH_TOKEN_AGE')), samesite="Strict", httponly=True)
         return response
+
     except Exception as error:
         logging.exception(error)
-        return JsonResponse({ "error": "Internal Server Error" })
+        return JsonResponse({ "error": "Internal Server Error" }, status=500)
 
 def logout_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
+
+    jwt_token = req.COOKIES.get("AUTH_TOKEN")
+    if jwt_token is None:
+        return JsonResponse({ "message": "You are already logged out." }, status=200)
+
+    res = HttpResponseRedirect(env("ORIGIN"))
+    res.delete_cookie("AUTH_TOKEN")
+    res.status_code = 200
+    return res
