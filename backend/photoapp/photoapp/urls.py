@@ -21,6 +21,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("csrf", views.csrf),
+    path("session", views.create_session),
     path("api/accounts/", include('accounts.urls')),
     path("api/media/", include('media.urls'))
 ]

@@ -1,14 +1,17 @@
 import datetime
 import json
 import logging
+from datetime import timedelta
+
 import environ
 import jwt
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect, HttpRequest
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from models import Session
 
 User = get_user_model()
 env = environ.Env()
@@ -51,9 +54,14 @@ def login_user(req):
         return JsonResponse({ "message": "You are already logged in to an account." }, status=200)
 
     # Validates login attempts
-    login_attempts = req.COOKIES.get("LOGIN_ATTEMPTS")
+    login_attempts = req.session.get("login_attempts")
+    last_login = req.session.get("last_login")
+    req.session["last_login"] = timezone.now()
     if login_attempts is not None and int(login_attempts) >= 10:
-        return JsonResponse({ "error": "Too many login attempts, try again later." }, status=400)
+        if last_login + timedelta(hours=2) > timezone.now():
+            req.session["login_attempts"] = 0
+        else:
+            return JsonResponse({ "error": "Too many login attempts, try again later." }, status=400)
 
     try:
         response = HttpResponse(content_type="application/json")
@@ -62,11 +70,7 @@ def login_user(req):
 
         user = authenticate(username=username, password=password)
         if user is None:
-            if login_attempts is None:
-                response.set_cookie(key="LOGIN_ATTEMPTS", value="1", max_age=int(env('LOGIN_COOLDOWN')), samesite="Strict", httponly=True)
-            else:
-                response.set_cookie(key="LOGIN_ATTEMPTS", value=str(int(login_attempts)+1), max_age=int(env('LOGIN_COOLDOWN')), samesite="Strict", httponly=True)
-
+            req.session["login_attempts"] = login_attempts + 1
             response.write(json.dumps({ "error": "Invalid username or password.", "login_attempts": str(login_attempts) }))
             response.status_code = 401
             return response
@@ -74,7 +78,6 @@ def login_user(req):
         token = jwt.encode({ "user_id": user.id, "exp": datetime.datetime.now() + datetime.timedelta(minutes=15) }, env("JWT_SECRET"), algorithm="HS256")
         response.set_cookie(key="AUTH_TOKEN", value=str(token), max_age=int(env('AUTH_TOKEN_AGE')), samesite="Strict", httponly=True)
         response.write(json.dumps({ "message": "You have successfully logged in." }))
-        response.delete_cookie("LOGIN_ATTEMPTS")
 
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])

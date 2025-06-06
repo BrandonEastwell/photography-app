@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 import environ
+from django.conf.global_settings import SESSION_ENGINE
+
 # from django.conf.global_settings import AUTH_USER_MODEL
 
 # Initialise environment variables
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
     'accounts',
     'storages',
     'media',
+    'django.contrib.sessions',
     'django.contrib.gis',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -86,6 +89,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'photoapp.wsgi.application'
 
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -96,7 +101,7 @@ DATABASES = {
         'USER': 'admin',
         'PASSWORD': 'password',
         'HOST': 'localhost',
-        'PORT': '5432',        # default PostgreSQL port
+        'PORT': '5432',
     }
 }
 
