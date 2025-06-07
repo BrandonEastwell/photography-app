@@ -4,17 +4,29 @@ import logging
 from datetime import timedelta
 
 import environ
-import jwt
 from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect, HttpRequest
-from django.contrib.auth import get_user_model
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.utils import timezone
-from models import Session
+
+from .models import Session
+from ..lib.auth_helpers import create_jwt
 
 User = get_user_model()
 env = environ.Env()
+
+def get_user(req):
+    if req.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+
+    token = req.COOKIES.get("AUTH_TOKEN")
+    if token is None:
+        user_id = req.session.get("user_id")
+        if user_id is not None:
+
+
 
 def create_user(req):
     if req.method != "POST":
@@ -48,18 +60,18 @@ def login_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    # Checks for a JWT
-    jwt_token = req.COOKIES.get("AUTH_TOKEN")
-    if jwt_token is not None:
+    session_id = req.COOKIES.get("session_id")
+
+    # Checks if user is already logged in
+    user_session = Session.objects.get(id=session_id)
+    if user_session.user_id and user_session.expire_at < timezone.now():
         return JsonResponse({ "message": "You are already logged in to an account." }, status=200)
 
     # Validates login attempts
-    login_attempts = req.session.get("login_attempts")
-    last_login = req.session.get("last_login")
-    req.session["last_login"] = timezone.now()
-    if login_attempts is not None and int(login_attempts) >= 10:
-        if last_login + timedelta(hours=2) > timezone.now():
-            req.session["login_attempts"] = 0
+    user_session.last_login_attempt = timezone.now()
+    if user_session.login_attempts is not None and int(user_session.login_attempts) >= 10:
+        if user_session.last_login_attempt + timedelta(hours=2) > timezone.now():
+            user_session.login_attempts = 0
         else:
             return JsonResponse({ "error": "Too many login attempts, try again later." }, status=400)
 
@@ -70,14 +82,18 @@ def login_user(req):
 
         user = authenticate(username=username, password=password)
         if user is None:
-            req.session["login_attempts"] = login_attempts + 1
-            response.write(json.dumps({ "error": "Invalid username or password.", "login_attempts": str(login_attempts) }))
+            user_session.login_attempts = user_session.login_attempts + 1
+            response.write(json.dumps({ "error": "Invalid username or password.", "login_attempts": str(user_session.login_attempts) }))
             response.status_code = 401
             return response
 
-        token = jwt.encode({ "user_id": user.id, "exp": datetime.datetime.now() + datetime.timedelta(minutes=15) }, env("JWT_SECRET"), algorithm="HS256")
-        response.set_cookie(key="AUTH_TOKEN", value=str(token), max_age=int(env('AUTH_TOKEN_AGE')), samesite="Strict", httponly=True)
+        create_jwt(response, user.id)
         response.write(json.dumps({ "message": "You have successfully logged in." }))
+
+        # Create session cookie to revalidate JWT
+        session_expiry = timezone.now() + datetime.timedelta(weeks=1)
+        session_refresh = Session.objects.update_or_create(user_id=user.id, login_attempts=0, expire_at=session_expiry)
+        response.set_cookie(key="session_id", value=str(session_refresh.id), max_age=datetime.timedelta(weeks=1), samesite="Lax", httponly=True)
 
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])

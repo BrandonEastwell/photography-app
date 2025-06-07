@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 import environ
-from django.conf.global_settings import SESSION_ENGINE
 
 # from django.conf.global_settings import AUTH_USER_MODEL
 
@@ -44,7 +43,6 @@ INSTALLED_APPS = [
     'accounts',
     'storages',
     'media',
-    'django.contrib.sessions',
     'django.contrib.gis',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -57,7 +55,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -88,8 +85,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'photoapp.wsgi.application'
-
-SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
