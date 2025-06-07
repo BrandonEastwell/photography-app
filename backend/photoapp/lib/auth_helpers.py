@@ -7,9 +7,9 @@ from accounts.models import Session
 from django.utils import timezone
 env = environ.Env()
 
-def create_session(response):
+def create_session(response, user_id=None):
     session_expiry = timezone.now() + timedelta(weeks=1)
-    session = Session.objects.update_or_create(login_attempts=0, expire_at=session_expiry)
+    session = Session.objects.update_or_create(user_id=user_id, login_attempts=0, expire_at=session_expiry)
     response.set_cookie(key="session_id", value=str(session.id), max_age=timedelta(weeks=1), samesite="Lax", httponly=True)
     return response
 

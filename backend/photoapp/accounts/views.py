@@ -12,10 +12,21 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, Http
 from django.utils import timezone
 
 from .models import Session
-from lib.auth_helpers import create_jwt
+from lib.auth_helpers import create_jwt, create_session
 
 User = get_user_model()
 env = environ.Env()
+
+def valid_login_attempt(session):
+    # Validates login attempts
+    session.last_login_attempt = timezone.now()
+    if session.login_attempts is not None and int(session.login_attempts) >= 10:
+        if session.last_login_attempt + timedelta(hours=2) > timezone.now():
+            session.login_attempts = 0
+        else:
+            return False
+    return True
+
 
 def get_user(req):
     if req.method != "GET":
@@ -24,7 +35,6 @@ def get_user(req):
     token = req.COOKIES.get("AUTH_TOKEN")
     if token is None:
         user_id = req.session.get("user_id")
-
 
 
 def create_user(req):
@@ -40,7 +50,7 @@ def create_user(req):
 
         user_exists = User.objects.filter(username=username).exists()
         if user_exists:
-            return JsonResponse( { "error": "Username is taken" }, status=409 )
+            return JsonResponse( { "error": "Username is taken." }, status=409 )
 
         try:
             validate_password(password)
@@ -49,11 +59,12 @@ def create_user(req):
 
         User.objects.create_user(first_name=first_name, last_name=last_name, username=username, password=password)
 
-        return JsonResponse( { "message": "Successfully registered account" })
+        return JsonResponse( { "message": "Successfully registered account." })
 
     except Exception as e:
         logging.exception(e)
         return JsonResponse({ "error": "Internal Server Error" }, status=500)
+
 
 def login_user(req):
     if req.method != "POST":
@@ -66,13 +77,9 @@ def login_user(req):
     if user_session.user_id and user_session.expire_at < timezone.now():
         return JsonResponse({ "message": "You are already logged in to an account." }, status=200)
 
-    # Validates login attempts
-    user_session.last_login_attempt = timezone.now()
-    if user_session.login_attempts is not None and int(user_session.login_attempts) >= 10:
-        if user_session.last_login_attempt + timedelta(hours=2) > timezone.now():
-            user_session.login_attempts = 0
-        else:
-            return JsonResponse({ "error": "Too many login attempts, try again later." }, status=400)
+    valid_login = valid_login_attempt(user_session)
+    if valid_login is False:
+        return JsonResponse({ "error": "Too many login attempts, try again later." }, status=400)
 
     try:
         response = HttpResponse(content_type="application/json")
@@ -90,9 +97,7 @@ def login_user(req):
         response.write(json.dumps({ "message": "You have successfully logged in." }))
 
         # Create session cookie to revalidate JWT
-        session_expiry = timezone.now() + datetime.timedelta(weeks=1)
-        session_refresh = Session.objects.update_or_create(user_id=user.id, login_attempts=0, expire_at=session_expiry)
-        response.set_cookie(key="session_id", value=str(session_refresh.id), max_age=datetime.timedelta(weeks=1), samesite="Lax", httponly=True)
+        create_session(response, user_session.user_id)
 
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])
@@ -101,6 +106,7 @@ def login_user(req):
     except Exception as error:
         logging.exception(error)
         return JsonResponse({ "error": "Internal Server Error" }, status=500)
+
 
 def logout_user(req):
     if req.method != "POST":
