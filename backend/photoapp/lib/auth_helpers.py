@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 import environ
 import jwt
 
-from ..accounts.models import Session
+from accounts.models import Session
 from django.utils import timezone
 env = environ.Env()
 

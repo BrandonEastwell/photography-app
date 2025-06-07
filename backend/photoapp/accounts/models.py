@@ -13,6 +13,6 @@ class CustomUser(AbstractUser):
 class Session(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)
     user_id = models.ForeignKey(CustomUser, null=True, on_delete=models.SET_NULL)
-    expire_at = models.DateTimeField(default=(timezone.now() + datetime.timedelta(weeks=1)))
+    expire_at = models.DateTimeField(null=False)
     login_attempts = models.SmallIntegerField(default=0)
     last_login_attempt = models.DateTimeField()

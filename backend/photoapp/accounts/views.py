@@ -12,7 +12,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, Http
 from django.utils import timezone
 
 from .models import Session
-from ..lib.auth_helpers import create_jwt
+from lib.auth_helpers import create_jwt
 
 User = get_user_model()
 env = environ.Env()
@@ -24,7 +24,6 @@ def get_user(req):
     token = req.COOKIES.get("AUTH_TOKEN")
     if token is None:
         user_id = req.session.get("user_id")
-        if user_id is not None:
 
 
 
