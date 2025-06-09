@@ -1,4 +1,3 @@
-import datetime
 import json
 import logging
 from datetime import timedelta
@@ -10,9 +9,9 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.utils import timezone
-
-from .models import Session
 from lib.auth_helpers import create_jwt, create_session
+
+from backend.photoapp.accounts.models import Session, Profile
 
 User = get_user_model()
 env = environ.Env()
@@ -26,15 +25,6 @@ def valid_login_attempt(session):
         else:
             return False
     return True
-
-
-def get_user(req):
-    if req.method != "GET":
-        return HttpResponseNotAllowed(["GET"])
-
-    token = req.COOKIES.get("AUTH_TOKEN")
-    if token is None:
-        user_id = req.session.get("user_id")
 
 
 def create_user(req):
@@ -57,7 +47,8 @@ def create_user(req):
         except ValidationError as e:
             return JsonResponse( { "error": e.error_list[0].message }, status=401 )
 
-        User.objects.create_user(first_name=first_name, last_name=last_name, username=username, password=password)
+        user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username, password=password)
+        Profile.objects.create(user=user)
 
         return JsonResponse( { "message": "Successfully registered account." })
 

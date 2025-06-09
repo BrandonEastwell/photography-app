@@ -9,6 +9,7 @@ from django.contrib.gis.measure import D
 
 from ..models import Photo, Camera, Lens
 from django.contrib.gis.geos import Point, MultiPoint
+from backend.photoapp.photoapp.middleware.auth_middleware import JWTAuthenticationMiddleware
 
 import environ
 env = environ.Env()
@@ -91,33 +92,42 @@ class ImagesView(View):
     def post(self, req):
         return image_upload(req)
 
-    # URL params e.g. /images?sort_by_popularity=trending&sort_by_time=this_week&location=44.4647452,7.3553838&limit=20&page=1
     def get(self, req):
-        SORT_FIELDS_POPULARITY = {
-            "relevance",
-            "trending",
-            "top",
-        }
+        return image_search(req)
 
-        items_limit = req.GET.get("limit")
-        images = Photo.objects.all()
+# URL params e.g. /images?sort_by_popularity=trending&sort_by_time=this_week&location=44.4647452,7.3553838&limit=20&page=1
+def image_search(req):
+    if req.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
 
-        # Sort photos by location
-        location = get_location(req.GET.get("location"))
-        if location:
-            images = sort_media_by_location(images, location, items_limit)
+    SORT_FIELDS_POPULARITY = {
+        "relevance",
+        "trending",
+        "top",
+    }
 
-        # Sort photos by time period
-        time_period = req.GET.get("sort_by_time")
-        images = sort_media_by_time(images, time_period)
+    items_limit = req.GET.get("limit")
+    images = Photo.objects.all()
 
-        # Sort photos by EXIF data
-        filter_options = get_filters_from_url(req)
-        images = sort_media_by_exif(images, filter_options)
-        return JsonResponse(images[:items_limit], status=200)
+    # Sort photos by location
+    location = get_location(req.GET.get("location"))
+    if location:
+        images = sort_media_by_location(images, location, items_limit)
 
+    # Sort photos by time period
+    time_period = req.GET.get("sort_by_time")
+    images = sort_media_by_time(images, time_period)
 
+    # Sort photos by EXIF data
+    filter_options = get_filters_from_url(req)
+    images = sort_media_by_exif(images, filter_options)
+    return JsonResponse(images[:items_limit], status=200)
+
+@JWTAuthenticationMiddleware
 def image_upload(req):
+    if req.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
     encoded_jwt = req.COOKIES.get("AUTH_TOKEN")
     if encoded_jwt is None:
         return JsonResponse( { "error": "You must be logged in to upload photos" }, status=404 )

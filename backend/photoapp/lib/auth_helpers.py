@@ -2,10 +2,9 @@ from datetime import timedelta, datetime
 
 import environ
 import jwt
-
 from accounts.models import Session
-from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
+
 env = environ.Env()
 
 def create_session(response, user_id=None):
@@ -22,20 +21,3 @@ def create_jwt(response, user_id):
     token = jwt.encode({ "user_id": user_id, "exp": expiry }, env("JWT_SECRET"), algorithm="HS256")
     response.set_cookie(key="auth_token", value=str(token), max_age=token_age, samesite="Lax", httponly=True)
     response.set_cookie(key="auth_token_exp", value=expiry, max_age=token_age)
-
-
-def refresh_jwt(req):
-    session = Session.objects.get(id=req.COOKIES.get("session_id"))
-
-    if session is None or session.expire_at < timezone.now():
-        # Recreate updated session cookie
-        response = HttpResponseRedirect("")
-        return create_session(response)
-
-    # If user is not logged in
-    if session.user_id is None:
-        return HttpResponseRedirect("")
-
-    response = HttpResponse()
-    create_jwt(response, session.user_id)
-    return response
