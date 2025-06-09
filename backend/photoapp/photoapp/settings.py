@@ -24,7 +24,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal310.dll"
 GEOS_LIBRARY_PATH = r"C:\OSGeo4W\bin\geos_c.dll"
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -43,11 +42,11 @@ INSTALLED_APPS = [
     'accounts',
     'storages',
     'media',
+    'django.contrib.sessions',
     'django.contrib.gis',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
@@ -55,12 +54,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'backend.photoapp.photoapp.middleware.auth_middleware.JWTAuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -86,6 +86,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'photoapp.wsgi.application'
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_COOKIE_AGE = 604800
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

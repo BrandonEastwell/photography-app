@@ -13,4 +13,4 @@ class Session(models.Model):
     user_id = models.ForeignKey(CustomUser, null=True, on_delete=models.SET_NULL)
     expire_at = models.DateTimeField(null=False)
     login_attempts = models.SmallIntegerField(default=0)
-    last_login_attempt = models.DateTimeField()
+    last_login_attempt = models.DateTimeField(null=True)

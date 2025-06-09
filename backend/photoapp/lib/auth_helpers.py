@@ -4,16 +4,38 @@ import environ
 import jwt
 
 from accounts.models import Session
+from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 env = environ.Env()
 
 def create_session(response, user_id=None):
     session_expiry = timezone.now() + timedelta(weeks=1)
     session = Session.objects.update_or_create(user_id=user_id, login_attempts=0, expire_at=session_expiry)
+    if session[1]:
+        session = session[0]
     response.set_cookie(key="session_id", value=str(session.id), max_age=timedelta(weeks=1), samesite="Lax", httponly=True)
     return response
 
 def create_jwt(response, user_id):
     token_age = int(env('AUTH_TOKEN_AGE'))
-    token = jwt.encode({ "user_id": user_id, "exp": datetime.now() + timedelta(seconds=token_age) }, env("JWT_SECRET"), algorithm="HS256")
-    response.set_cookie(key="AUTH_TOKEN", value=str(token), max_age=token_age, samesite="Lax", httponly=True)
+    expiry = datetime.now() + timedelta(seconds=token_age)
+    token = jwt.encode({ "user_id": user_id, "exp": expiry }, env("JWT_SECRET"), algorithm="HS256")
+    response.set_cookie(key="auth_token", value=str(token), max_age=token_age, samesite="Lax", httponly=True)
+    response.set_cookie(key="auth_token_exp", value=expiry, max_age=token_age)
+
+
+def refresh_jwt(req):
+    session = Session.objects.get(id=req.COOKIES.get("session_id"))
+
+    if session is None or session.expire_at < timezone.now():
+        # Recreate updated session cookie
+        response = HttpResponseRedirect("")
+        return create_session(response)
+
+    # If user is not logged in
+    if session.user_id is None:
+        return HttpResponseRedirect("")
+
+    response = HttpResponse()
+    create_jwt(response, session.user_id)
+    return response
