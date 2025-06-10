@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import jwt
 from django.db.models import Case, When, Value, Q, Sum, IntegerField
-from django.http import JsonResponse, HttpRequest, HttpResponseNotAllowed
+from django.http import JsonResponse, HttpResponseNotAllowed
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
 from django.views import View
@@ -9,7 +9,7 @@ from django.contrib.gis.measure import D
 
 from ..models import Photo, Camera, Lens
 from django.contrib.gis.geos import Point, MultiPoint
-from backend.photoapp.photoapp.middleware.auth_middleware import JWTAuthenticationMiddleware
+from photoapp.middleware.auth_middleware import JWTAuthenticationMiddleware
 
 import environ
 env = environ.Env()

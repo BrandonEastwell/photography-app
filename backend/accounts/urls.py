@@ -1,7 +1,7 @@
 from django.urls import path
 
-from backend.photoapp.accounts.views.account_views import create_user, login_user, logout_user
-from backend.photoapp.accounts.views.user_views import get_user_camera, get_user, get_user_lens
+from .views.account_views import create_user, login_user, logout_user
+from .views.user_views import get_user_camera, get_user, get_user_lens
 
 urlpatterns = [
     path('login', login_user),

@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from media.models import Camera, Lens
 
 class CustomUser(AbstractUser):
     username = models.CharField(max_length=50, unique=True)
@@ -18,6 +18,6 @@ class Session(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
-    camera = models.ManyToManyField("Camera", blank=True)
-    lens = models.ManyToManyField("Lens", blank=True)
+    camera = models.ManyToManyField(Camera, blank=True)
+    lens = models.ManyToManyField(Lens, blank=True)
 

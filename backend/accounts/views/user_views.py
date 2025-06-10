@@ -1,8 +1,8 @@
 from django.http import HttpResponseNotAllowed, JsonResponse
 
-from backend.photoapp.photoapp.middleware.auth_middleware import JWTAuthenticationMiddleware
+from photoapp.middleware.auth_middleware import JWTAuthenticationMiddleware
 from django.contrib.auth import get_user_model
-from backend.photoapp.media.models import Camera, Lens
+from media.models import Camera, Lens
 
 User = get_user_model()
 
