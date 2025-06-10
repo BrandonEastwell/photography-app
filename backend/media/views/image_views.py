@@ -4,8 +4,10 @@ from django.db.models import Case, When, Value, Q, Sum, IntegerField
 from django.http import JsonResponse, HttpResponseNotAllowed
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.contrib.gis.measure import D
+from django.views.decorators.csrf import csrf_exempt
 
 from ..models import Photo, Camera, Lens
 from django.contrib.gis.geos import Point, MultiPoint
@@ -87,7 +89,7 @@ def sort_media_by_exif(query_set, filters):
         ))
         return query_set.order_by("-relevance", "-total_votes")
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class ImagesView(View):
     def post(self, req):
         return image_upload(req)
@@ -128,15 +130,11 @@ def image_upload(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    encoded_jwt = req.COOKIES.get("AUTH_TOKEN")
-    if encoded_jwt is None:
-        return JsonResponse( { "error": "You must be logged in to upload photos" }, status=404 )
-
-    user_data = jwt.decode(encoded_jwt, env("JWT_SECRET"), algorithms=["HS256"])
-    if user_data["user_id"] is None:
-        return JsonResponse( { "error": "You must be logged in to upload photos" }, status=404 )
-
+    user_id = req.user_id
     image_file = req.FILES.get('image')
+    if image_file is None:
+        return JsonResponse({ "error": "Please upload a photo" }, status=400)
+
     image = Image.open(image_file)
     exif_data = image.getexif()
 
@@ -160,8 +158,24 @@ def image_upload(req):
     for tag_id in exif_data:
         tag_name = TAGS.get(tag_id, tag_id)
         tag_value = exif_data.get(tag_id)
-        if image_tags.get(tag_name) is not None:
+        if tag_name in image_tags:
             image_tags[tag_name] = tag_value
+
+    gps_info = image_tags.get("GPSInfo")
+    if gps_info is not None:
+        gps_info = {}
+        for key in image_tags["GPSInfo"]:
+            decode = GPSTAGS.get(key, key)
+            gps_info[decode] = image_tags["GPSInfo"][key]
+
+        image_tags["GPSInfo"] = Point(float(gps_info['GPSLatitude']), float(gps_info['GPSLongitude']))
+    else:
+        # Falls back to user uploaded GPS location
+        lat = req.POST.get("lat")
+        lon = req.POST.get("lon")
+
+        if lat or lon is not None:
+            image_tags["GPSInfo"] = Point(float(lat), float(lon))
 
     missing_tags = []
     for tag in required_tags:
@@ -171,14 +185,6 @@ def image_upload(req):
     if len(missing_tags) > 0:
         return JsonResponse( { "missing_tags": missing_tags, "error": "Missing tags from image" }, status=400 )
 
-    gps_info = {}
-    for key in image_tags["GPSInfo"]:
-            decode = GPSTAGS.get(key, key)
-            gps_info[decode] = image_tags["GPSInfo"][key]
-
-    gps_lat = Point(gps_info['GPSLatitude'])
-    gps_lon = Point(gps_info['GPSLongitude'])
-
     camera_model = Camera.objects.get(camera_model=image_tags["Model"])
     if camera_model is None:
         camera_model = Camera.objects.create(camera_model=image_tags["Model"], camera_make=image_tags["Make"])
@@ -187,10 +193,10 @@ def image_upload(req):
     if lens_model is None:
         lens_model = Lens.objects.create(lens_model=image_tags["LensModel"])
 
-    photo = Photo.objects.create(user_id=user_data["user_id"], image=image_file)
+    photo = Photo.objects.create(user_id=user_id, image=image_file)
     photo.camera = camera_model
     photo.lens = lens_model
-    photo.location = MultiPoint(gps_lat, gps_lon)
+    photo.location = image_tags["GPSInfo"]
     photo.f_stop = image_tags['FNumber']
     photo.flash = image_tags['Flash'] not in (0, None)
     photo.focal_length = image_tags['FocalLength']

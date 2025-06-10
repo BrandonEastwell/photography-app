@@ -25,5 +25,5 @@ urlpatterns = [
     path("session", views.get_session),
     path("api/account/", include('accounts.urls')),
     path("api/user/", include('accounts.urls')),
-    path("api/media", include('media.urls'))
+    path("api/media/", include('media.urls'))
 ]
