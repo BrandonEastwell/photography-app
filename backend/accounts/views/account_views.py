@@ -9,6 +9,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from lib.auth_helpers import create_jwt, create_session
 
 from ..models import Session, Profile
@@ -26,7 +27,7 @@ def valid_login_attempt(session):
             return False
     return True
 
-
+@csrf_exempt
 def create_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -56,7 +57,7 @@ def create_user(req):
         logging.exception(e)
         return JsonResponse({ "error": "Internal Server Error" }, status=500)
 
-
+@csrf_exempt
 def login_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -65,7 +66,7 @@ def login_user(req):
 
     # Checks if user is already logged in
     user_session = Session.objects.get(id=session_id)
-    if user_session.user_id and user_session.expire_at < timezone.now():
+    if user_session.user_id and user_session.expire_at > timezone.now():
         return JsonResponse({ "message": "You are already logged in to an account." }, status=200)
 
     valid_login = valid_login_attempt(user_session)
@@ -82,13 +83,14 @@ def login_user(req):
             user_session.login_attempts = user_session.login_attempts + 1
             response.write(json.dumps({ "error": "Invalid username or password.", "login_attempts": str(user_session.login_attempts) }))
             response.status_code = 401
+            user_session.save()
             return response
 
         create_jwt(response, user.id)
         response.write(json.dumps({ "message": "You have successfully logged in." }))
 
         # Create session cookie to revalidate JWT
-        create_session(response, user_session.user_id)
+        create_session(response, user_session.id, user)
 
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])

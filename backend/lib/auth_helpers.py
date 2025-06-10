@@ -7,11 +7,12 @@ from django.utils import timezone
 
 env = environ.Env()
 
-def create_session(response, user_id=None):
+def create_session(response, session_id=None, user=None):
     session_expiry = timezone.now() + timedelta(weeks=1)
-    session = Session.objects.update_or_create(user_id=user_id, login_attempts=0, expire_at=session_expiry)
-    if session[1]:
-        session = session[0]
+    session, created = Session.objects.update_or_create(id=session_id,
+                                               defaults={"user_id": user, "login_attempts": 0, "expire_at": session_expiry},
+                                               create_defaults={"expire_at": session_expiry})
+
     response.set_cookie(key="session_id", value=str(session.id), max_age=timedelta(weeks=1), samesite="Lax", httponly=True)
     return response
 

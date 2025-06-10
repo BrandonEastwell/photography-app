@@ -7,7 +7,7 @@ urlpatterns = [
     path('login', login_user),
     path('logout', logout_user),
     path('register', create_user),
-    path('user/<int:user_id>', get_user),
-    path('user/camera', get_user_camera),
-    path('user/lens', get_user_lens)
+    path('<int:user_id>', get_user),
+    path('camera', get_user_camera),
+    path('lens', get_user_lens)
 ]
