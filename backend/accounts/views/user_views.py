@@ -20,8 +20,8 @@ def get_user_camera(req):
         return JsonResponse({ "error": "User must be logged in" }, status=404)
 
     try:
-        cameras = Camera.objects.select_related("camera_model").filter(profile__user__id=user_id)
-        return JsonResponse( { "cameras": json.dumps(cameras) }, status=200)
+        cameras = Camera.objects.filter(profile__user_id=user_id).values("camera_model")
+        return JsonResponse( { "cameras": json.dumps(list(cameras)) }, status=200)
     except Exception as e:
         logging.exception(e)
         return JsonResponse( { "error": "Unable to retrieve data at this time." }, status=500)
@@ -36,8 +36,8 @@ def get_user_lens(req):
         return JsonResponse({ "error": "User must be logged in" }, status=404)
 
     try:
-        lens = Lens.objects.select_related("lens_model").filter(profile__user__id=user_id)
-        return JsonResponse( { "lens": json.dumps(lens) }, status=200)
+        lens = Lens.objects.filter(profile__user_id=user_id).values("lens_model")
+        return JsonResponse( { "lens": json.dumps(list(lens)) }, status=200)
     except Exception as e:
         logging.exception(e)
         return JsonResponse( { "error": "Unable to retrieve data at this time." }, status=500)
