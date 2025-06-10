@@ -17,7 +17,7 @@ def get_user_camera(req):
 
     user_id = req.user_id
     if user_id is None:
-        return JsonResponse({ "error": "user must be logged in" }, status=404)
+        return JsonResponse({ "error": "User must be logged in" }, status=404)
 
     try:
         cameras = Camera.objects.select_related("camera_model").filter(profile__user__id=user_id)
@@ -33,7 +33,7 @@ def get_user_lens(req):
 
     user_id = req.user_id
     if user_id is None:
-        return JsonResponse({ "error": "user must be logged in" }, status=404)
+        return JsonResponse({ "error": "User must be logged in" }, status=404)
 
     try:
         lens = Lens.objects.select_related("lens_model").filter(profile__user__id=user_id)
@@ -48,6 +48,10 @@ def get_user(req, user_id):
 
     try:
         user_profile = Profile.objects.get(user__id=user_id)
+
+        if user_profile is None:
+            return JsonResponse( { "error": "User does not exist." }, status=400)
+
         return JsonResponse( { json.dumps(user_profile) }, status=200)
     except Exception as e:
         logging.exception(e)
