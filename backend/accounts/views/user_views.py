@@ -1,8 +1,12 @@
-from django.http import HttpResponseNotAllowed, JsonResponse
+import json
+import logging
+
+from django.http import HttpResponseNotAllowed, JsonResponse, HttpRequest
 
 from photoapp.middleware.auth_middleware import JWTAuthenticationMiddleware
 from django.contrib.auth import get_user_model
 from media.models import Camera, Lens
+from accounts.models import Profile
 
 User = get_user_model()
 
@@ -15,17 +19,28 @@ def get_user_camera(req):
     if user_id is None:
         return JsonResponse({ "error": "user must be logged in" }, status=404)
 
-    camera_model = Camera.objects.select_related("camera")
+    cameras = Camera.objects.select_related("camera_model").filter(profile__user__id=user_id)
+    return JsonResponse( { "cameras": json.dumps(cameras) }, status=200)
 
 @JWTAuthenticationMiddleware
 def get_user_lens(req):
     if req.method != "GET":
         return HttpResponseNotAllowed(["GET"])
 
-def get_user(req):
+    user_id = req.user_id
+    if user_id is None:
+        return JsonResponse({ "error": "user must be logged in" }, status=404)
+
+    lens = Lens.objects.select_related("lens_model").filter(profile__user__id=user_id)
+    return JsonResponse( { "lens": json.dumps(lens) }, status=200)
+
+def get_user(req, user_id):
     if req.method != "GET":
         return HttpResponseNotAllowed(["GET"])
 
-    token = req.COOKIES.get("AUTH_TOKEN")
-    if token is None:
-        user_id = req.session.get("user_id")
+    try:
+        user_profile = Profile.objects.get(user__id=user_id)
+        return JsonResponse( { json.dumps(user_profile) }, status=200)
+    except Exception as e:
+        logging.exception(e)
+        return JsonResponse( { "error": "Unable to retrieve user at this time." }, status=500)
