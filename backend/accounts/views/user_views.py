@@ -19,8 +19,12 @@ def get_user_camera(req):
     if user_id is None:
         return JsonResponse({ "error": "user must be logged in" }, status=404)
 
-    cameras = Camera.objects.select_related("camera_model").filter(profile__user__id=user_id)
-    return JsonResponse( { "cameras": json.dumps(cameras) }, status=200)
+    try:
+        cameras = Camera.objects.select_related("camera_model").filter(profile__user__id=user_id)
+        return JsonResponse( { "cameras": json.dumps(cameras) }, status=200)
+    except Exception as e:
+        logging.exception(e)
+        return JsonResponse( { "error": "Unable to retrieve data at this time." }, status=500)
 
 @JWTAuthenticationMiddleware
 def get_user_lens(req):
@@ -31,8 +35,12 @@ def get_user_lens(req):
     if user_id is None:
         return JsonResponse({ "error": "user must be logged in" }, status=404)
 
-    lens = Lens.objects.select_related("lens_model").filter(profile__user__id=user_id)
-    return JsonResponse( { "lens": json.dumps(lens) }, status=200)
+    try:
+        lens = Lens.objects.select_related("lens_model").filter(profile__user__id=user_id)
+        return JsonResponse( { "lens": json.dumps(lens) }, status=200)
+    except Exception as e:
+        logging.exception(e)
+        return JsonResponse( { "error": "Unable to retrieve data at this time." }, status=500)
 
 def get_user(req, user_id):
     if req.method != "GET":
