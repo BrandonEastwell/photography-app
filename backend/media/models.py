@@ -23,6 +23,6 @@ class Photo(models.Model):
     focal_length = models.IntegerField(null=True)
     aperture = models.DecimalField(max_digits=4, decimal_places=2, null=True)
     flash = models.BooleanField(default=False)
-    taken_at = models.DateTimeField()
+    taken_at = models.DateTimeField(null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     total_votes = models.IntegerField(default=0, null=False)
