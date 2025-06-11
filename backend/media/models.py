@@ -21,7 +21,6 @@ class Photo(models.Model):
     ISO = models.IntegerField(null=True)
     shutter_speed = models.CharField(max_length=10, null=True)
     focal_length = models.IntegerField(null=True)
-    aperture = models.DecimalField(max_digits=4, decimal_places=2, null=True)
     flash = models.BooleanField(default=False)
     taken_at = models.DateTimeField(null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)

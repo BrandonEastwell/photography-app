@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timedelta
 
 import environ
+import exifread
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
 from django.contrib.auth import get_user_model
@@ -9,6 +10,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.db.models import Case, When, Value, Q, Sum, IntegerField
 from django.http import JsonResponse, HttpResponseNotAllowed
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -128,6 +130,13 @@ def image_search(req):
     images = sort_media_by_exif(images, filter_options)
     return JsonResponse(images[:items_limit], status=200)
 
+def _convert_to_degrees(value):
+    # Each value is a Ratio object (ex: 52/1, 30/1)
+    d = float(value[0].num) / float(value[0].den)
+    m = float(value[1].num) / float(value[1].den)
+    s = float(value[2].num) / float(value[2].den)
+    return d + (m / 60.0) + (s / 3600.0)
+
 @JWTAuthenticationMiddleware
 def image_upload(req):
     if req.method != "POST":
@@ -144,10 +153,9 @@ def image_upload(req):
         return JsonResponse({ "error": "Please upload a photo" }, status=400)
 
     try:
-        image = Image.open(image_file)
-        exif_data = image.getexif()
+        tags = exifread.process_file(image_file.file)
 
-        required_tags = ["Make", "Model", "GPSInfo"]
+        required_tags = ["Make", "Model", "GPSLatitude", "GPSLongitude"]
         image_tags = {
             "Make": None,
             "Model": None,
@@ -155,36 +163,32 @@ def image_upload(req):
             "FocalLength": None,
             "Flash": None,
             "FNumber": None,
-            "GPSInfo": None,
+            "GPSLatitude": None,
+            "GPSLongitude": None,
             "ISOSpeedRatings": None,
-            "ApertureValue": None,
             "ShutterSpeedValue": None,
             "DateTimeOriginal": None,
             "ExifImageWidth": None,
             "ExifImageHeight": None
         }
 
-        for tag_id in exif_data:
-            tag_name = TAGS.get(tag_id, tag_id)
-            tag_value = exif_data.get(tag_id)
+        for tag_id in tags:
+            tag_name = tag_id.split(" ")[1]
             if tag_name in image_tags:
-                image_tags[tag_name] = tag_value
+                if tag_name == "ISOSpeedRatings" or "FocalLength":
+                    image_tags[tag_name] = tags[tag_id].values[0] if isinstance(tags[tag_id].values, list) else tags[tag_id].values
+                elif tag_name == "FocalLength":
+                    image_tags[tag_name] = tags[tag_id].values[0] if isinstance(tags[tag_id].values, list) else tags[tag_id].values
+                else:
+                    image_tags[tag_name] = tags[tag_id]
 
-        gps_info = image_tags.get("GPSInfo")
-        if gps_info is not None:
-            gps_info = {}
-            for key in image_tags["GPSInfo"]:
-                decode = GPSTAGS.get(key, key)
-                gps_info[decode] = image_tags["GPSInfo"][key]
-
-            image_tags["GPSInfo"] = Point(float(gps_info['GPSLatitude']), float(gps_info['GPSLongitude']))
+        if image_tags["GPSLatitude"] and image_tags["GPSLongitude"] is not None:
+            image_tags["GPSLongitude"] = _convert_to_degrees(image_tags["GPSLongitude"])
+            image_tags["GPSLatitude"] = _convert_to_degrees(image_tags["GPSLatitude"])
         else:
             # Falls back to user uploaded GPS location
-            lat = req.POST.get("lat")
-            lon = req.POST.get("lon")
-
-            if lat or lon is not None:
-                image_tags["GPSInfo"] = Point(float(lat), float(lon))
+            image_tags["GPSLongitude"] = req.POST.get("lat")
+            image_tags["GPSLatitude"] = req.POST.get("lon")
 
         missing_tags = []
         for tag in required_tags:
@@ -200,11 +204,11 @@ def image_upload(req):
         if image_tags["LensModel"]:
             lens, _ = Lens.objects.get_or_create(lens_model=image_tags["LensModel"])
 
-        Photo.objects.create(user_id=user, image=image_file, location=image_tags["GPSInfo"], camera=camera,
-                                        lens=lens, f_stop=image_tags['FNumber'], flash=image_tags['Flash'] not in (0, None),
-                                        focal_length = image_tags['FocalLength'], aperture = image_tags['ApertureValue'],
-                                        ISO = image_tags['ISOSpeedRatings'], taken_at = image_tags['DateTimeOriginal'],
-                                        shutter_speed = image_tags['ShutterSpeedValue'])
+        Photo.objects.create(user_id=user, image=image_file, location=Point(float(image_tags["GPSLatitude"]), float(image_tags["GPSLongitude"])),
+                             camera=camera, lens=lens, f_stop=image_tags['FNumber'], flash=image_tags['Flash'] not in (0, None),
+                             focal_length = image_tags['FocalLength'], ISO = image_tags['ISOSpeedRatings'],
+                             taken_at = timezone.make_aware(datetime.strptime(str(image_tags['DateTimeOriginal']), "%Y:%m:%d %H:%M:%S")),
+                             shutter_speed = image_tags['ShutterSpeedValue'])
 
         return JsonResponse({ "message": "Photo successfully uploaded" }, status=200)
     except Exception as e:
