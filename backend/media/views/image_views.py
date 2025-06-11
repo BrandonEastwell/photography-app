@@ -1,9 +1,12 @@
 import logging
+import types
+import uuid
 from datetime import datetime, timedelta
 
 import environ
 import exifread
 from django.contrib.auth import get_user_model
+from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.db.models import Case, When, Value, Q, Sum, IntegerField
@@ -21,26 +24,17 @@ User = get_user_model()
 
 def get_location(coordinates):
     if coordinates is None:
-        return JsonResponse( { "error": "You must have a location set" }, status=404 )
+        return JsonResponse( { "error": "You must provide a location" }, status=404 )
 
     lat_str, lon_str = coordinates.split(",")
-    latitude = float(lat_str.strip())
-    longitude = float(lon_str.strip())
+    lat = float(lat_str.strip())
+    lon = float(lon_str.strip())
 
-    return Point(latitude, longitude)
+    return Point(lon, lat, srid=4326)
 
-def sort_media_by_location(query_set, location, items_min):
-    max_distance = 1000
-    distance = 2
-    while distance < max_distance:
-        query_set = query_set.objects.filter(location__distance_lte=(location, D(m=distance)))
-        if query_set.count() >= items_min:
-            break
-        distance *= 2
-    return query_set
-
-def sort_media_by_time(query_set, time_period):
+def filter_media_by_time(query_set, time_period):
     SORT_FIELDS_TIME = {
+        "today": datetime.now() - timedelta(days=1),
         "this_week": datetime.now() - timedelta(weeks=1),
         "this_month": datetime.now() - timedelta(weeks=4),
         "this_year": datetime.now() - timedelta(weeks=56),
@@ -111,22 +105,44 @@ def image_search(req):
         "top",
     }
 
-    items_limit = req.GET.get("limit")
-    images = Photo.objects.all()
+    items_limit = int(req.GET.get("limit"))
+    query_set = Photo.objects.all()
 
     # Sort photos by location
-    location = get_location(req.GET.get("location"))
-    if location:
-        images = sort_media_by_location(images, location, items_limit)
+    search_point = get_location(req.GET.get("location"))
+    if search_point:
+        query_set = query_set.annotate(distance=Distance("location", search_point))
 
-    # Sort photos by time period
+    # Filter photos by time period
     time_period = req.GET.get("sort_by_time")
-    images = sort_media_by_time(images, time_period)
+    query_set = filter_media_by_time(query_set, time_period)
 
     # Sort photos by EXIF data
-    filter_options = get_filters_from_url(req)
-    images = sort_media_by_exif(images, filter_options)
-    return JsonResponse(images[:items_limit], status=200)
+    #filter_options = get_filters_from_url(req)
+    #query_set = sort_media_by_exif(query_set, filter_options)
+
+    images = query_set.all()[:items_limit]
+    images_serialized = [
+        {
+            "user_id": image.user_id.id,
+            "image_url": image.image.url,
+            "camera_model": image.camera.camera_model,
+            "camera_make": image.camera.camera_make,
+            "lens": image.lens.lens_model if not types.NoneType else None,
+            "ISO": image.ISO if not None else None,
+            "shutter_speed": image.shutter_speed if not None else None,
+            "focal_length": image.focal_length if not None else None,
+            "votes": image.total_votes
+        }
+        for image in images
+    ]
+
+    results = {
+        "items": len(images_serialized),
+        "results": images_serialized
+    }
+
+    return JsonResponse(results, safe=False, status=200)
 
 def _convert_to_degrees(value):
     # Each value is a Ratio object (ex: 52/1, 30/1)
@@ -185,8 +201,8 @@ def image_upload(req):
             image_tags["GPSLatitude"] = _convert_to_degrees(image_tags["GPSLatitude"])
         else:
             # Falls back to user uploaded GPS location
-            image_tags["GPSLongitude"] = req.POST.get("lat")
-            image_tags["GPSLatitude"] = req.POST.get("lon")
+            image_tags["GPSLongitude"] = req.POST.get("lon")
+            image_tags["GPSLatitude"] = req.POST.get("lat")
 
         missing_tags = []
         for tag in required_tags:
@@ -202,7 +218,11 @@ def image_upload(req):
         if image_tags["LensModel"]:
             lens, _ = Lens.objects.get_or_create(lens_model=image_tags["LensModel"])
 
-        Photo.objects.create(user_id=user, image=image_file, location=Point(float(image_tags["GPSLatitude"]), float(image_tags["GPSLongitude"])),
+        # Rename file with random UUID
+        ext = str(image_file).split(".")[1]
+        image_file.name = fr"{uuid.uuid4().hex}.{ext}"
+
+        Photo.objects.create(user_id=user, image=image_file, location=Point(float(image_tags["GPSLongitude"]), float(image_tags["GPSLatitude"]), srid=4326),
                              camera=camera, lens=lens, f_stop=image_tags['FNumber'], flash=image_tags['Flash'] not in (0, None),
                              focal_length = image_tags['FocalLength'], ISO = image_tags['ISOSpeedRatings'],
                              taken_at = timezone.make_aware(datetime.strptime(str(image_tags['DateTimeOriginal']), "%Y:%m:%d %H:%M:%S")),
