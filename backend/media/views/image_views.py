@@ -3,8 +3,6 @@ from datetime import datetime, timedelta
 
 import environ
 import exifread
-from PIL import Image
-from PIL.ExifTags import TAGS, GPSTAGS
 from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
