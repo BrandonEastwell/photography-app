@@ -12,7 +12,7 @@ class Lens(models.Model):
 
 class Photo(models.Model):
     id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey('accounts.CustomUser', on_delete=models.CASCADE, null=False)
+    user = models.ForeignKey('accounts.CustomUser', on_delete=models.CASCADE, null=False)
     image = models.ImageField(upload_to='photos/', null=False, blank=False)
     location = geomodels.PointField(geography=True, null=False)
     camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)

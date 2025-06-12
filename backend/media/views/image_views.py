@@ -10,7 +10,7 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.db.models import Case, When, Value, Q, Sum, IntegerField
-from django.http import JsonResponse, HttpResponseNotAllowed
+from django.http import JsonResponse, HttpResponseNotAllowed, HttpRequest
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -46,19 +46,21 @@ def filter_media_by_time(query_set, time_period):
         query_set = query_set.filter(uploaded_at__gte=time)
         return query_set
 
-def get_filters_from_url(req):
+def get_filters(req):
     # TODO Filter options need to be sanitized + check if lens and camera exist in DB (predefined options)
-    filter_options = {
-        "camera__model": req.GET.get("camera"),
-        "lens__model": req.GET.get("lens"),
-        "ISO": req.GET.get("ISO"),
-        "shutter_speed": req.GET.get("shutter_speed"),
-        "focal_length": req.GET.get("focal_length"),
-        "flash": req.GET.get("flash"),
-        "aperture": req.GET.get("aperture")
-    }
+    filter_options = ["camera", "lens", "focal_length", "flash", "f_stop", "ISO", "shutter_speed"]
+    filters = {}
+    for key in req.GET.keys():
+        if filter_options.count(key) == 1:
+            value = req.GET.get(key)
+            if key == "camera":
+                filters["camera__model"] = value
+            elif key == "lens":
+                filters["lens__model"] = value
+            else:
+                filters[key] = value
 
-    return filter_options
+    return filters
 
 def sort_media_by_exif(query_set, filters):
     # Sort photos by EXIF data
@@ -84,7 +86,7 @@ def sort_media_by_exif(query_set, filters):
         query_set.annotate(relevance=Sum(
             Case(*conditions, output_field=IntegerField())
         ))
-        return query_set.order_by("-relevance", "-total_votes")
+        return query_set.order_by("-relevance")
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ImagesView(View):
@@ -94,38 +96,71 @@ class ImagesView(View):
     def get(self, req):
         return image_search(req)
 
-# URL params e.g. /images?sort_by_popularity=trending&sort_by_time=this_week&location=44.4647452,7.3553838&limit=20&page=1
+def filter_media_by_exif(query_set, filter_options):
+
+    return query_set
+
+# URL params e.g. /images?sort_by=trending&sort_by_time=this_week&location=44.4647452,7.3553838&limit=20&page=1
 def image_search(req):
     if req.method != "GET":
         return HttpResponseNotAllowed(["GET"])
 
-    SORT_FIELDS_POPULARITY = {
+    SORT_FIELDS = [
         "relevance",
-        "trending",
-        "top",
-    }
+        "trending"
+    ]
 
     items_limit = int(req.GET.get("limit"))
-    query_set = Photo.objects.all()
-
-    # Sort photos by location
-    search_point = get_location(req.GET.get("location"))
-    if search_point:
-        query_set = query_set.annotate(distance=Distance("location", search_point))
+    query_set = Photo.objects
 
     # Filter photos by time period
     time_period = req.GET.get("sort_by_time")
     query_set = filter_media_by_time(query_set, time_period)
 
-    # Sort photos by EXIF data
-    #filter_options = get_filters_from_url(req)
-    #query_set = sort_media_by_exif(query_set, filter_options)
+    # TODO Optimistic Filter by EXIF and append fallback threshold of similar results by weight sorting
+    # TODO Throw distance into the weight calculation?
+    # Filter photos by EXIF data
+    filter_options = get_filters(req)
+    fallback_set = None
+    has_filters = len(filter_options) > 0
+    if has_filters:
+        hard_filtered_set = filter_media_by_exif(query_set, filter_options)
+        quantity = hard_filtered_set.count()
 
-    images = query_set.all()[:items_limit]
+        if quantity < items_limit:
+            fallback_set = sort_media_by_exif(query_set, filter_options)[quantity:]
+
+        query_set = hard_filtered_set
+
+
+    # Sort photos by location
+    location = req.GET.get("location")
+    if location:
+        search_point = get_location(location)
+        query_set = query_set.annotate(distance=Distance("location", search_point))
+
+    sort_by = req.GET.get("sort_by")
+    if SORT_FIELDS.count(sort_by) != 1:
+        sort_by = "relevance"
+
+    if sort_by == "relevance":
+        if location:
+            query_set.order_by("distance")
+        # TODO if no location given, recommend based on users gear
+    elif sort_by == "trending":
+        # TODO Track votes and views in given time period
+        if location:
+            query_set.order_by("-total_votes", "distance")
+
+    if fallback_set is not None:
+        query_set.union(fallback_set)
+
+    images = query_set[:items_limit]
     images_serialized = [
         {
             "user_id": image.user_id.id,
             "image_url": image.image.url,
+            "distance": str(image.distance) if image.distance is not None else None,
             "camera_model": image.camera.camera_model,
             "camera_make": image.camera.camera_make,
             "lens": image.lens.lens_model if not types.NoneType else None,
