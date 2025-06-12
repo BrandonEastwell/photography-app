@@ -8,6 +8,7 @@ import exifread
 from django.contrib.auth import get_user_model
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
+from django.contrib.gis.measure import D
 from django.db.models import Case, When, Value, Q, Sum, IntegerField
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.utils import timezone
@@ -21,7 +22,7 @@ from ..models import Photo, Camera, Lens
 env = environ.Env()
 User = get_user_model()
 
-def get_location(coordinates):
+def get_search_point(coordinates):
     if coordinates is None:
         return JsonResponse( { "error": "You must provide a location" }, status=404 )
 
@@ -31,7 +32,7 @@ def get_location(coordinates):
 
     return Point(lon, lat, srid=4326)
 
-def filter_media_by_time(query_set, time_period):
+def filter_by_time_period(query_set, time_period):
     SORT_FIELDS_TIME = {
         "today": datetime.now() - timedelta(days=1),
         "this_week": datetime.now() - timedelta(weeks=1),
@@ -63,8 +64,8 @@ def get_filters(req):
 
     return filters
 
-def sort_media_by_exif(query_set, filters):
-    # Sort photos by EXIF data
+# Sort photos by EXIF data
+def sort_by_exif(query_set, filters, search_point=None):
     conditions = []
     for field, value in filters.items():
         if value:
@@ -83,6 +84,13 @@ def sort_media_by_exif(query_set, filters):
             else:
                 conditions.append(When(Q(**{field: value}), then=Value(1)))
 
+    if search_point:
+        query_set = query_set.annotate(distance=Distance("location", search_point)) # includes distance weight
+        conditions.append(When(Q(distance__lte=D(m=100)), then=Value(10))
+                          or When(Q(distance__gt=D(m=100)) & Q(distance__lte=D(m=1000)), then=Value(8))
+                          or When(Q(distance__gt=D(m=1000)) & Q(distance__lte=D(m=10000)), then=Value(6))
+                          or When(Q(distance__gt=D(m=10000)) & Q(distance__lte=D(m=100000)), then=Value(4)))
+
     if conditions:
         query_set = query_set.annotate(relevance=Sum(
             Case(*conditions, output_field=IntegerField())
@@ -97,9 +105,12 @@ class ImagesView(View):
     def get(self, req):
         return image_search(req)
 
-def filter_media_by_exif(query_set, filter_options):
-
-    return query_set
+def filter_by_exif(query_set, filter_options):
+    filtered_qs = query_set
+    for field, value in filter_options.items():
+        if value is not None:
+            filtered_qs = filtered_qs.filter(**{field: value})
+    return filtered_qs
 
 # URL params e.g. /images?sort_by=trending&sort_by_time=this_week&location=44.4647452,7.3553838&limit=20&page=1
 def image_search(req):
@@ -113,52 +124,48 @@ def image_search(req):
 
     sort_by = req.GET.get("sort_by") if SORT_FIELD_OPTIONS.count(req.GET.get("sort_by")) == 1 else "relevance"
     items_limit = int(req.GET.get("limit")) if req.GET.get("limit") is not None else 20
-    query_set = Photo.objects
+    search_point = get_search_point(req.GET.get("location")) if req.GET.get("location") is not None else None
+    time_period = req.GET.get("sort_by_time")
+
+    primary_qs = Photo.objects # Base query set
 
     # Filter photos by time period
-    time_period = req.GET.get("sort_by_time")
-    query_set = filter_media_by_time(query_set, time_period)
+    time_filtered = filter_by_time_period(primary_qs, time_period)
+    primary_qs = time_filtered
 
-
-    # TODO Optimistic Filter by EXIF and append fallback threshold of similar results by weight sorting
-    # TODO Throw distance into the weight calculation?
     # Filter photos by EXIF data
-    filter_options = get_filters(req)
-    fallback_set = None
-    has_filters = len(filter_options) > 0
-    if has_filters:
-        hard_filtered_set = filter_media_by_exif(query_set, filter_options)
-        quantity = hard_filtered_set.count()
+    search_filters = get_filters(req)
+    primary_qs = filter_by_exif(primary_qs, search_filters) if search_filters else primary_qs
 
-        if quantity < items_limit:
-            fallback_set = sort_media_by_exif(query_set, filter_options)
+    # Calculate distances from geo point
+    primary_qs = primary_qs.annotate(distance=Distance("location", search_point)) if search_point else primary_qs
 
-        query_set = hard_filtered_set
-
-
-    # Sort photos by location
-    location = req.GET.get("location")
-    if location is not None:
-        search_point = get_location(location)
-        query_set = query_set.annotate(distance=Distance("location", search_point))
+    fallback_qs = None
+    if primary_qs.count() < items_limit:
+        fallback_qs = sort_by_exif(time_filtered, search_filters, search_point)
 
 
     if sort_by == "relevance":
-        if location:
-            query_set = query_set.order_by("-distance")
+        if search_point:
+            primary_qs = primary_qs.order_by("-distance")
         # TODO if no location given, recommend based on users gear
     elif sort_by == "trending":
         # TODO Track votes and views in given time period
-        if location:
-            query_set = query_set.order_by("-total_votes", "distance")
+        if search_point:
+            primary_qs = primary_qs.order_by("-total_votes", "distance")
 
-    if fallback_set is not None:
-        query_set = query_set.union(fallback_set)
 
-    images = query_set[:items_limit]
+    if fallback_qs:
+        # Merge the fallback set to the original query set
+        primary_ids = set(primary_qs.values_list("id", flat=True))
+        fallback_qs = fallback_qs.exclude(id__in=primary_ids)
+        primary_qs = list(primary_qs) + list(fallback_qs)
+
+    images = primary_qs[:items_limit]
     images_serialized = [
         {
             "user_id": image.user.id,
+            "relevance_score": image.relevance if hasattr(image, "relevance") else None,
             "image_url": image.image.url,
             "distance": str(image.distance) if hasattr(image, "distance") and image.distance is not None else None,
             "camera_model": image.camera.model,
