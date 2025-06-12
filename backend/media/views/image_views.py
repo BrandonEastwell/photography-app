@@ -8,9 +8,8 @@ import exifread
 from django.contrib.auth import get_user_model
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D
 from django.db.models import Case, When, Value, Q, Sum, IntegerField
-from django.http import JsonResponse, HttpResponseNotAllowed, HttpRequest
+from django.http import JsonResponse, HttpResponseNotAllowed
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -105,17 +104,19 @@ def image_search(req):
     if req.method != "GET":
         return HttpResponseNotAllowed(["GET"])
 
-    SORT_FIELDS = [
+    SORT_FIELD_OPTIONS = [
         "relevance",
         "trending"
     ]
 
+    sort_by = req.GET.get("sort_by") if SORT_FIELD_OPTIONS.count(req.GET.get("sort_by")) == 1 else "relevance"
     items_limit = int(req.GET.get("limit"))
     query_set = Photo.objects
 
     # Filter photos by time period
     time_period = req.GET.get("sort_by_time")
     query_set = filter_media_by_time(query_set, time_period)
+
 
     # TODO Optimistic Filter by EXIF and append fallback threshold of similar results by weight sorting
     # TODO Throw distance into the weight calculation?
@@ -135,13 +136,10 @@ def image_search(req):
 
     # Sort photos by location
     location = req.GET.get("location")
-    if location:
+    if location is not None:
         search_point = get_location(location)
         query_set = query_set.annotate(distance=Distance("location", search_point))
 
-    sort_by = req.GET.get("sort_by")
-    if SORT_FIELDS.count(sort_by) != 1:
-        sort_by = "relevance"
 
     if sort_by == "relevance":
         if location:
@@ -158,7 +156,7 @@ def image_search(req):
     images = query_set[:items_limit]
     images_serialized = [
         {
-            "user_id": image.user_id.id,
+            "user_id": image.user.id,
             "image_url": image.image.url,
             "distance": str(image.distance) if image.distance is not None else None,
             "camera_model": image.camera.camera_model,
@@ -247,11 +245,11 @@ def image_upload(req):
         if len(missing_tags) > 0:
             return JsonResponse( { "missing_tags": missing_tags, "error": "Missing tags from image" }, status=400 )
 
-        camera, _ = Camera.objects.get_or_create(camera_model=image_tags["Model"], defaults={"camera_make": image_tags["Make"]})
+        camera, _ = Camera.objects.get_or_create(model=image_tags["Model"], defaults={"make": image_tags["Make"]})
 
         lens = None
         if image_tags["LensModel"]:
-            lens, _ = Lens.objects.get_or_create(lens_model=image_tags["LensModel"])
+            lens, _ = Lens.objects.get_or_create(model=image_tags["LensModel"])
 
         # Rename file with random UUID
         ext = str(image_file).split(".")[1]

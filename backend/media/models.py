@@ -3,12 +3,12 @@ from django.db import models
 
 class Camera(models.Model):
     id = models.AutoField(primary_key=True)
-    camera_make = models.CharField(max_length=25, blank=False)
-    camera_model = models.CharField(max_length=25, blank=False, unique=True, db_index=True)
+    make = models.CharField(max_length=25, blank=False)
+    model = models.CharField(max_length=25, blank=False, unique=True, db_index=True)
 
 class Lens(models.Model):
     id = models.AutoField(primary_key=True)
-    lens_model = models.CharField(max_length=25, blank=False, unique=True, db_index=True)
+    model = models.CharField(max_length=25, blank=False, unique=True, db_index=True)
 
 class Photo(models.Model):
     id = models.AutoField(primary_key=True)
