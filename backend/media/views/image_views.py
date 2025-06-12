@@ -40,10 +40,12 @@ def filter_media_by_time(query_set, time_period):
     }
 
     # Sort photos by time period
-    time = SORT_FIELDS_TIME[time_period]
-    if time:
-        query_set = query_set.filter(uploaded_at__gte=time)
-        return query_set
+    time = SORT_FIELDS_TIME.get(time_period)
+    if time is None:
+        time = SORT_FIELDS_TIME["this_week"]
+
+    query_set = query_set.filter(uploaded_at__gte=time)
+    return query_set
 
 def get_filters(req):
     # TODO Filter options need to be sanitized + check if lens and camera exist in DB (predefined options)
@@ -72,17 +74,17 @@ def sort_media_by_exif(query_set, filters):
                 conditions.append(When(Q(lens__model=value), then=Value(4)))
             elif field == "ISO":
                 # ISO Bucket match
-                conditions.append(When(Q(ISO__lte=value+100) & Q(ISO__gte=value-100), then=value(3)))
+                conditions.append(When(Q(ISO__lte=value+100) & Q(ISO__gte=value-100), then=Value(3)))
             elif field == "focal_length":
                 conditions.append(When(Q(focal_length=value), then=Value(3)))
             elif field == "shutter_speed":
                 # ISO Bucket match
-                conditions.append(When(Q(shutter_speed__lte=value+(value/2)) & Q(shutter_speed__gte=value-(value/2)), then=value(2)))
+                conditions.append(When(Q(shutter_speed__lte=value+(value/2)) & Q(shutter_speed__gte=value-(value/2)), then=Value(2)))
             else:
                 conditions.append(When(Q(**{field: value}), then=Value(1)))
 
     if conditions:
-        query_set.annotate(relevance=Sum(
+        query_set = query_set.annotate(relevance=Sum(
             Case(*conditions, output_field=IntegerField())
         ))
         return query_set.order_by("-relevance")
@@ -110,7 +112,7 @@ def image_search(req):
     ]
 
     sort_by = req.GET.get("sort_by") if SORT_FIELD_OPTIONS.count(req.GET.get("sort_by")) == 1 else "relevance"
-    items_limit = int(req.GET.get("limit"))
+    items_limit = int(req.GET.get("limit")) if req.GET.get("limit") is not None else 20
     query_set = Photo.objects
 
     # Filter photos by time period
@@ -129,7 +131,7 @@ def image_search(req):
         quantity = hard_filtered_set.count()
 
         if quantity < items_limit:
-            fallback_set = sort_media_by_exif(query_set, filter_options)[quantity:]
+            fallback_set = sort_media_by_exif(query_set, filter_options)
 
         query_set = hard_filtered_set
 
@@ -143,25 +145,25 @@ def image_search(req):
 
     if sort_by == "relevance":
         if location:
-            query_set.order_by("distance")
+            query_set = query_set.order_by("-distance")
         # TODO if no location given, recommend based on users gear
     elif sort_by == "trending":
         # TODO Track votes and views in given time period
         if location:
-            query_set.order_by("-total_votes", "distance")
+            query_set = query_set.order_by("-total_votes", "distance")
 
     if fallback_set is not None:
-        query_set.union(fallback_set)
+        query_set = query_set.union(fallback_set)
 
     images = query_set[:items_limit]
     images_serialized = [
         {
             "user_id": image.user.id,
             "image_url": image.image.url,
-            "distance": str(image.distance) if image.distance is not None else None,
-            "camera_model": image.camera.camera_model,
-            "camera_make": image.camera.camera_make,
-            "lens": image.lens.lens_model if not types.NoneType else None,
+            "distance": str(image.distance) if hasattr(image, "distance") and image.distance is not None else None,
+            "camera_model": image.camera.model,
+            "camera_make": image.camera.make,
+            "lens": image.lens.model if not types.NoneType else None,
             "ISO": image.ISO if not None else None,
             "shutter_speed": image.shutter_speed if not None else None,
             "focal_length": image.focal_length if not None else None,
