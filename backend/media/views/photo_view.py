@@ -23,7 +23,7 @@ env = environ.Env()
 User = get_user_model()
 
 @method_decorator(csrf_exempt, name='dispatch')
-class ImagesView(View):
+class ImageView(View):
     def post(self, req):
         return image_upload(req)
 

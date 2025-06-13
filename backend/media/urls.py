@@ -1,9 +1,11 @@
 from django.urls import path
 
-from .views.image_views import ImagesView
-from .views.image_id_views import image_by_id
+from .views.camera_view import CameraView
+from .views.photo_view import ImageView
+from .views.photo_id_view import get_or_delete_photo
 
 urlpatterns = [
-    path("images", ImagesView.as_view()),
-    path("images/<int:image_id>/", image_by_id)
+    path("photos", ImageView.as_view()),
+    path("photo/<int:image_id>/", get_or_delete_photo),
+    path("cameras", CameraView.as_view()),
 ]

@@ -3,7 +3,7 @@ import logging
 from django.http import HttpResponseNotAllowed, JsonResponse
 from ..models import Photo
 
-def image_by_id(req, image_id):
+def get_or_delete_photo(req, image_id):
     if req.method == "GET":
         try:
             image = Photo.objects.get(id=image_id)
