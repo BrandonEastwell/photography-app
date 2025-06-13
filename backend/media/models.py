@@ -25,3 +25,4 @@ class Photo(models.Model):
     taken_at = models.DateTimeField(null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     total_votes = models.IntegerField(default=0, null=False)
+
