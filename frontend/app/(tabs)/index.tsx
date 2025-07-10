@@ -1,6 +1,8 @@
-import {View} from "react-native";
+import {Animated, SafeAreaView, View} from "react-native";
 import {useEffect, useState} from "react";
 import { Image } from 'expo-image';
+import { Dimensions } from 'react-native';
+import ScrollView = Animated.ScrollView;
 
 interface image {
     ISO: number | null
@@ -18,6 +20,7 @@ interface image {
 
 export default function Index() {
     const [images, setImages] = useState<image[]>([])
+    const screenWidth = Dimensions.get('window').width;
 
     async function searchPhotos(location = null, sort_by_time = "this_year", sort_by_popularity = "relevance") {
         let params = new URLSearchParams()
@@ -38,23 +41,24 @@ export default function Index() {
             let res = await searchPhotos()
             setImages(res.results)
         }
+
         getPhotos()
     }, []);
 
-    console.log(images)
-
     return (
-        <View
-            style={{
+        <ScrollView>
+            <View style={{
                 flex: 1,
-                alignItems: "center"
-            }}
-        >
-            { images &&
-                images.map((image: image, index) => (
-                    <Image key={index} source={image.image_url} style={{ width: 320, height: 440, borderRadius: 18 }} />
-                ))
-            }
-        </View>
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "center"
+            }}>
+                { images &&
+                    images.map((image: image, index) => (
+                        <Image key={index} source={image.image_url} style={{ width: screenWidth / 3 - 5, height: 175, margin: 2.5 }} />
+                    ))
+                }
+            </View>
+        </ScrollView>
     );
 }
