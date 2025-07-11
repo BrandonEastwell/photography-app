@@ -9,6 +9,7 @@ export default function FileUpload() {
     const [showUpload, setShowUpload] = useState(false)
     const [imageUpload, setImageUpload] = useState<ImagePickerAsset | undefined>(undefined)
     const [exif, setExif] = useState<Record<string, any> | null>(null);
+    const [error, setError] = useState<string | null>(null)
 
     function clickHandler() {
         setShowUpload((prevState) => !prevState)
@@ -23,9 +24,11 @@ export default function FileUpload() {
         });
 
         if (!result.canceled) {
-            setImageUpload(result.assets[0])
-            setExif(result.assets[0].exif || null);
-            console.log('EXIF:', result.assets[0].exif);
+            let image = result.assets[0]
+            if (!image.fileSize || image.fileSize > 1048576) return setError("Image size exceeds limit (10MB)")
+            setImageUpload(image)
+            setExif(image.exif || null);
+            console.log('EXIF:', image.exif);
         }
     }
 
