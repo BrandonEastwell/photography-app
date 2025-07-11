@@ -4,8 +4,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import FileUpload from '../components/FileUpload'
 import {Pressable} from "react-native";
 import {Entypo} from "@expo/vector-icons";
+import * as SecureStore from 'expo-secure-store';
 
 export default function TabLayout() {
+    const onUploadClick = () => {
+        const authTokenExp =
+    }
+
     return (
         <Tabs
             screenOptions={{

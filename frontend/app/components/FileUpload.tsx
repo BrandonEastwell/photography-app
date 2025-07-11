@@ -26,6 +26,8 @@ export default function FileUpload() {
         if (!result.canceled) {
             let image = result.assets[0]
             if (!image.fileSize || image.fileSize > 1048576) return setError("Image size exceeds limit (10MB)")
+            // Check for location in exif
+            // Check other exif data like cam make and model
             setImageUpload(image)
             setExif(image.exif || null);
             console.log('EXIF:', image.exif);

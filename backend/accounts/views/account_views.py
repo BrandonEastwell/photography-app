@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from lib.auth_helpers import create_jwt, create_session
@@ -62,7 +62,8 @@ def login_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    session_id = req.COOKIES.get("session_id")
+    data = json.loads(req.body)
+    session_id = data.get("session_id")
 
     # Checks if user is already logged in
     user_session = Session.objects.get(id=session_id)
@@ -74,27 +75,27 @@ def login_user(req):
         return JsonResponse({ "error": "Too many login attempts, try again later." }, status=400)
 
     try:
-        response = HttpResponse(content_type="application/json")
         username = req.POST.get('username')
         password = req.POST.get('password')
 
         user = authenticate(username=username, password=password)
         if user is None:
             user_session.login_attempts = user_session.login_attempts + 1
-            response.write(json.dumps({ "error": "Invalid username or password.", "login_attempts": str(user_session.login_attempts) }))
-            response.status_code = 401
             user_session.save()
-            return response
+            return JsonResponse({ "error": "Invalid username or password.", "login_attempts": str(user_session.login_attempts) }, status=401)
 
-        create_jwt(response, user.id)
-        response.write(json.dumps({ "message": "You have successfully logged in." }))
-
-        # Create session cookie to revalidate JWT
-        create_session(response, user_session.id, user)
+        # Create session / add to response body
+        token, expiry = create_jwt(user.id)
+        session = create_session(user_session.id, user)
 
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])
-        return response
+        return JsonResponse({
+            "session_id": session.id,
+            "auth_token_exp": expiry,
+            "auth_token": token,
+            "message": "You have successfully logged in."
+        })
 
     except Exception as error:
         logging.exception(error)
