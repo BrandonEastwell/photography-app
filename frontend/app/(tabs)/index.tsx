@@ -51,7 +51,8 @@ export default function Index() {
                 flex: 1,
                 flexDirection: "row",
                 flexWrap: "wrap",
-                justifyContent: "center"
+                justifyContent: "center",
+                backgroundColor: "#181a1b"
             }}>
                 { images &&
                     images.map((image: image, index) => (
