@@ -1,14 +1,19 @@
-import { Tabs } from 'expo-router';
+import {Redirect, Tabs} from 'expo-router';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import FileUpload from '../components/FileUpload'
 import {Pressable} from "react-native";
 import {Entypo} from "@expo/vector-icons";
-import * as SecureStore from 'expo-secure-store';
+import AuthService from "@/app/lib/AuthService";
 
 export default function TabLayout() {
-    const onUploadClick = () => {
-        const authTokenExp =
+
+    const onUploadClick = async () => {
+        const isLoggedIn = await AuthService.isUserLoggedIn()
+        if (isLoggedIn) return <FileUpload />
+        let res = await AuthService.refreshAuthToken()
+        if (res.success) return <FileUpload />
+        return <Redirect href="/login"></Redirect>
     }
 
     return (
@@ -38,7 +43,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="upload"
                 options={{
-                    tabBarButton: () => <FileUpload />
+                    tabBarButton: () => onUploadClick()
                 }}
             />
             <Tabs.Screen

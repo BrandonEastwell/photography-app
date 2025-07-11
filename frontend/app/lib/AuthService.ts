@@ -1,4 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class AuthService {
     static async createSession() {
@@ -16,15 +18,29 @@ export default class AuthService {
 
         if (res.ok) {
             let { authToken, authTokenExp } = await res.json()
-            await SecureStore.setItemAsync("auth_token", authToken)
-            await SecureStore.setItemAsync("auth_token_exp", authTokenExp)
-            return { authToken, authTokenExp }
+            if (Platform.OS == "web") {
+                await AsyncStorage.setItem("auth_token", authToken)
+                await AsyncStorage.setItem("auth_token_exp", authTokenExp)
+            } else {
+                await SecureStore.setItemAsync("auth_token", authToken)
+                await SecureStore.setItemAsync("auth_token_exp", authTokenExp)
+            }
+
+            return { "success": true }
         }
+
+        return { "success": false }
 
     }
 
     static async isUserLoggedIn() {
-        let authTokenExp = await SecureStore.getItemAsync("auth_token_exp")
+        let authTokenExp
+        if (Platform.OS == "web") {
+            authTokenExp = await AsyncStorage.getItem("auth_token_exp")
+        } else {
+            authTokenExp = await SecureStore.getItemAsync("auth_token_exp")
+        }
+
         if (!authTokenExp) return false
 
         const curTime = new Date()
