@@ -16,32 +16,21 @@ env = environ.Env()
 def csrf(req):
     return JsonResponse({"csrfToken": get_token(req)})
 
-# returns a session on every initial page load
+# returns a session on every page load
 @csrf_exempt
 def get_session(req):
-    if not req.body:
-        return JsonResponse({ "message": "Expected session id or null" }, status=400)
-
-    data = json.loads(req.body)
-    if not data.get("session_id"):
-        return JsonResponse({ "message": "Expected session id or null" }, status=400)
-
-    # Create session
-    session_id = create_session()
-    return JsonResponse({ "session_id": session_id })
+    response = HttpResponse()
+    if not req.COOKIES.get("session_id"):
+        # Create session cookie
+        create_session(response)
+        return response
+    return JsonResponse({ "message": "Session already exists" }, status=200)
 
 # returns a new jwt if session is valid or redirects user to login page if login session is invalid
 # session acts as the refresh token for the JWT access token
 @csrf_exempt
 def refresh_token(req):
-    try:
-        data = json.loads(req.body)
-        session_id = data.get("session_id")
-        session = Session.objects.get(id=session_id)
-    except Exception as e:
-        logging.error(e)
-        return HttpResponseRedirect("")
-
+    session = Session.objects.get(id=req.COOKIES.get("session_id"))
 
     if session is None or session.expire_at < timezone.now():
         # Recreate updated session cookie

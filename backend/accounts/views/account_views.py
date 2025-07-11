@@ -62,8 +62,7 @@ def login_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    data = json.loads(req.body)
-    session_id = data.get("session_id")
+    session_id = req.COOKIES.get("session_id")
 
     # Checks if user is already logged in
     user_session = Session.objects.get(id=session_id)
