@@ -1,9 +1,12 @@
 import { Stack } from "expo-router";
+import AuthService from "@/app/lib/AuthService";
 
 export default function RootLayout() {
-  return (
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-  )
+    AuthService.createSession()
+
+    return (
+        <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+    )
 }
