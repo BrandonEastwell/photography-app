@@ -29,6 +29,7 @@
       }
     },
     "plugins": [
+      "expo-secure-store",
       "expo-router",
       [
         "expo-splash-screen",
@@ -38,8 +39,7 @@
           "resizeMode": "contain",
           "backgroundColor": "#181a1b"
         }
-      ],
-      "expo-secure-store"
+      ]
     ],
     "experiments": {
       "typedRoutes": true

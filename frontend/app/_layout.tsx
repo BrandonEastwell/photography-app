@@ -1,8 +1,11 @@
 import { Stack } from "expo-router";
 import AuthService from "@/app/lib/AuthService";
+import {useEffect} from "react";
 
 export default function RootLayout() {
-    AuthService.createSession()
+    useEffect(() => {
+        AuthService.createSession()
+    }, []);
 
     return (
         <Stack>

@@ -5,15 +5,22 @@ import FileUpload from '../components/FileUpload'
 import {Pressable} from "react-native";
 import {Entypo} from "@expo/vector-icons";
 import AuthService from "@/app/lib/AuthService";
+import {useState} from "react";
 
 export default function TabLayout() {
+    const [showUpload, setShowUpload] = useState(false)
 
     const onUploadClick = async () => {
         const isLoggedIn = await AuthService.isUserLoggedIn()
-        if (isLoggedIn) return <FileUpload />
+
+        if (isLoggedIn) {
+            setShowUpload(true)
+            return <FileUpload showUpload={showUpload} />
+        }
+
         let res = await AuthService.refreshAuthToken()
-        if (res.success) return <FileUpload />
-        return <Redirect href="/login"></Redirect>
+        if (res.success) return <FileUpload showUpload={showUpload} />
+        return <Redirect href="/(auth)/login"></Redirect>
     }
 
     return (
@@ -43,7 +50,11 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="upload"
                 options={{
-                    tabBarButton: () => onUploadClick()
+                    tabBarButton: () => (
+                        <Pressable onPress={onUploadClick} style={{ justifyContent: 'center', alignItems: 'center', flex: 1, padding: 5 }}>
+                            <Entypo name="circle-with-plus" size={24} color="#ffffff" />
+                        </Pressable>
+                    )
                 }}
             />
             <Tabs.Screen
