@@ -1,4 +1,6 @@
-import json
+import logging
+from datetime import timedelta
+
 import logging
 from datetime import timedelta
 
@@ -12,7 +14,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from lib.auth_helpers import create_jwt, create_session, get_session
 
-from ..models import Session, Profile
+from ..models import Profile
 
 User = get_user_model()
 env = environ.Env()
@@ -62,16 +64,18 @@ def login_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    session_id = get_session(req)
+    try:
+        session = get_session(req)
+        if session.user_id and session.expire_at > timezone.now():
+            return JsonResponse({ "message": "You are already logged in to an account." }, status=200)
 
-    # Checks if user is already logged in
-    user_session = Session.objects.get(id=session_id)
-    if user_session.user_id and user_session.expire_at > timezone.now():
-        return JsonResponse({ "message": "You are already logged in to an account." }, status=200)
+        valid_login = valid_login_attempt(session)
+        if valid_login is False:
+            return JsonResponse({ "error": "Too many login attempts, try again later." }, status=400)
 
-    valid_login = valid_login_attempt(user_session)
-    if valid_login is False:
-        return JsonResponse({ "error": "Too many login attempts, try again later." }, status=400)
+    except Exception as e:
+        return JsonResponse({ "error": str(e) }, status=400)
+
 
     try:
         username = req.POST.get('username')
@@ -79,13 +83,13 @@ def login_user(req):
 
         user = authenticate(username=username, password=password)
         if user is None:
-            user_session.login_attempts = user_session.login_attempts + 1
-            user_session.save()
-            return JsonResponse({ "error": "Invalid username or password.", "login_attempts": str(user_session.login_attempts) }, status=401)
+            session.login_attempts = session.login_attempts + 1
+            session.save()
+            return JsonResponse({ "error": "Invalid username or password.", "login_attempts": str(session.login_attempts) }, status=401)
 
         # Create session / add to response body
         token, expiry = create_jwt(user.id)
-        session = create_session(user_session.id, user)
+        session = create_session(session.id, user)
 
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])
