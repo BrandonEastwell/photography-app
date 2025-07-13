@@ -25,8 +25,14 @@ def session(req):
             return JsonResponse({ "message": "Session already exists" }, status=200)
 
     except (ValueError, SessionNotFoundError):
-        # Create session
-        session_id = create_session()
+        platform = req.META.get('HTTP_PLATFORM')
+        session_id = create_session() # Create session
+        if platform == "web":
+            response = JsonResponse({ "session_id": session_id }, status=201)
+            response.set_cookie(key="session_id", value=str(session_id), max_age=timedelta(weeks=1), samesite="Lax", httponly=True)
+            return response
+
+        # Returns session in body for Mobile
         return JsonResponse({ "session_id": session_id }, status=201)
 
     except Exception as e:

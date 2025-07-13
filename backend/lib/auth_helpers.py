@@ -25,7 +25,7 @@ def create_jwt(user_id):
     return token, expiry
 
 def get_session(req):
-    session_id = req.META.get('HTTP_SESSION')
+    session_id = req.META.get('HTTP_SESSION') or req.COOKIES.get('session_id')
 
     if not session_id:
         raise ValueError("Expected session ID in 'Session' header")
