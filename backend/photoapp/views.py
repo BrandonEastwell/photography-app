@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from accounts.models import Session
 from django.views.decorators.csrf import csrf_exempt
-from lib.auth_helpers import create_session, create_jwt
+from lib.auth_helpers import create_session, create_jwt, get_session, SessionNotFoundError
 
 env = environ.Env()
 
@@ -18,19 +18,31 @@ def csrf(req):
 
 # returns a session on every page load
 @csrf_exempt
-def get_session(req):
-    response = HttpResponse()
-    if not req.COOKIES.get("session_id"):
-        # Create session cookie
-        create_session(response)
-        return response
-    return JsonResponse({ "message": "Session already exists" }, status=200)
+def session(req):
+    try:
+        session = get_session(req)
+        if session:
+            return JsonResponse({ "message": "Session already exists" }, status=200)
+
+    except (ValueError, SessionNotFoundError):
+        # Create session
+        session_id = create_session()
+        return JsonResponse({ "session_id": session_id }, status=201)
+
+    except Exception as e:
+        # Unexpected server error
+        return JsonResponse({ "error": str(e) }, status=500)
 
 # returns a new jwt if session is valid or redirects user to login page if login session is invalid
 # session acts as the refresh token for the JWT access token
 @csrf_exempt
 def refresh_token(req):
-    session = Session.objects.get(id=req.COOKIES.get("session_id"))
+    session_id = req.META.get('HTTP_SESSION')
+
+    if not session_id:
+        return JsonResponse({ "error": "No session id found" }, status=400)
+
+    session = Session.objects.get(id=session_id)
 
     if session is None or session.expire_at < timezone.now():
         # Recreate updated session cookie
@@ -46,7 +58,6 @@ def refresh_token(req):
     token, expiry = create_jwt(session.user_id)
 
     return JsonResponse({
-        "session_id": session.id,
         "auth_token_exp": expiry,
         "auth_token": token
     })

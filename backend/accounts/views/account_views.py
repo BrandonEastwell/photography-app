@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from lib.auth_helpers import create_jwt, create_session
+from lib.auth_helpers import create_jwt, create_session, get_session
 
 from ..models import Session, Profile
 
@@ -62,7 +62,7 @@ def login_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    session_id = req.COOKIES.get("session_id")
+    session_id = get_session(req)
 
     # Checks if user is already logged in
     user_session = Session.objects.get(id=session_id)
