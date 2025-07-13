@@ -1,4 +1,4 @@
-import {Redirect, Tabs} from 'expo-router';
+import {Tabs, useRouter} from 'expo-router';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import FileUpload from '../components/FileUpload'
@@ -9,18 +9,14 @@ import {useState} from "react";
 
 export default function TabLayout() {
     const [showUpload, setShowUpload] = useState(false)
+    const router = useRouter()
 
     const onUploadClick = async () => {
         const isLoggedIn = await AuthService.isUserLoggedIn()
-
-        if (isLoggedIn) {
-            setShowUpload(true)
-            return <FileUpload showUpload={showUpload} />
-        }
-
-        let res = await AuthService.refreshAuthToken()
-        if (res.success) return <FileUpload showUpload={showUpload} />
-        return <Redirect href="/(auth)/login"></Redirect>
+        if (!isLoggedIn) return router.push("/auth/login")
+        let isAuthRefreshed: boolean = await AuthService.refreshAuthToken()
+        if (isAuthRefreshed) return <FileUpload showUpload={showUpload} />
+        return router.push("/auth/login")
     }
 
     return (

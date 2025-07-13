@@ -20,7 +20,7 @@ export default class AuthService {
         })
 
         if (res.ok) {
-            let {session_id} = await res.json()
+            let { session_id } = await res.json()
             if (Platform.OS !== "web") {
                 await SecureStore.setItemAsync("session_id", session_id)
             }
@@ -28,27 +28,31 @@ export default class AuthService {
     }
 
     static async refreshAuthToken() {
-        let res = await fetch("${apiUrl}/refresh-token", {
+        const headers: Record<string, string> = {"Platform": Platform.OS}
+        if (Platform.OS !== "web") {
+            const sessionId = await SecureStore.getItemAsync('session_id');
+            if (sessionId) headers["Session"] = sessionId
+        }
+
+        let res = await fetch(`${apiUrl}/refresh-token`, {
             method: "GET",
+            headers,
             credentials: "include"
         })
 
-        if (!res.ok) {
-            let data = await res.json()
-            console.log(data)
-            return { "success": false }
+        let data = await res.json()
+
+        if (data.success) {
+            if (Platform.OS == "web") {
+                await AsyncStorage.setItem("auth_token", JSON.stringify(data.authToken))
+                await AsyncStorage.setItem("auth_token_exp", JSON.stringify(data.authTokenExp))
+            } else {
+                await SecureStore.setItemAsync("auth_token", JSON.stringify(data.authToken))
+                await SecureStore.setItemAsync("auth_token_exp", JSON.stringify(data.authTokenExp))
+            }
         }
 
-        let { authToken, authTokenExp } = await res.json()
-        if (Platform.OS == "web") {
-            await AsyncStorage.setItem("auth_token", authToken)
-            await AsyncStorage.setItem("auth_token_exp", authTokenExp)
-        } else {
-            await SecureStore.setItemAsync("auth_token", authToken)
-            await SecureStore.setItemAsync("auth_token_exp", authTokenExp)
-        }
-
-        return { "success": true }
+        return data.success
     }
 
     static async isUserLoggedIn() {
