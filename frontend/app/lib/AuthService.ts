@@ -43,16 +43,20 @@ export default class AuthService {
         let data = await res.json()
 
         if (data.success) {
-            if (Platform.OS == "web") {
-                await AsyncStorage.setItem("auth_token", JSON.stringify(data.authToken))
-                await AsyncStorage.setItem("auth_token_exp", JSON.stringify(data.authTokenExp))
-            } else {
-                await SecureStore.setItemAsync("auth_token", JSON.stringify(data.authToken))
-                await SecureStore.setItemAsync("auth_token_exp", JSON.stringify(data.authTokenExp))
-            }
+            await this.saveAuthToken(data.auth_token, data.auth_token_exp)
         }
 
         return data.success
+    }
+
+    static async saveAuthToken(authToken: string, authTokenExp: string) {
+        if (Platform.OS == "web") {
+            await AsyncStorage.setItem("auth_token", authToken)
+            await AsyncStorage.setItem("auth_token_exp", authTokenExp)
+        } else {
+            await SecureStore.setItemAsync("auth_token", authToken)
+            await SecureStore.setItemAsync("auth_token_exp", authTokenExp)
+        }
     }
 
     static async isUserLoggedIn() {

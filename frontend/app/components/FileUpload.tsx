@@ -1,4 +1,4 @@
-import {Entypo, Feather} from "@expo/vector-icons";
+import {Feather} from "@expo/vector-icons";
 import { Modal, Pressable, View, Text } from "react-native";
 import { useState } from "react";
 import * as ImagePicker from 'expo-image-picker';
@@ -30,17 +30,21 @@ export default function FileUpload({ showUpload } : { showUpload: boolean }) {
     }
 
     const uploadPhoto = async () => {
-        const formData = new FormData();
-        formData.append('image', {
-            uri: imageUpload?.uri,
-            name: imageUpload?.fileName
-        })
+        if (imageUpload) {
+            const formData = new FormData();
+            formData.append('image', {
+                uri: imageUpload.uri,
+                name: imageUpload.fileName,
+                type: imageUpload.type
+            })
 
-        let result = await fetch("http://127.0.0.1:8000/api/media/photos", {
-            method: "POST",
-            body: formData,
-            headers: { 'Content-Type': 'multipart/form-data' }
-        })
+            let result = await fetch("http://127.0.0.1:8000/api/media/photos", {
+                method: "POST",
+                body: formData,
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+        }
+
     }
 
     return (

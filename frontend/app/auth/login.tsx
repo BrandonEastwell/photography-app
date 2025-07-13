@@ -1,11 +1,17 @@
-import {View, Text, TextInput, StyleSheet, TouchableOpacity} from "react-native";
+import {View, Text, TextInput, StyleSheet, TouchableOpacity, Platform} from "react-native";
 import {useRouter} from "expo-router";
-import React from 'react';
+import React, {useState} from 'react';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import {useAuth} from "@/app/lib/AuthContext";
+import Constants from 'expo-constants';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
+import AuthService from "@/app/lib/AuthService";
+const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Login() {
+    const [error, setError] = useState(null)
     const { login } = useAuth()
     const router = useRouter()
 
@@ -20,10 +26,27 @@ export default function Login() {
             .required('Password is required'),
     });
 
-    const formSubmit = (values: {
+    const formSubmit = async (values: {
         username: string
         password: string
     }) => {
+
+        let res = await fetch(`${apiUrl}/api/account/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ "username": values.username, "password": values.password })
+        })
+
+        let data = await res.json()
+        if (!data.success) {
+            setError(data.error)
+            return
+        }
+
+        await AuthService.saveAuthToken(data.auth_token, data.auth_token_exp)
+
         login()
     }
 
@@ -81,6 +104,9 @@ export default function Login() {
                             >
                                 <Text style={styles.buttonText}>Login</Text>
                             </TouchableOpacity>
+                            {error && (
+                                <Text style={styles.errorText}>{error}</Text>
+                            )}
                             <TouchableOpacity onPress={() => router.push('/auth/register')}>
                                 <Text style={styles.signUp}>
                                     Don't have an account? <Text style={styles.signUpLink}>Sign Up</Text>
