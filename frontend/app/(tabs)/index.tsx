@@ -1,8 +1,10 @@
-import {Animated, SafeAreaView, View} from "react-native";
+import {Animated, View} from "react-native";
 import {useEffect, useState} from "react";
 import { Image } from 'expo-image';
 import { Dimensions } from 'react-native';
 import ScrollView = Animated.ScrollView;
+import Constants from 'expo-constants';
+const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 interface image {
     ISO: number | null
@@ -27,7 +29,7 @@ export default function Index() {
         location && params.set("location", location)
         params.set("sort_by_time", sort_by_time)
         params.set("sort_by_popularity", sort_by_popularity)
-        let url = new URL(`http://127.0.0.1:8000/api/media/photos?${params}`)
+        let url = new URL(`${apiUrl}/api/media/photos?${params}`)
 
         const res = await fetch(url, {
             method: "GET"

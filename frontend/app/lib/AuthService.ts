@@ -1,6 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default class AuthService {
     static async createSession() {
@@ -11,8 +13,9 @@ export default class AuthService {
             if (sessionId) headers["Session"] = sessionId
         }
 
-        let res = await fetch("http://127.0.0.1:8000/session", {
+        let res = await fetch(`${apiUrl}/session`, {
             method: "GET",
+            credentials: 'include',
             headers
         })
 
@@ -25,7 +28,7 @@ export default class AuthService {
     }
 
     static async refreshAuthToken() {
-        let res = await fetch("http://127.0.0.1:8000/refresh-token", {
+        let res = await fetch("${apiUrl}/refresh-token", {
             method: "GET",
             credentials: "include"
         })
