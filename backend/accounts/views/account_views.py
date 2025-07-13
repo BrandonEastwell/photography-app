@@ -88,17 +88,24 @@ def login_user(req):
             return JsonResponse({ "error": "Invalid username or password.", "login_attempts": str(session.login_attempts) }, status=401)
 
         # Create session / add to response body
-        token, expiry = create_jwt(user.id)
         session = create_session(session.id, user)
+        token, expiry = create_jwt(user.id)
 
-        user.last_login = timezone.now()
-        user.save(update_fields=["last_login"])
-        return JsonResponse({
+        response = JsonResponse({
             "session_id": session.id,
             "auth_token_exp": expiry,
             "auth_token": token,
             "message": "You have successfully logged in."
         })
+
+        platform = req.META.get('HTTP_PLATFORM')
+        if platform == "web":
+            response.set_cookie(key="session_id", value=str(session.id), max_age=timedelta(weeks=1), samesite="Lax", httponly=True)
+            return response
+
+        user.last_login = timezone.now()
+        user.save(update_fields=["last_login"])
+        return response
 
     except Exception as error:
         logging.exception(error)
