@@ -5,8 +5,6 @@ import { Formik } from 'formik';
 import * as yup from 'yup';
 import {useAuth} from "@/app/lib/AuthContext";
 import Constants from 'expo-constants';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
 import AuthService from "@/app/lib/AuthService";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
@@ -18,7 +16,6 @@ export default function Login() {
     const loginValidationSchema = yup.object().shape({
         username: yup
             .string()
-            .email('Please enter a valid username')
             .required('Username is required'),
         password: yup
             .string()
@@ -26,16 +23,13 @@ export default function Login() {
             .required('Password is required'),
     });
 
-    const formSubmit = async (values: {
-        username: string
-        password: string
-    }) => {
-
+    const formSubmit = async (values: { username: string; password: string; }) => {
         let res = await fetch(`${apiUrl}/api/account/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
+            credentials: "include",
             body: JSON.stringify({ "username": values.username, "password": values.password })
         })
 
@@ -57,7 +51,7 @@ export default function Login() {
                 <Formik
                     validationSchema={loginValidationSchema}
                     initialValues={{ username: '', password: '' }}
-                    onSubmit={formSubmit}
+                    onSubmit={values => formSubmit(values)}
                 >
                     {({
                           handleChange,
@@ -99,13 +93,13 @@ export default function Login() {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.button}
-                                onPress={() => handleSubmit}
+                                onPress={handleSubmit}
                                 disabled={!isValid}
                             >
                                 <Text style={styles.buttonText}>Login</Text>
                             </TouchableOpacity>
                             {error && (
-                                <Text style={styles.errorText}>{error}</Text>
+                                <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20 }}>{error}</Text>
                             )}
                             <TouchableOpacity onPress={() => router.push('/auth/register')}>
                                 <Text style={styles.signUp}>
@@ -142,8 +136,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f1f1f1',
         borderRadius: 6,
         paddingHorizontal: 10,
-        marginBottom: 10,
-        outline: "none"
+        marginBottom: 10
     },
     icon: {
         marginRight: 10,
