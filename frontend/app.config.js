@@ -33,10 +33,14 @@ export default {
       backgroundColor: "#181a1b"
     },
     plugins: [
-      "expo-secure-store",
       "expo-router",
-      [
-        "expo-splash-screen",
+      "expo-secure-store",
+      [ "expo-font",
+        {
+          fonts: [ "./assets/fonts/BethEllen-Regular.ttf" ]
+        }
+      ],
+      [ "expo-splash-screen",
         {
           image: "",
           imageWidth: 200,

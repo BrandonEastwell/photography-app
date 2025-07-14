@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
         marginBottom: 40,
-        fontWeight: 'bold',
+        fontFamily: "BethEllen-Regular",
         color: 'rgba(229,229,229,0.97)',
         alignSelf: "center"
     },
@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         marginBottom: 20,
         color: '#f1f1f1',
+        fontFamily: "SpaceMono-Regular",
     },
     button: {
         width: '100%',
@@ -140,10 +141,12 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#fff',
+        fontFamily: "SpaceMono-Regular",
         fontSize: 18,
     },
     signUp: {
         color: '#f1f1f1',
+        fontFamily: "SpaceMono-Regular",
         alignSelf: "center"
     },
     signUpLink: {
@@ -153,5 +156,6 @@ const styles = StyleSheet.create({
         color: 'red',
         alignSelf: 'flex-start',
         marginBottom: 10,
+        fontFamily: "SpaceMono-Regular",
     },
 });
