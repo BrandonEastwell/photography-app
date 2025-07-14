@@ -78,8 +78,7 @@ def login_user(req):
             return JsonResponse({ "success": False, "error": "Too many login attempts, try again later." }, status=400)
 
     except Exception as e:
-        return JsonResponse({ "success": False, "error": str(e) }, status=400)
-
+        return JsonResponse({ "success": False, "error": "Session expired. Please try again." }, status=400)
 
     try:
         username = req.POST.get('username')
@@ -97,7 +96,8 @@ def login_user(req):
         if platform == "web":
             response = JsonResponse({ "success": True, "message": "You have successfully logged in." })
             set_token_to_response(response, token, expiry)
-            response.set_cookie(key="session_id", value=str(session.id), max_age=session.expire_at, samesite="None", secure=True, httponly=True)
+            expires_in_seconds = int((session.expire_at - timezone.now()).total_seconds())
+            response.set_cookie(key="session_id", value=str(session.id), max_age=expires_in_seconds, samesite="None", secure=True, httponly=True)
             return response
 
         response = JsonResponse({

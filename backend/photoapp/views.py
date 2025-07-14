@@ -1,9 +1,6 @@
-import json
-from datetime import timedelta
-
 import environ
 from accounts.models import Session
-from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
+from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -20,22 +17,23 @@ def session(req):
     try:
         session = get_session(req)
         if session:
-            return JsonResponse({ "message": "Session already exists" }, status=200)
+            return JsonResponse({ "success": True, "message": "Session already exists" }, status=200)
 
     except (ValueError, SessionNotFoundError):
         platform = req.META.get('HTTP_PLATFORM')
         session = create_session() # Create session
         if platform == "web":
-            response = HttpResponse
-            response.set_cookie(key="session_id", value=str(session.id), max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=True)
+            response = JsonResponse({ "success": True })
+            expires_in_seconds = int((session.expire_at - timezone.now()).total_seconds())
+            response.set_cookie(key="session_id", value=str(session.id), max_age=expires_in_seconds, samesite="None", secure=True, httponly=True)
             return response
 
         # Returns session in body for Mobile
-        return JsonResponse({ "session_id": session.id }, status=201)
+        return JsonResponse({ "success": True, "session_id": session.id }, status=201)
 
     except Exception as e:
         # Unexpected server error
-        return JsonResponse({ "error": str(e) }, status=500)
+        return JsonResponse({ "success": False, "error": str(e) }, status=500)
 
 # returns a new jwt if session is valid or redirects user to login page if login session is invalid
 # session acts as the refresh token for the JWT access token
