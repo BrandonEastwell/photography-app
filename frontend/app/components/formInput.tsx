@@ -1,8 +1,10 @@
-import {StyleSheet, TextInput, View} from "react-native";
-import React, {ChangeEvent} from "react";
+import {StyleSheet, TextInput, TouchableOpacity, View} from "react-native";
+import React, {ChangeEvent, useState} from "react";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export default function FormInput({ placeholder, onChangeText, onBlur, secure, value } : { placeholder: string,
     onChangeText: (e: string | ChangeEvent<any>) => void, onBlur: (e: any) => void, secure: boolean, value: string}) {
+    const [show, setShow] = useState(secure)
 
     return (
         <View style={styles.inputContainer}>
@@ -12,8 +14,13 @@ export default function FormInput({ placeholder, onChangeText, onBlur, secure, v
                 onChangeText={onChangeText}
                 onBlur={onBlur}
                 value={value}
-                secureTextEntry={secure}
+                secureTextEntry={show}
             />
+            {secure &&
+                <TouchableOpacity onPress={() => setShow(!show)}>
+                    <FontAwesome name={show ? "eye" : "eye-slash"} size={24} color="black" />
+                </TouchableOpacity>
+            }
         </View>
     )
 }
