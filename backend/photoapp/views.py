@@ -29,7 +29,7 @@ def session(req):
         session_id = create_session() # Create session
         if platform == "web":
             response = JsonResponse({ "session_id": session_id }, status=201)
-            response.set_cookie(key="session_id", value=str(session_id), max_age=timedelta(weeks=1), samesite="Lax", httponly=True)
+            response.set_cookie(key="session_id", value=str(session_id), max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=True)
             return response
 
         # Returns session in body for Mobile
@@ -43,12 +43,7 @@ def session(req):
 # session acts as the refresh token for the JWT access token
 @csrf_exempt
 def refresh_token(req):
-    session_id = req.META.get('HTTP_SESSION')
-
-    if not session_id:
-        return JsonResponse({ "error": "No session id found" }, status=400)
-
-    session = Session.objects.get(id=session_id)
+    session = get_session(req)
 
     if session is None or session.expire_at < timezone.now():
         # Recreate updated session cookie
@@ -59,11 +54,12 @@ def refresh_token(req):
 
     # If user is not logged in
     if session.user_id is None:
-        return HttpResponseRedirect("")
+        return JsonResponse({ "success": False }, status=400)
 
     token, expiry = create_jwt(session.user_id)
 
     return JsonResponse({
+        "success": True,
         "auth_token_exp": expiry,
         "auth_token": token
-    })
+    }, status=200)

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 from pathlib import Path
+from corsheaders.defaults import default_headers
 
 import environ
 
@@ -32,11 +33,11 @@ SECRET_KEY = 'django-insecure-o5)9cyx=@62omlu&bp3=w8xo*jfy2m-a^og+8n&936-&$+^(*8
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-CORS_ORIGIN_ALLOW_ALL = DEBUG
 ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "django_extensions",
     'corsheaders',
     'accounts',
     'storages',
@@ -61,10 +62,16 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
+CORS_ALLOWED_ORIGINS = ["http://localhost:8081"]
+CORS_ORIGIN_ALLOW_ALL = DEBUG
 CORS_ALLOW_CREDENTIALS = True
 # change to https://app.example.com in production settings
 CORS_ORIGIN_WHITELIST = [env("ORIGIN")]
 CSRF_TRUSTED_ORIGINS = [env("ORIGIN")]
+CORS_ALLOW_HEADERS = list(default_headers) + ['Platform']
+
+SECURE_SSL_REDIRECT = False
+
 
 ROOT_URLCONF = 'photoapp.urls'
 

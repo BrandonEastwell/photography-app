@@ -23,7 +23,7 @@ def valid_login_attempt(session):
     # Validates login attempts
     session.last_login_attempt = timezone.now()
     if session.login_attempts is not None and int(session.login_attempts) >= 10:
-        if session.last_login_attempt + timedelta(hours=2) > timezone.now():
+        if session.last_login_attempt + timedelta(hours=1) < timezone.now():
             session.login_attempts = 0
         else:
             return False
@@ -43,21 +43,21 @@ def create_user(req):
 
         user_exists = User.objects.filter(username=username).exists()
         if user_exists:
-            return JsonResponse( { "error": "Username is taken." }, status=409 )
+            return JsonResponse( { "success": False, "error": "Username is taken." }, status=409 )
 
         try:
             validate_password(password)
         except ValidationError as e:
-            return JsonResponse( { "error": e.error_list[0].message }, status=401 )
+            return JsonResponse( { "success": False, "error": e.error_list[0].message }, status=401 )
 
         user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username, password=password)
         Profile.objects.create(user=user)
 
-        return JsonResponse( { "message": "Successfully registered account." })
+        return JsonResponse( { "success": True, "message": "Successfully registered account." })
 
     except Exception as e:
         logging.exception(e)
-        return JsonResponse({ "error": "Internal Server Error" }, status=500)
+        return JsonResponse({ "success": False, "error": "Internal Server Error" }, status=500)
 
 @csrf_exempt
 def login_user(req):
@@ -67,14 +67,14 @@ def login_user(req):
     try:
         session = get_session(req)
         if session.user_id and session.expire_at > timezone.now():
-            return JsonResponse({ "message": "You are already logged in to an account." }, status=200)
+            return JsonResponse({ "success": False, "error": "You are already logged in to an account." }, status=400)
 
         valid_login = valid_login_attempt(session)
         if valid_login is False:
-            return JsonResponse({ "error": "Too many login attempts, try again later." }, status=400)
+            return JsonResponse({ "success": False, "error": "Too many login attempts, try again later." }, status=400)
 
     except Exception as e:
-        return JsonResponse({ "error": str(e) }, status=400)
+        return JsonResponse({ "success": False, "error": str(e) }, status=400)
 
 
     try:
@@ -92,6 +92,7 @@ def login_user(req):
         token, expiry = create_jwt(user.id)
 
         response = JsonResponse({
+            "success": True,
             "session_id": session.id,
             "auth_token_exp": expiry,
             "auth_token": token,
@@ -100,7 +101,7 @@ def login_user(req):
 
         platform = req.META.get('HTTP_PLATFORM')
         if platform == "web":
-            response.set_cookie(key="session_id", value=str(session.id), max_age=timedelta(weeks=1), samesite="Lax", httponly=True)
+            response.set_cookie(key="session_id", value=str(session.id), max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=True)
             return response
 
         user.last_login = timezone.now()
@@ -109,7 +110,7 @@ def login_user(req):
 
     except Exception as error:
         logging.exception(error)
-        return JsonResponse({ "error": "Internal Server Error" }, status=500)
+        return JsonResponse({ "success": False, "error": "Internal Server Error" }, status=500)
 
 
 def logout_user(req):
