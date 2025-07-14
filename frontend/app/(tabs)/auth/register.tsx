@@ -1,4 +1,4 @@
-import {View, Text, TextInput, StyleSheet, TouchableOpacity} from "react-native";
+import {View, Text, TextInput, StyleSheet, TouchableOpacity, Platform} from "react-native";
 import {useRouter} from "expo-router";
 import React, {useState} from 'react';
 import { Formik } from 'formik';
@@ -10,6 +10,7 @@ const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Register() {
     const [error, setError] = useState(null)
+    const [message, setMessage] = useState(null)
     const router = useRouter()
 
     const loginValidationSchema = yup.object().shape({
@@ -21,7 +22,6 @@ export default function Register() {
             .required('Last name is required'),
         username: yup
             .string()
-            .email('Please enter a valid username')
             .required('Username is required'),
         password: yup
             .string()
@@ -32,14 +32,19 @@ export default function Register() {
     const formSubmit = async (values: { firstName: string, lastName: string,
         username: string, password: string }) => {
 
+        const formData = new FormData()
+        formData.append("firstName", values.firstName)
+        formData.append("lastName", values.lastName)
+        formData.append("username", values.username)
+        formData.append("password", values.password)
+
         let res = await fetch(`${apiUrl}/api/account/register`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
             credentials: "include",
-            body: JSON.stringify({ "firstName": values.firstName, "lastName": values.lastName,
-                "username": values.username, "password": values.password })
+            headers: {
+              "Platform": Platform.OS
+            },
+            body: formData
         })
 
         let data = await res.json()
@@ -48,7 +53,10 @@ export default function Register() {
             return
         }
 
-        await AuthService.saveAuthToken(data.auth_token, data.auth_token_exp)
+        setMessage(data.message)
+        setTimeout(() => {
+            router.replace('/auth/login')
+        }, 2000)
     }
 
     return (
@@ -58,7 +66,7 @@ export default function Register() {
                 <Formik
                     validationSchema={loginValidationSchema}
                     initialValues={{ firstName: '', lastName: '', username: '', password: '' }}
-                    onSubmit={formSubmit}
+                    onSubmit={values => formSubmit(values)}
                 >
                     {({
                           handleChange,
@@ -92,11 +100,17 @@ export default function Register() {
                             )}
                             <TouchableOpacity
                                 style={styles.button}
-                                onPress={() => handleSubmit}
+                                onPress={handleSubmit}
                                 disabled={!isValid}
                             >
                                 <Text style={styles.buttonText}>Register</Text>
                             </TouchableOpacity>
+                            {error && !message && (
+                                <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
+                            )}
+                            {message && (
+                                <Text style={{ color: '#3091fc', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{message}</Text>
+                            )}
                             <TouchableOpacity onPress={() => router.push('/auth/login')}>
                                 <Text style={styles.signUp}>
                                     Already have an account? <Text style={styles.signUpLink}>Sign In</Text>

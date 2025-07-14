@@ -1,7 +1,7 @@
-import {View, Text, TextInput, StyleSheet, TouchableOpacity} from "react-native";
+import {View, Text, TextInput, StyleSheet, TouchableOpacity, Platform} from "react-native";
 import {useRouter} from "expo-router";
 import React, {useState} from 'react';
-import { Formik } from 'formik';
+import {Form, Formik} from 'formik';
 import * as yup from 'yup';
 import {useAuth} from "@/app/lib/AuthContext";
 import Constants from 'expo-constants';
@@ -25,13 +25,17 @@ export default function Login() {
     });
 
     const formSubmit = async (values: { username: string; password: string; }) => {
+        const formData = new FormData()
+        formData.append("username", values.username)
+        formData.append("password", values.password)
+
         let res = await fetch(`${apiUrl}/api/account/login`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Platform": Platform.OS
             },
             credentials: "include",
-            body: JSON.stringify({ "username": values.username, "password": values.password })
+            body: formData
         })
 
         let data = await res.json()
@@ -85,7 +89,7 @@ export default function Login() {
                                 <Text style={styles.buttonText}>Login</Text>
                             </TouchableOpacity>
                             {error && (
-                                <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20 }}>{error}</Text>
+                                <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
                             )}
                             <TouchableOpacity onPress={() => router.push('/auth/register')}>
                                 <Text style={styles.signUp}>
