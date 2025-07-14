@@ -51,6 +51,7 @@ def create_user(req):
 
 def valid_login_attempt(session):
     # Validates login attempt
+    session.login_attempts = 0
     if session.login_attempts is not None and int(session.login_attempts) >= 10:
         if session.last_login_attempt + timedelta(hours=1) < timezone.now():
             session.login_attempts = 0

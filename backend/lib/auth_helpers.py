@@ -16,7 +16,7 @@ def create_session(session_id=None, user=None):
                                                         defaults={"user_id": user, "login_attempts": 0, "expire_at": session_expiry},
                                                         create_defaults={"expire_at": session_expiry})
 
-    return session.id
+    return session
 
 def create_jwt(user_id):
     token_age = int(env('AUTH_TOKEN_AGE'))

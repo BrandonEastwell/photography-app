@@ -26,14 +26,14 @@ def session(req):
 
     except (ValueError, SessionNotFoundError):
         platform = req.META.get('HTTP_PLATFORM')
-        session_id = create_session() # Create session
+        session = create_session() # Create session
         if platform == "web":
-            response = JsonResponse({ "session_id": session_id }, status=201)
-            response.set_cookie(key="session_id", value=str(session_id), max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=True)
+            response = JsonResponse({ "session_id": session.id }, status=201)
+            response.set_cookie(key="session_id", value=str(session.id), max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=True)
             return response
 
         # Returns session in body for Mobile
-        return JsonResponse({ "session_id": session_id }, status=201)
+        return JsonResponse({ "session_id": session.id }, status=201)
 
     except Exception as e:
         # Unexpected server error
@@ -48,8 +48,8 @@ def refresh_token(req):
     if session is None or session.expire_at < timezone.now():
         # Recreate updated session cookie
         response = HttpResponseRedirect("", content_type="application/json")
-        session_id = create_session(response)
-        response.write(json.dumps({"session_id": session_id}))
+        session = create_session(response)
+        response.write(json.dumps({"session_id": session.id}))
         return response
 
     # If user is not logged in
