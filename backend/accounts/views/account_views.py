@@ -19,16 +19,6 @@ from ..models import Profile
 User = get_user_model()
 env = environ.Env()
 
-def valid_login_attempt(session):
-    # Validates login attempts
-    session.last_login_attempt = timezone.now()
-    if session.login_attempts is not None and int(session.login_attempts) >= 10:
-        if session.last_login_attempt + timedelta(hours=1) < timezone.now():
-            session.login_attempts = 0
-        else:
-            return False
-    return True
-
 @csrf_exempt
 def create_user(req):
     if req.method != "POST":
@@ -36,8 +26,8 @@ def create_user(req):
 
     try:
         data = req.POST
-        first_name = data.get('first_name')
-        last_name = data.get('last_name')
+        first_name = data.get('firstName')
+        last_name = data.get('lastName')
         username = data.get('username')
         password = data.get('password')
 
@@ -58,6 +48,19 @@ def create_user(req):
     except Exception as e:
         logging.exception(e)
         return JsonResponse({ "success": False, "error": "Internal Server Error" }, status=500)
+
+def valid_login_attempt(session):
+    # Validates login attempt
+    if session.login_attempts is not None and int(session.login_attempts) >= 10:
+        if session.last_login_attempt + timedelta(hours=1) < timezone.now():
+            session.login_attempts = 0
+        else:
+            return False
+
+    session.last_login_attempt = timezone.now()
+    session.login_attempts = session.login_attempts + 1
+    session.save()
+    return True
 
 @csrf_exempt
 def login_user(req):
@@ -83,8 +86,6 @@ def login_user(req):
 
         user = authenticate(username=username, password=password)
         if user is None:
-            session.login_attempts = session.login_attempts + 1
-            session.save()
             return JsonResponse({ "error": "Invalid username or password.", "login_attempts": str(session.login_attempts) }, status=401)
 
         # Create session / add to response body
