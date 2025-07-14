@@ -1,13 +1,11 @@
 import json
-import logging
 from datetime import timedelta
 
 import environ
-from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
+from accounts.models import Session
+from django.http import JsonResponse, HttpResponseRedirect
 from django.middleware.csrf import get_token
 from django.utils import timezone
-
-from accounts.models import Session
 from django.views.decorators.csrf import csrf_exempt
 from lib.auth_helpers import create_session, create_jwt, get_session, SessionNotFoundError
 

@@ -103,6 +103,8 @@ def login_user(req):
 
         platform = req.META.get('HTTP_PLATFORM')
         if platform == "web":
+            response.set_cookie(key="auth_token_exp", value=str(token), max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=False)
+            response.set_cookie(key="auth_token", value=str(token), max_age=expiry, samesite="None", secure=True, httponly=True)
             response.set_cookie(key="session_id", value=str(session.id), max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=True)
             return response
 
@@ -119,11 +121,11 @@ def logout_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    jwt_token = req.COOKIES.get("AUTH_TOKEN")
+    jwt_token = req.COOKIES.get("auth_token")
     if jwt_token is None:
         return JsonResponse({ "message": "You are already logged out." }, status=200)
 
     res = HttpResponseRedirect(env("ORIGIN"))
-    res.delete_cookie("AUTH_TOKEN")
+    res.delete_cookie("auth_token")
     res.status_code = 200
     return res
