@@ -3,11 +3,11 @@ from datetime import timedelta
 
 import environ
 from accounts.models import Session
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.middleware.csrf import get_token
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from lib.auth_helpers import create_session, create_jwt, get_session, SessionNotFoundError
+from lib.auth_helpers import create_session, create_jwt, get_session, SessionNotFoundError, set_token_to_response
 
 env = environ.Env()
 
@@ -26,7 +26,7 @@ def session(req):
         platform = req.META.get('HTTP_PLATFORM')
         session = create_session() # Create session
         if platform == "web":
-            response = JsonResponse({ "session_id": session.id }, status=201)
+            response = HttpResponse
             response.set_cookie(key="session_id", value=str(session.id), max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=True)
             return response
 
@@ -45,16 +45,19 @@ def refresh_token(req):
 
     if session is None or session.expire_at < timezone.now():
         # Recreate updated session cookie
-        response = HttpResponseRedirect("", content_type="application/json")
-        session = create_session(response)
-        response.write(json.dumps({"session_id": session.id}))
-        return response
+        return JsonResponse({ "success": False, "error": "Invalid session" }, status=400)
 
     # If user is not logged in
     if session.user_id is None:
         return JsonResponse({ "success": False }, status=400)
 
     token, expiry = create_jwt(session.user_id)
+
+    platform = req.META.get('HTTP_PLATFORM')
+    if platform == "web":
+        response = JsonResponse({ "success": True }, status=200)
+        set_token_to_response(response, token, expiry)
+        return response
 
     return JsonResponse({
         "success": True,

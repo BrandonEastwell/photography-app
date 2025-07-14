@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from lib.auth_helpers import create_jwt, create_session, get_session
+from lib.auth_helpers import create_jwt, create_session, get_session, set_token_to_response
 
 from ..models import Profile
 
@@ -89,9 +89,16 @@ def login_user(req):
         if user is None:
             return JsonResponse({ "error": "Invalid username or password.", "login_attempts": str(session.login_attempts) }, status=401)
 
-        # Create session / add to response body
+        # Create new session / add to response body
         session = create_session(session.id, user)
         token, expiry = create_jwt(user.id)
+
+        platform = req.META.get('HTTP_PLATFORM')
+        if platform == "web":
+            response = JsonResponse({ "success": True, "message": "You have successfully logged in." })
+            set_token_to_response(response, token, expiry)
+            response.set_cookie(key="session_id", value=str(session.id), max_age=session.expire_at, samesite="None", secure=True, httponly=True)
+            return response
 
         response = JsonResponse({
             "success": True,
@@ -100,13 +107,6 @@ def login_user(req):
             "auth_token": token,
             "message": "You have successfully logged in."
         })
-
-        platform = req.META.get('HTTP_PLATFORM')
-        if platform == "web":
-            response.set_cookie(key="auth_token_exp", value=str(token), max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=False)
-            response.set_cookie(key="auth_token", value=str(token), max_age=expiry, samesite="None", secure=True, httponly=True)
-            response.set_cookie(key="session_id", value=str(session.id), max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=True)
-            return response
 
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])

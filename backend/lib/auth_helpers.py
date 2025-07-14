@@ -11,7 +11,7 @@ class SessionNotFoundError(Exception):
     pass
 
 def create_session(session_id=None, user=None):
-    session_expiry = timezone.now() + timedelta(weeks=1)
+    session_expiry = timezone.now() + timedelta(days=3)
     session, created = Session.objects.update_or_create(id=session_id,
                                                         defaults={"user_id": user, "login_attempts": 0, "expire_at": session_expiry},
                                                         create_defaults={"expire_at": session_expiry})
@@ -34,3 +34,8 @@ def get_session(req):
         return Session.objects.get(id=session_id)
     except Session.DoesNotExist:
         raise SessionNotFoundError("Session does not exist")
+
+def set_token_to_response(response, token, expiry):
+    response.set_cookie(key="auth_token_exp", value=str(token), max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=False)
+    response.set_cookie(key="auth_token", value=str(token), max_age=expiry, samesite="None", secure=True, httponly=True)
+    return response
