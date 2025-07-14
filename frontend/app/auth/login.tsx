@@ -1,4 +1,4 @@
-import {View, Text, TextInput, StyleSheet, TouchableOpacity, Platform} from "react-native";
+import {View, Text, TextInput, StyleSheet, TouchableOpacity} from "react-native";
 import {useRouter} from "expo-router";
 import React, {useState} from 'react';
 import { Formik } from 'formik';
@@ -6,6 +6,7 @@ import * as yup from 'yup';
 import {useAuth} from "@/app/lib/AuthContext";
 import Constants from 'expo-constants';
 import AuthService from "@/app/lib/AuthService";
+import FormInput from "@/app/components/formInput";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Login() {
@@ -63,28 +64,13 @@ export default function Login() {
                           isValid,
                       }) => (
                         <>
-                            <View style={styles.inputContainer}>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Username"
-                                    onChangeText={handleChange('username')}
-                                    onBlur={handleBlur('username')}
-                                    value={values.username}
-                                />
-                            </View>
+                            <FormInput placeholder={"Username"} onChangeText={handleChange('username')}
+                                       onBlur={handleBlur('username')} value={values.username} secure={false}></FormInput>
                             {errors.username && touched.username && (
                                 <Text style={styles.errorText}>{errors.username}</Text>
                             )}
-                            <View style={styles.inputContainer}>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Password"
-                                    secureTextEntry
-                                    onChangeText={handleChange('password')}
-                                    onBlur={handleBlur('password')}
-                                    value={values.password}
-                                />
-                            </View>
+                            <FormInput placeholder={"Password"} onChangeText={handleChange('password')}
+                                       onBlur={handleBlur('password')} value={values.password} secure={true}></FormInput>
                             {errors.password && touched.password && (
                                 <Text style={styles.errorText}>{errors.password}</Text>
                             )}
@@ -127,23 +113,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'rgba(229,229,229,0.97)',
         alignSelf: "center"
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '100%',
-        height: 50,
-        backgroundColor: '#f1f1f1',
-        borderRadius: 6,
-        paddingHorizontal: 10,
-        marginBottom: 10
-    },
-    icon: {
-        marginRight: 10,
-    },
-    input: {
-        flex: 1,
-        height: '100%',
     },
     forgotPassword: {
         alignSelf: 'flex-end',

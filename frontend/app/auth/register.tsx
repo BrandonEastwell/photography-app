@@ -1,13 +1,24 @@
 import {View, Text, TextInput, StyleSheet, TouchableOpacity} from "react-native";
 import {useRouter} from "expo-router";
-import React from 'react';
+import React, {useState} from 'react';
 import { Formik } from 'formik';
 import * as yup from 'yup';
+import Constants from 'expo-constants';
+import AuthService from "@/app/lib/AuthService";
+import FormInput from "@/app/components/formInput";
+const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Register() {
+    const [error, setError] = useState(null)
     const router = useRouter()
 
     const loginValidationSchema = yup.object().shape({
+        firstName: yup
+            .string()
+            .required('First name is required'),
+        lastName: yup
+            .string()
+            .required('Last name is required'),
         username: yup
             .string()
             .email('Please enter a valid username')
@@ -18,11 +29,26 @@ export default function Register() {
             .required('Password is required'),
     });
 
-    const formSubmit = (values: {
-        username: string
-        password: string
-    }) => {
+    const formSubmit = async (values: { firstName: string, lastName: string,
+        username: string, password: string }) => {
 
+        let res = await fetch(`${apiUrl}/api/account/register`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify({ "firstName": values.firstName, "lastName": values.lastName,
+                "username": values.username, "password": values.password })
+        })
+
+        let data = await res.json()
+        if (!data.success) {
+            setError(data.error)
+            return
+        }
+
+        await AuthService.saveAuthToken(data.auth_token, data.auth_token_exp)
     }
 
     return (
@@ -31,7 +57,7 @@ export default function Register() {
                 <Text style={styles.title}>Photography App</Text>
                 <Formik
                     validationSchema={loginValidationSchema}
-                    initialValues={{ username: '', password: '' }}
+                    initialValues={{ firstName: '', lastName: '', username: '', password: '' }}
                     onSubmit={formSubmit}
                 >
                     {({
@@ -44,28 +70,23 @@ export default function Register() {
                           isValid,
                       }) => (
                         <>
-                            <View style={styles.inputContainer}>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Username"
-                                    onChangeText={handleChange('username')}
-                                    onBlur={handleBlur('username')}
-                                    value={values.username}
-                                />
-                            </View>
+                            <FormInput placeholder={"First name"} onChangeText={handleChange('firstName')}
+                                       onBlur={handleBlur('firstName')} value={values.firstName} secure={false}></FormInput>
+                            {errors.firstName && touched.firstName && (
+                                <Text style={styles.errorText}>{errors.firstName}</Text>
+                            )}
+                            <FormInput placeholder={"Last name"} onChangeText={handleChange('lastName')}
+                                       onBlur={handleBlur('lastName')} value={values.lastName} secure={false}></FormInput>
+                            {errors.lastName && touched.lastName && (
+                                <Text style={styles.errorText}>{errors.lastName}</Text>
+                            )}
+                            <FormInput placeholder={"Username"} onChangeText={handleChange('username')}
+                                       onBlur={handleBlur('username')} value={values.username} secure={false}></FormInput>
                             {errors.username && touched.username && (
                                 <Text style={styles.errorText}>{errors.username}</Text>
                             )}
-                            <View style={styles.inputContainer}>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Password"
-                                    secureTextEntry
-                                    onChangeText={handleChange('password')}
-                                    onBlur={handleBlur('password')}
-                                    value={values.password}
-                                />
-                            </View>
+                            <FormInput placeholder={"Password"} onChangeText={handleChange('password')}
+                                       onBlur={handleBlur('password')} value={values.password} secure={true}></FormInput>
                             {errors.password && touched.password && (
                                 <Text style={styles.errorText}>{errors.password}</Text>
                             )}
@@ -102,24 +123,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'rgba(229,229,229,0.97)',
         alignSelf: "center"
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '100%',
-        height: 50,
-        backgroundColor: '#f1f1f1',
-        borderRadius: 6,
-        paddingHorizontal: 10,
-        marginBottom: 10,
-        outline: "none"
-    },
-    icon: {
-        marginRight: 10,
-    },
-    input: {
-        flex: 1,
-        height: '100%',
     },
     forgotPassword: {
         alignSelf: 'flex-end',
