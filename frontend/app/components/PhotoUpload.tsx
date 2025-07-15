@@ -1,11 +1,15 @@
-import {Modal, Pressable, View, Text} from "react-native";
+import {Modal, Pressable, View, Text, Platform} from "react-native";
 import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from "react";
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import {ImagePickerAsset} from "expo-image-picker";
 import {ExifData} from "@/app/lib/Types";
 import ExifForm from "@/app/components/ExifForm";
-
+import Constants from 'expo-constants';
+import * as SecureStore from "expo-secure-store";
+import AuthService from "@/app/lib/AuthService";
+import {router} from "expo-router";
+const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatch<SetStateAction<boolean>>  }) {
     const [imageUpload, setImageUpload] = useState<ImagePickerAsset | undefined>(undefined);
@@ -44,20 +48,45 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
     }
 
     const uploadPhoto = async () => {
-        if (imageUpload) {
-            const formData = new FormData();
-            formData.append('image', {
-                uri: imageUpload.uri,
-                name: imageUpload.fileName,
-                type: imageUpload.type
-            })
+        if (!imageUpload) return
 
-            let result = await fetch("http://127.0.0.1:8000/api/media/photos", {
-                method: "POST",
-                body: formData,
-                headers: { 'Content-Type': 'multipart/form-data' }
-            })
+        const formData = new FormData();
+        formData.append('image', {
+            uri: imageUpload.uri,
+            name: imageUpload.fileName,
+            type: imageUpload.type
+        })
+
+        let res = await postPhoto(formData)
+        let data = await res.json()
+
+        if (!data.success) {
+            if (data.error == "Token expired") {
+                const refreshed = await AuthService.refreshAuthToken()
+                if (!refreshed) return router.replace("/auth/login")
+
+                res = await postPhoto(formData)
+                data = res.json()
+
+                if (!data.success) throw new Error("Upload failed after refresh");
+            }
         }
+    }
+    
+    async function postPhoto(formData: any) {
+        const headers: Record<string, string> = {"Platform": Platform.OS, 'Content-Type': 'multipart/form-data'}
+
+        if (Platform.OS !== "web") {
+            const token = await SecureStore.getItemAsync("auth_token") as string
+            headers['Authorization'] = `Bearer ${token}`
+        }
+
+        return await fetch(`${apiUrl}/api/media/photos`, {
+            method: "POST",
+            body: formData,
+            headers,
+            credentials: "include",
+        })
     }
 
     return (
@@ -75,7 +104,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                         <View style={{ flexDirection: "row", gap: 15, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
                             { exif && Object.entries(exif).map(([key, value]) => { if (value !== undefined) {
                                     return (
-                                        <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 4 }}>
+                                        <View key={key} style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 4 }}>
                                             <Text style={{ color: "white" }}>{key}</Text>
                                             <View style={{ backgroundColor: 'rgb(227,227,227)', borderRadius: 6, padding: 5 }}>
                                                 <Text style={{  }}>{value}</Text>
