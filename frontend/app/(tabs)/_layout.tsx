@@ -1,7 +1,7 @@
 import {Tabs, useRouter} from 'expo-router';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
-import FileUpload from '../components/FileUpload'
+import PhotoUpload from '../components/PhotoUpload'
 import {Pressable} from "react-native";
 import {Entypo} from "@expo/vector-icons";
 import AuthService from "@/app/lib/AuthService";
@@ -68,7 +68,7 @@ export default function TabLayout() {
                 <Tabs.Screen name="auth/login" options={{ href: null }}></Tabs.Screen>
                 <Tabs.Screen name="auth/register" options={{ href: null }}></Tabs.Screen>
             </Tabs>
-            { showUpload && <FileUpload setShowUpload={setShowUpload} /> }
+            { showUpload && <PhotoUpload setShowUpload={setShowUpload} /> }
         </>
 
     );

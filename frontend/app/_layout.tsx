@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import {AuthProvider} from "@/app/lib/AuthContext";
 import {useFonts} from "expo-font";
 import { View} from "react-native";
-import FileUpload from "@/app/components/FileUpload";
+import PhotoUpload from "@/app/components/PhotoUpload";
 
 export default function RootLayout() {
     const [loaded, error] = useFonts({
