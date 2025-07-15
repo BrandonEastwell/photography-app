@@ -116,6 +116,8 @@ def image_upload(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
+    print("hi")
+
     user_id = req.user_id
     try:
         user = User.objects.get(id=user_id)

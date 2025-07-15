@@ -11,7 +11,17 @@ env = environ.Env()
 def JWTAuthenticationMiddleware(view_func):
 
     def middleware(request, *args, **kwargs):
-        token = request.COOKIES.get("auth_token")
+        platform = request.META.get('HTTP_PLATFORM')
+        token = None
+
+        if platform != "web":
+            auth_header = request.META.get('HTTP_AUTHORIZATION')
+            if auth_header:
+                token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
+            else:
+                return JsonResponse({ "success": False, "error": "No authorization header provided" })
+        else:
+            token = request.COOKIES.get("auth_token")
 
         if token is None:
             return token_expired()
@@ -27,6 +37,6 @@ def JWTAuthenticationMiddleware(view_func):
     return middleware
 
 def token_expired():
-    response = JsonResponse({ "error": "token expired" }, status=401)
+    response = JsonResponse({ "success": False, "error": "Token expired" }, status=401)
     response.headers["X-Token-Expired"] = True
     return response

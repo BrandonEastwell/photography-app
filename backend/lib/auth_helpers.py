@@ -35,7 +35,6 @@ def get_session(req):
     except Session.DoesNotExist:
         raise SessionNotFoundError("Session does not exist")
 
-def set_token_to_response(response, token, expiry):
-    response.set_cookie(key="auth_token_exp", value=expiry, max_age=timedelta(weeks=1), samesite="None", secure=True, httponly=False)
+def set_token_to_response(response, token):
     response.set_cookie(key="auth_token", value=str(token), max_age=int(env('AUTH_TOKEN_AGE')), samesite="None", secure=True, httponly=True)
     return response

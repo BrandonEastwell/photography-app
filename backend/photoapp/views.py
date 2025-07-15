@@ -54,7 +54,7 @@ def refresh_token(req):
     platform = req.META.get('HTTP_PLATFORM')
     if platform == "web":
         response = JsonResponse({ "success": True }, status=200)
-        set_token_to_response(response, token, expiry)
+        set_token_to_response(response, token)
         return response
 
     return JsonResponse({

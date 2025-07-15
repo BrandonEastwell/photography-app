@@ -94,8 +94,8 @@ def login_user(req):
 
         platform = req.META.get('HTTP_PLATFORM')
         if platform == "web":
-            response = JsonResponse({ "success": True, "message": "You have successfully logged in." })
-            set_token_to_response(response, token, expiry)
+            response = JsonResponse({ "success": True, "auth_token_exp": expiry, "message": "You have successfully logged in." })
+            set_token_to_response(response, token)
             expires_in_seconds = int((session.expire_at - timezone.now()).total_seconds())
             response.set_cookie(key="session_id", value=str(session.id), max_age=expires_in_seconds, samesite="None", secure=True, httponly=True)
             return response
