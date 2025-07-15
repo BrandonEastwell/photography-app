@@ -3,8 +3,6 @@ import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from "reac
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import {ImagePickerAsset} from "expo-image-picker";
-import ExifInputField from "@/app/components/ExifInputField";
-import LocationInput from "@/app/components/LocationInput";
 import {ExifData} from "@/app/lib/Types";
 import ExifForm from "@/app/components/ExifForm";
 
@@ -73,10 +71,24 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                     <ExifForm setExif={setExif} exif={exif} initExif={exifRef.current} onSubmit={() => setShowExifForm(false)} />
                 }
                 { imageUpload && !showExifForm &&
-                    <Pressable onPress={uploadPhoto} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
-                        borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
-                        <Text style={{ color: 'black' }}>Upload Photo</Text>
-                    </Pressable>
+                    <>
+                        <View style={{ flexDirection: "row", gap: 15, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+                            { exif && Object.entries(exif).map(([key, value]) => { if (value !== undefined) {
+                                    return (
+                                        <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 4 }}>
+                                            <Text style={{ color: "white" }}>{key}</Text>
+                                            <View style={{ backgroundColor: 'rgb(227,227,227)', borderRadius: 6, padding: 5 }}>
+                                                <Text style={{  }}>{value}</Text>
+                                            </View>
+                                        </View>
+                                    )
+                                }})}
+                        </View>
+                        <Pressable onPress={uploadPhoto} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
+                            borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
+                            <Text style={{ color: 'black' }}>Upload Photo</Text>
+                        </Pressable>
+                    </>
                 }
             </View>
         </Modal>
