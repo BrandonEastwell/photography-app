@@ -4,8 +4,7 @@ import React, {useState} from 'react';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import Constants from 'expo-constants';
-import AuthService from "@/app/lib/AuthService";
-import FormInput from "@/app/components/formInput";
+import FormInput from "@/app/components/FormInput";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Register() {

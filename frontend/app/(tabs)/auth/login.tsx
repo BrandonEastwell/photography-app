@@ -6,11 +6,12 @@ import * as yup from 'yup';
 import {useAuth} from "@/app/lib/AuthContext";
 import Constants from 'expo-constants';
 import AuthService from "@/app/lib/AuthService";
-import FormInput from "@/app/components/formInput";
+import FormInput from "@/app/components/FormInput";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Login() {
     const [error, setError] = useState(null)
+    const [message, setMessage] = useState(null)
     const { login } = useAuth()
     const router = useRouter()
 
@@ -41,12 +42,17 @@ export default function Login() {
         let data = await res.json()
         if (!data.success) {
             setError(data.error)
+            if (data.error === "Session expired. Please try again.") await AuthService.createSession()
             return
         }
 
+        setMessage(data.message)
+        console.log(data.auth_token_exp)
         await AuthService.saveAuthToken(data.auth_token, data.auth_token_exp)
 
-        login()
+        setTimeout(() => {
+            router.replace('/profile')
+        }, 2000)
     }
 
     return (
@@ -88,8 +94,11 @@ export default function Login() {
                             >
                                 <Text style={styles.buttonText}>Login</Text>
                             </TouchableOpacity>
-                            {error && (
+                            {error && !message && (
                                 <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
+                            )}
+                            {message && (
+                                <Text style={{ color: '#3091fc', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{message}</Text>
                             )}
                             <TouchableOpacity onPress={() => router.push('/auth/register')}>
                                 <Text style={styles.signUp}>

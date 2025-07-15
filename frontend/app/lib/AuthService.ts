@@ -50,27 +50,28 @@ export default class AuthService {
     }
 
     static async saveAuthToken(authToken: string, authTokenExp: string) {
-        if (Platform.OS == "web") {
-            await AsyncStorage.setItem("auth_token", authToken)
-            await AsyncStorage.setItem("auth_token_exp", authTokenExp)
-        } else {
+        if (Platform.OS !== "web") {
             await SecureStore.setItemAsync("auth_token", authToken)
             await SecureStore.setItemAsync("auth_token_exp", authTokenExp)
+        }  else {
+            await AsyncStorage.setItem("auth_token_exp", authTokenExp)
         }
     }
 
     static async isUserLoggedIn() {
         let authTokenExp;
-        if (Platform.OS == "web") {
-            authTokenExp = await AsyncStorage.getItem("auth_token_exp")
-        } else {
+        if (Platform.OS !== "web") {
             authTokenExp = await SecureStore.getItemAsync("auth_token_exp")
+        } else {
+            authTokenExp = await AsyncStorage.getItem("auth_token_exp")
         }
 
         if (!authTokenExp) return false
 
         const curTime = new Date()
         const expiry = new Date(authTokenExp)
+        console.log(expiry)
+        console.log(curTime)
         return curTime <= expiry;
     }
 }
