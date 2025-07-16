@@ -16,6 +16,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
     const [exif, setExif] = useState<ExifData | undefined>(undefined);
     const [showExifForm, setShowExifForm] = useState<boolean>(false)
     const exifRef = useRef(exif)
+    const [error, setError] = useState<string | undefined>(undefined)
 
     useEffect(() => {
         pickImageAsync()
@@ -51,11 +52,15 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
         if (!imageUpload) return
 
         const formData = new FormData();
+
+        // @ts-ignore
         formData.append('image', {
             uri: imageUpload.uri,
             name: imageUpload.fileName,
             type: imageUpload.type
         })
+
+        if (exif) Object.entries(exif).map(([key, value]) => formData.append(key, value))
 
         let res = await postPhoto(formData)
         let data = await res.json()
@@ -70,11 +75,12 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
 
                 if (!data.success) throw new Error("Upload failed after refresh");
             }
+            setError(data.error)
         }
     }
     
     async function postPhoto(formData: any) {
-        const headers: Record<string, string> = {"Platform": Platform.OS, 'Content-Type': 'multipart/form-data'}
+        const headers: Record<string, string> = {"Platform": Platform.OS}
 
         if (Platform.OS !== "web") {
             const token = await SecureStore.getItemAsync("auth_token") as string
@@ -117,6 +123,9 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                             borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
                             <Text style={{ color: 'black' }}>Upload Photo</Text>
                         </Pressable>
+                        {error && (
+                            <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
+                        )}
                     </>
                 }
             </View>

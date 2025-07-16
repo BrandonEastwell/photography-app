@@ -1,7 +1,7 @@
 import {Pressable, Text, View} from "react-native";
 import LocationInput from "@/app/components/LocationInput";
 import ExifInputField from "@/app/components/ExifInputField";
-import React, {Dispatch, SetStateAction, useRef, useState} from "react";
+import React, {Dispatch, SetStateAction, useState} from "react";
 import * as yup from "yup";
 import {ExifData, ExifDataErrors} from "@/app/lib/Types";
 
