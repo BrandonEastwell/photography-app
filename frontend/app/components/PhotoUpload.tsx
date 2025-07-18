@@ -17,6 +17,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
     const [showExifForm, setShowExifForm] = useState<boolean>(false)
     const exifRef = useRef(exif)
     const [error, setError] = useState<string | undefined>(undefined)
+    const [message, setMessage] = useState<string | undefined>(undefined)
 
     useEffect(() => {
         pickImageAsync()
@@ -88,8 +89,13 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
 
                 if (!data.success) throw new Error("Upload failed after refresh");
             }
-            setError(data.error)
+            return setError(data.error)
         }
+
+        setMessage(data.message)
+        setTimeout(() => {
+            setShowUpload(false)
+        }, 2000)
     }
     
     async function postPhoto(formData: any) {
@@ -138,6 +144,9 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                         </Pressable>
                         {error && (
                             <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
+                        )}
+                        {message && (
+                            <Text style={{ color: '#3091fc', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{message}</Text>
                         )}
                     </>
                 }
