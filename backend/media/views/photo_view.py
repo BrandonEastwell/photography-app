@@ -116,21 +116,17 @@ def image_upload(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    print("hi")
-
     user_id = req.user_id
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return JsonResponse({ "error": "Your account does not exist." }, status=400)
 
-    image_file = req.FILES.get('image')
+    image_file = req.FILES.get('image') if req.FILES.get('image') is not None else req.POST.get('image')
     if image_file is None:
         return JsonResponse({ "error": "Please upload a photo" }, status=400)
 
     try:
-        tags = exifread.process_file(image_file.file)
-
         required_tags = ["Make", "Model", "GPSLatitude", "GPSLongitude"]
         image_tags = {
             "Make": None,
@@ -148,23 +144,14 @@ def image_upload(req):
             "ExifImageHeight": None
         }
 
-        for tag_id in tags:
-            tag_name = tag_id.split(" ")[1]
-            if tag_name in image_tags:
-                if tag_name == "ISOSpeedRatings" or "FocalLength":
-                    image_tags[tag_name] = tags[tag_id].values[0] if isinstance(tags[tag_id].values, list) else tags[tag_id].values
-                elif tag_name == "FocalLength":
-                    image_tags[tag_name] = tags[tag_id].values[0] if isinstance(tags[tag_id].values, list) else tags[tag_id].values
-                else:
-                    image_tags[tag_name] = tags[tag_id]
+        for tag in image_tags:
+            image_tags[tag] = req.POST.get(tag)
 
-        if image_tags["GPSLatitude"] and image_tags["GPSLongitude"] is not None:
+        print(image_tags)
+
+        if image_tags["GPSLatitude"] and image_tags["GPSLongitude"] is not None and not float:
             image_tags["GPSLongitude"] = _convert_to_degrees(image_tags["GPSLongitude"])
             image_tags["GPSLatitude"] = _convert_to_degrees(image_tags["GPSLatitude"])
-        else:
-            # Falls back to user uploaded GPS location
-            image_tags["GPSLongitude"] = req.POST.get("lon")
-            image_tags["GPSLatitude"] = req.POST.get("lat")
 
         missing_tags = []
         for tag in required_tags:
