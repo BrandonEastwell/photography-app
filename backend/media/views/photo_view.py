@@ -140,14 +140,11 @@ def image_upload(req):
             "ISOSpeedRatings": None,
             "ShutterSpeedValue": None,
             "DateTimeOriginal": None,
-            "ExifImageWidth": None,
-            "ExifImageHeight": None
         }
 
         for tag in image_tags:
-            image_tags[tag] = req.POST.get(tag)
-
-        print(image_tags)
+            if req.POST.get(tag) != 'undefined' and not None:
+                image_tags[tag] = req.POST.get(tag)
 
         if image_tags["GPSLatitude"] and image_tags["GPSLongitude"] is not None and not float:
             image_tags["GPSLongitude"] = _convert_to_degrees(image_tags["GPSLongitude"])
