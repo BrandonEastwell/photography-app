@@ -48,19 +48,32 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
         }
     }
 
-    const uploadPhoto = async () => {
+    const uploadBtnOnClick = async () => {
         if (!imageUpload) return
-
         const formData = new FormData();
 
-        // @ts-ignore
-        formData.append('image', {
-            uri: imageUpload.uri,
-            name: imageUpload.fileName,
-            type: imageUpload.type
-        })
+        if (Platform.OS === "web" && imageUpload.file) {
+            formData.append("image", imageUpload.file, imageUpload.file.name);
+        } else {
+            // @ts-ignore
+            formData.append('image', {
+                uri: imageUpload.uri,
+                name: imageUpload.fileName,
+                type: imageUpload.type
+            })
+        }
 
         if (exif) Object.entries(exif).map(([key, value]) => formData.append(key, value))
+
+        await uploadPhoto(formData)
+    }
+
+    const uploadPhoto = async (formData: FormData) => {
+        const isUserLoggedIn = await AuthService.isUserLoggedIn()
+        if (!isUserLoggedIn) {
+            const refreshed = await AuthService.refreshAuthToken()
+            if (!refreshed) return router.replace("/auth/login")
+        }
 
         let res = await postPhoto(formData)
         let data = await res.json()
@@ -119,7 +132,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                                     )
                                 }})}
                         </View>
-                        <Pressable onPress={uploadPhoto} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
+                        <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
                             borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
                             <Text style={{ color: 'black' }}>Upload Photo</Text>
                         </Pressable>
