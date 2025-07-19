@@ -17,14 +17,15 @@ def get_user_camera(req):
 
     user_id = req.user_id
     if user_id is None:
-        return JsonResponse({ "error": "User must be logged in" }, status=404)
+        return JsonResponse({ "success": False, "error": "User must be logged in" }, status=404)
 
     try:
         cameras = Camera.objects.filter(profile__user_id=user_id).values("camera_model")
         return JsonResponse( { "cameras": json.dumps(list(cameras)) }, status=200)
     except Exception as e:
         logging.exception(e)
-        return JsonResponse( { "error": "Unable to retrieve data at this time." }, status=500)
+        return JsonResponse( { "success": False, "error": "Unable to retrieve data at this time." }, status=500)
+
 
 @JWTAuthenticationMiddleware
 def get_user_lens(req):
@@ -33,26 +34,51 @@ def get_user_lens(req):
 
     user_id = req.user_id
     if user_id is None:
-        return JsonResponse({ "error": "User must be logged in" }, status=404)
+        return JsonResponse({ "success": False, "error": "User must be logged in" }, status=404)
 
     try:
         lens = Lens.objects.filter(profile__user_id=user_id).values("lens_model")
-        return JsonResponse( { "lens": json.dumps(list(lens)) }, status=200)
+        return JsonResponse( { "success": True, "lens": json.dumps(list(lens)) }, status=200)
     except Exception as e:
         logging.exception(e)
-        return JsonResponse( { "error": "Unable to retrieve data at this time." }, status=500)
+        return JsonResponse( { "success": False, "error": "Unable to retrieve data at this time." }, status=500)
 
-def get_user(req, user_id):
+
+@JWTAuthenticationMiddleware
+def get_profile(req):
+    if req.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+
+    user_id = req.user_id
+    if user_id is None:
+        return JsonResponse({ "success": False, "error": "User must be logged in" }, status=404)
+
+    try:
+        user_profile = Profile.objects.get(user__id=user_id)
+        print(user_profile)
+
+        if user_profile is None:
+            return JsonResponse( { "success": False, "error": "User does not exist." }, status=400)
+
+        return JsonResponse( { "success": True, "user": json.dumps(user_profile) }, status=200)
+    except Exception as e:
+        logging.exception(e)
+        return JsonResponse( { "success": False, "error": "Unable to retrieve user at this time." }, status=500)
+
+
+def get_user_profile(req, user_id):
     if req.method != "GET":
         return HttpResponseNotAllowed(["GET"])
 
     try:
         user_profile = Profile.objects.get(user__id=user_id)
 
-        if user_profile is None:
-            return JsonResponse( { "error": "User does not exist." }, status=400)
+        print(user_profile)
 
-        return JsonResponse( { json.dumps(user_profile) }, status=200)
+        if user_profile is None:
+            return JsonResponse( { "success": False, "error": "User does not exist." }, status=400)
+
+        return JsonResponse( { "success": True, "user": json.dumps(user_profile) }, status=200)
     except Exception as e:
         logging.exception(e)
-        return JsonResponse( { "error": "Unable to retrieve user at this time." }, status=500)
+        return JsonResponse( { "success": False, "error": "Unable to retrieve user at this time." }, status=500)

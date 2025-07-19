@@ -23,7 +23,7 @@ urlpatterns = [
     path("csrf", views.csrf),
     path("refresh-token", views.refresh_token),
     path("session", views.session),
-    path("api/account/", include('accounts.urls')),
-    path("api/user/", include('accounts.urls')),
+    path("api/account/", include('accounts.account_urls')),
+    path("api/user/", include('accounts.user_urls')),
     path("api/media/", include('media.urls'))
 ]
