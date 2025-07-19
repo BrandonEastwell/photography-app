@@ -1,9 +1,12 @@
 import {Pressable, Text, View} from "react-native";
 import LocationInput from "@/app/components/LocationInput";
 import ExifInputField from "@/app/components/ExifInputField";
-import React, {Dispatch, SetStateAction, useState} from "react";
+import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
 import * as yup from "yup";
 import {ExifData, ExifDataErrors} from "@/app/lib/Types";
+import MultiSelectInput from "@/app/components/MultiSelectInput";
+import Constants from "expo-constants";
+const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 const exifSchema = yup.object().shape({
     Make: yup.string(),
@@ -23,6 +26,28 @@ export default function ExifForm({ setExif, initExif, exif, onSubmit } : {
     onSubmit: () => void;
 }) {
     const [errors, setErrors] = useState<ExifDataErrors | undefined>(undefined);
+    const [cameraMakes, setCameraMakes] = useState<string[] | null>(null)
+    const [cameraModels, setCameraModels] = useState<string[] | null>(null)
+
+    useEffect(() => {
+        const getCameras = async () => {
+            const res = await fetch(`${apiUrl}/api/media/cameras`, {
+                method: "GET"
+            })
+
+            const data = await res.json()
+            if (data.items && data.items > 0) {
+                const filtered = data.results.filter((item: { model: string; make: string; }) =>
+                    item.model !== "undefined" && item.make !== "undefined")
+                const cameraMakes = filtered.map((camera: { make: string; }) => camera.make)
+                const cameraModels = filtered.map((camera: { model: string; }) => camera.model)
+                setCameraMakes(Array.from(new Set<string>(cameraMakes)))
+                setCameraModels(Array.from(new Set<string>(cameraModels)))
+            }
+        }
+
+        getCameras()
+    }, []);
 
     const validateField = async (field: string, value: string | React.ChangeEvent<any>) => {
         try {
@@ -64,15 +89,17 @@ export default function ExifForm({ setExif, initExif, exif, onSubmit } : {
                     <LocationInput setExif={setExif}></LocationInput>
                 }
 
-                { initExif?.Make === undefined && <ExifInputField placeholder="Camera Make"
-                                                                          onChangeText={(text) => onExifFieldChange("Make", text)}
-                                                                          value={exif?.Make ?? ''}
-                                                                          error={errors?.Make} /> }
+                { initExif?.Make === undefined && cameraMakes && <MultiSelectInput placeholder="Camera Make"
+                                                                                   onChangeText={(text) => onExifFieldChange("Make", text)}
+                                                                                   value={exif?.Make ?? ''}
+                                                                                   error={errors?.Make}
+                                                                                   items={cameraMakes} zIndex={20} /> }
 
-                { initExif?.Model === undefined && <ExifInputField placeholder="Camera Model"
-                                                                           onChangeText={(text) => onExifFieldChange("Model", text)}
-                                                                           value={exif?.Model ?? ''}
-                                                                           error={errors?.Model} /> }
+                { initExif?.Model === undefined && cameraModels && <MultiSelectInput placeholder="Camera Model"
+                                                                                     onChangeText={(text) => onExifFieldChange("Model", text)}
+                                                                                     value={exif?.Model ?? ''}
+                                                                                     error={errors?.Model}
+                                                                                     items={cameraModels} zIndex={10} /> }
 
                 { initExif?.LensModel === undefined && <ExifInputField placeholder="Lens Model"
                                                                                onChangeText={(text) => onExifFieldChange("LensModel", text)}

@@ -5,7 +5,7 @@ export default function ExifInputField({ placeholder, onChangeText, value, error
     onChangeText: (e: string | ChangeEvent<any>) => void, value: any, error: string | undefined }) {
 
     return (
-        <>
+        <View style={{zIndex: 0}}>
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
@@ -17,7 +17,7 @@ export default function ExifInputField({ placeholder, onChangeText, value, error
             {error && (
                 <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
             )}
-        </>
+        </View>
 
     )
 }

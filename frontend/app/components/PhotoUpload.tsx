@@ -120,8 +120,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                 borderRadius: 15, flexDirection: "row", gap: 10, zIndex: 100, width: "100%", justifyContent: "flex-end", alignItems: "flex-end"}}>
                 <Text onPress={() => setShowUpload(false)} style={{ color: 'white', fontFamily: "BethEllen-Regular", fontSize: 20 }}>X</Text>
             </View>
-            <View style={{backgroundColor: 'rgba(0,0,0,0.70)', height: "95vh", flexDirection: "column", gap: 15, justifyContent: "center",
-                alignItems: "center"}}>
+            <View style={{ backgroundColor: 'rgba(0,0,0,0.70)', height: "95vh", flexDirection: "column", gap: 15, justifyContent: "center", alignItems: "center"}}>
                 <View style={{ width: 320, height: 540, backgroundColor: 'rgba(12,12,12,0.94)', borderRadius: 15, marginHorizontal: "auto" }}>
                     { imageUpload && <Image style={{ width: "100%", height: "100%", borderRadius: 15 }} source={imageUpload.uri}></Image> }
                 </View>
@@ -142,7 +141,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                                     )
                                 }})}
                             { !exif && <Text style={{ color: 'black', fontFamily: "SpaceMono-Regular", }}>Cancel Upload</Text> }
-                                </View>
+                        </View>
                         <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: '#3091fc', padding: 10, paddingHorizontal: 20,
                             borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
                             <Text style={{ color: 'white', fontFamily: "SpaceMono-Regular" }}>Upload Photo</Text>
