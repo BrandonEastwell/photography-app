@@ -19,7 +19,7 @@ def JWTAuthenticationMiddleware(view_func):
             if auth_header:
                 token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
             else:
-                return JsonResponse({ "success": False, "error": "No authorization header provided" })
+                return JsonResponse({ "success": False, "error": "No authorization header provided" }, status=400)
         else:
             token = request.COOKIES.get("auth_token")
 
