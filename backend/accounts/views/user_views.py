@@ -83,6 +83,7 @@ def get_user_profile(req, user_id):
 
         user = {
             "username": user_profile.user.username,
+            "description": user_profile.desc if user_profile.desc else None,
             "image": user_profile.image.url if user_profile.image else None,
             "photos": [
                 {

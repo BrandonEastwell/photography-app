@@ -19,6 +19,7 @@ class Session(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     image = models.ImageField(upload_to='pp/', null=True)
+    desc = models.CharField(max_length=150, null=True)
     camera = models.ManyToManyField(Camera, blank=True)
     lens = models.ManyToManyField(Lens, blank=True)
 
