@@ -4,7 +4,6 @@ import uuid
 from datetime import datetime
 
 import environ
-import exifread
 from django.contrib.auth import get_user_model
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
@@ -14,9 +13,9 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from photoapp.middleware.auth_middleware import JWTAuthenticationMiddleware
+
 from ..lib.PhotoManager import PhotoService
 from ..lib.helpers import get_search_point, get_filters, _convert_to_degrees
-
 from ..models import Photo, Camera, Lens
 
 env = environ.Env()
