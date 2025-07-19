@@ -1,13 +1,12 @@
 import json
 import logging
 
-from django.http import HttpResponseNotAllowed, JsonResponse, HttpRequest
-
-from photoapp.middleware.auth_middleware import JWTAuthenticationMiddleware
-from django.contrib.auth import get_user_model
-from media.models import Camera, Lens
 from accounts.models import Profile
+from django.contrib.auth import get_user_model
+from django.http import HttpResponseNotAllowed, JsonResponse
+from media.models import Camera, Lens
 from media.models import Photo
+from photoapp.middleware.auth_middleware import JWTAuthenticationMiddleware
 
 User = get_user_model()
 
@@ -46,41 +45,28 @@ def get_user_lens(req):
 
 
 @JWTAuthenticationMiddleware
-def get_profile(req):
+def profile(req):
     if req.method != "GET":
         return HttpResponseNotAllowed(["GET"])
 
     user_id = req.user_id
-    if user_id is None:
-        return JsonResponse({ "success": False, "error": "User must be logged in" }, status=404)
-
-    try:
-        user_profile = Profile.objects.get(user__id=user_id)
-        print(user_profile)
-
-        if user_profile is None:
-            return JsonResponse( { "success": False, "error": "User does not exist." }, status=400)
-
-        return JsonResponse( { "success": True, "user": { json.dumps(user_profile) } }, status=200)
-    except Exception as e:
-        logging.exception(e)
-        return JsonResponse( { "success": False, "error": "Unable to retrieve user at this time." }, status=500)
+    return get_user_profile(user_id)
 
 
-def get_user_profile(req, user_id):
+def users_profile(req, user_id):
     if req.method != "GET":
         return HttpResponseNotAllowed(["GET"])
 
+    return get_user_profile(user_id)
+
+
+def get_user_profile(user_id):
     try:
         user_profile = Profile.objects.get(user__id=user_id)
-
-        print(user_profile.image)
-
         if user_profile is None:
             return JsonResponse( { "success": False, "error": "User does not exist." }, status=400)
 
         images = Photo.objects.filter(pk=user_id)
-
         user = {
             "username": user_profile.user.username,
             "description": user_profile.desc if user_profile.desc else None,
@@ -93,6 +79,7 @@ def get_user_profile(req, user_id):
                 for image in images
             ]
         }
+
         return JsonResponse( { "success": True, "user": user }, status=200)
     except Exception as e:
         logging.exception(e)
