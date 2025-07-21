@@ -119,11 +119,11 @@ def image_upload(req):
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return JsonResponse({ "error": "Your account does not exist." }, status=400)
+        return JsonResponse({ "success": False, "error": "Your account does not exist." }, status=400)
 
     image_file = req.FILES.get('image') if req.FILES.get('image') is not None else req.POST.get('image')
     if image_file is None:
-        return JsonResponse({ "error": "Please upload a photo" }, status=400)
+        return JsonResponse({ "success": False, "error": "Please upload a photo" }, status=400)
 
     try:
         required_tags = ["Make", "Model", "GPSLatitude", "GPSLongitude"]
@@ -156,7 +156,7 @@ def image_upload(req):
 
 
         if len(missing_tags) > 0:
-            return JsonResponse( { "missing_tags": missing_tags, "error": "Missing tags from image" }, status=400 )
+            return JsonResponse( { "success": False, "missing_tags": missing_tags, "error": "Missing tags from image" }, status=400 )
 
         camera, _ = Camera.objects.get_or_create(model=image_tags["Model"], defaults={"make": image_tags["Make"]})
 
@@ -175,10 +175,10 @@ def image_upload(req):
                              if image_tags['DateTimeOriginal'] is not None else None,
                              shutter_speed = image_tags['ShutterSpeedValue'])
 
-        return JsonResponse({ "message": "Photo successfully uploaded" }, status=200)
+        return JsonResponse({ "success": True, "message": "Photo successfully uploaded" }, status=200)
     except Exception as e:
         logging.exception(e)
-        return JsonResponse({ "error": "Could not upload photo at this time." }, status=500)
+        return JsonResponse({ "success": False, "error": "Could not upload photo at this time." }, status=500)
 
 
 

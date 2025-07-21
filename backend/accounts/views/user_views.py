@@ -66,15 +66,17 @@ def get_user_profile(user_id):
         if user_profile is None:
             return JsonResponse( { "success": False, "error": "User does not exist." }, status=400)
 
-        images = Photo.objects.filter(pk=user_id)
+        images = Photo.objects.filter(user_id=user_id)
         user = {
             "username": user_profile.user.username,
+            "firstName": user_profile.user.first_name,
+            "lastName": user_profile.user.last_name,
             "description": user_profile.desc if user_profile.desc else None,
             "image": user_profile.image.url if user_profile.image else None,
             "photos": [
                 {
                     "id": image.id,
-                    "url": image.url
+                    "url": image.image.url
                 }
                 for image in images
             ]
