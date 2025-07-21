@@ -1,4 +1,4 @@
-import {View, Text, Platform, Pressable} from "react-native";
+import {View, Text, Platform, Pressable, Animated, Dimensions} from "react-native";
 import React, {useEffect, useState} from "react";
 import AuthService from "@/app/lib/AuthService";
 import {router} from "expo-router";
@@ -6,21 +6,24 @@ import Constants from "expo-constants";
 import {Image} from "expo-image";
 import useUpload from "@/app/lib/useUpload";
 import PhotoUpload from "@/app/components/PhotoUpload";
+import ScrollView = Animated.ScrollView;
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
-interface Photos {
+interface Photo {
     id: string
     url: string
 }
 
 interface Profile {
     username: string
+    firstName: string
+    lastName: string
     description: string | null
     image: string | null
 }
 
 export default function Profile() {
-    const [photos, setPhotos] = useState<Photos[] | null>(null)
+    const [photos, setPhotos] = useState<Photo[] | null>(null)
     const [profile, setProfile] = useState<Profile | null>(null)
     const [error, setError] = useState(null)
     const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload()
@@ -44,8 +47,8 @@ export default function Profile() {
             const data = await res.json()
             if (!data.success) return setError(data.error)
             const user = data.user
-            setProfile({ username: user.username, description: user.description, image: user.image })
-            setPhotos(data.photos)
+            setProfile({ username: user.username, description: user.description, image: user.image, firstName: user.firstName, lastName: user.lastName })
+            setPhotos(user.photos)
         }
 
         onLoad()
@@ -54,28 +57,45 @@ export default function Profile() {
     return (
         <>
             { profile &&
-                <View>
-                    <View style={{ flexDirection: "row", maxHeight: 200, padding: 30 }}>
-                        <View style={{ flex: 1 }}>
-                            <View style={{ width: "80%", aspectRatio: 1, borderRadius: 100, backgroundColor: "black"}}>
-                                { profile.image && <Image source={profile.image} style={{  }} /> }
-                            </View>
+                <View style={{ flex: 1, maxWidth: 600, width: '100%', marginHorizontal: "auto" }}>
+                    <View style={{ flexDirection: "row", maxHeight: 200, minHeight: 150, width: '100%', gap: 10, padding: 30, borderBottomWidth: 1, borderColor: "black" }}>
+                        <View style={{ height: '100%', maxWidth: 128, maxHeight: 128, aspectRatio: 1, borderRadius: 9999, backgroundColor: "black"}}>
+                            { profile.image && <Image source={ profile.image } style={{  }} /> }
                         </View>
                         <View style={{ flex: 2, flexDirection: "column", padding: 10 }}>
-                            <Text> { profile?.username } </Text>
+                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 16, color: 'black', fontFamily: "SpaceMono-Regular" }}>{ profile.username }</Text>
+                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 12, color: 'black', fontFamily: "SpaceMono-Regular" }}>{ profile.firstName + ' ' +profile.lastName }</Text>
+                            <View style={{ flex: 3, flexDirection: "row", flexWrap: "wrap", marginTop: 5, height: 'auto' }}>
+                                { profile.description && <Text style={{ fontSize: 12, color: 'black', fontFamily: "SpaceMono-Regular" }}>{ profile.description }</Text> }
+                                { !profile.description && <Text style={{ fontSize: 12, color: 'black', opacity: 0.5, fontFamily: "SpaceMono-Regular" }}>Add a description</Text> }
+                            </View>
                         </View>
                     </View>
 
                     { photos &&
-                        <View>
-
-                        </View>
+                        <ScrollView>
+                            <View style={{
+                                flex: 1,
+                                flexDirection: "row",
+                                flexWrap: "wrap",
+                                justifyContent: "center",
+                                marginTop: 2.5,
+                                gap: 2.5
+                            }}>
+                                { photos &&
+                                    photos.map((photo: Photo, index) => (
+                                        <Image key={index} source={photo.url} style={{ width: "32%", height: 200 }} />
+                                    ))
+                                }
+                            </View>
+                        </ScrollView>
                     }
 
                     { !photos &&
-                        <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 100 }}>
-                            <Pressable onPress={onUploadClick} style={{ backgroundColor: '#3091fc', padding: 10, paddingHorizontal: 20,
-                                borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
+                        <View style={{ flexDirection: "column", justifyContent: "center", marginTop: 100 }}>
+                            <Text style={{ marginHorizontal: "auto", color: 'black', fontFamily: "SpaceMono-Regular" }}>You have no photos!</Text>
+                            <Pressable onPress={onUploadClick} style={{ marginHorizontal: "auto", backgroundColor: '#3091fc', padding: 10, paddingHorizontal: 20,
+                                borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 10}}>
                                 <Text style={{ color: 'white', fontFamily: "SpaceMono-Regular" }}>Upload Photo</Text>
                             </Pressable>
                         </View>
