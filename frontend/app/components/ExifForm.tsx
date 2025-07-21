@@ -19,9 +19,8 @@ const exifSchema = yup.object().shape({
     ShutterSpeedValue: yup.string()
 });
 
-export default function ExifForm({ setExif, initExif, exif, onSubmit } : {
+export default function ExifForm({ setExif, exif, onSubmit } : {
     setExif: Dispatch<SetStateAction<ExifData | undefined>>;
-    initExif: ExifData | undefined;
     exif: ExifData | undefined;
     onSubmit: () => void;
 }) {

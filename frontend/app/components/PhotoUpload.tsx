@@ -15,7 +15,6 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
     const [imageUpload, setImageUpload] = useState<ImagePickerAsset | undefined>(undefined);
     const [exif, setExif] = useState<ExifData | undefined>(undefined);
     const [showExifForm, setShowExifForm] = useState<boolean>(false)
-    const exifRef = useRef(exif)
     const [error, setError] = useState<string | undefined>(undefined)
     const [message, setMessage] = useState<string | undefined>(undefined)
 
@@ -37,13 +36,13 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
             if (!image.fileSize || image.fileSize > 1048576) return
             console.log('EXIF:', image.exif);
 
-            exifRef.current = { Make: image.exif?.Make, Model: image.exif?.Model,
+            const exifData = { Make: image.exif?.Make, Model: image.exif?.Model,
                 LensModel: image.exif?.LensModel, FocalLength: image.exif?.FocalLength, Flash: image.exif?.Flash,
                 FNumber: image.exif?.FNumber, ISOSpeedRatings: image.exif?.ISOSpeedRatings,
                 ShutterSpeedValue: image.exif?.ShutterSpeedValue, GPSLatitude: image.exif?.GPSLatitude,
                 GPSLongitude: image.exif?.GPSLongitude }
 
-            setExif(exifRef.current)
+            setExif(exifData)
             setImageUpload(image)
             setShowExifForm(true)
         }
@@ -124,7 +123,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                     { imageUpload && <Image style={{ width: "100%", height: "100%", borderRadius: 15 }} source={imageUpload.uri}></Image> }
                 </View>
                 { imageUpload && showExifForm &&
-                    <ExifForm setExif={setExif} exif={exif} initExif={exifRef.current} onSubmit={() => setShowExifForm(false)} />
+                    <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} />
                 }
                 { imageUpload && !showExifForm &&
                     <>

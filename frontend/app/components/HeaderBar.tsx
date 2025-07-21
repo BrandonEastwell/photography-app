@@ -6,20 +6,6 @@ import * as Location from "expo-location";
 import ExifForm from "@/app/components/ExifForm";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
-interface image {
-    ISO: number | null
-    camera_make: string | null
-    camera_model: string | null
-    distance: number | null
-    focal_length: number | null
-    image_url: string | null
-    lens: string | null
-    relevance_score: number | null
-    shutter_speed: string | null
-    user_id: number | null
-    votes: number | null
-}
-
 export default function HeaderBar() {
     const [exif, setExif] = useState<ExifData | undefined>(undefined);
     const [timePeriod, setTimePeriod] = useState<string>("This Week")
@@ -66,7 +52,7 @@ export default function HeaderBar() {
                 </Pressable>
             </View>
             { showExifForm &&
-                <ExifForm setExif={setExif} exif={exif} initExif={exifRef.current} onSubmit={() => setShowExifForm(false)} />
+                <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} />
             }
         </View>
     );
