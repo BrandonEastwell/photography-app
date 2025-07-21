@@ -1,8 +1,9 @@
 import {Pressable, Text, TextInput, View} from "react-native";
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import Constants from 'expo-constants';
 import {ExifData} from "@/app/lib/Types";
 import * as Location from "expo-location";
+import ExifForm from "@/app/components/ExifForm";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 interface image {
@@ -24,6 +25,7 @@ export default function HeaderBar() {
     const [timePeriod, setTimePeriod] = useState<string>("This Week")
     const [showOptions, setShowOptions] = useState<boolean>(false)
     const options: string[] = ["Today", "This Week", "This Month", "This Year"]
+    const [showExifForm, setShowExifForm] = useState<boolean>(false)
 
     const getCurrentLocation = async () => {
         const { status } = await Location.requestForegroundPermissionsAsync();
@@ -63,6 +65,9 @@ export default function HeaderBar() {
                     <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 12, color: 'black' }}>Filters</Text>
                 </Pressable>
             </View>
+            { showExifForm &&
+                <ExifForm setExif={setExif} exif={exif} initExif={exifRef.current} onSubmit={() => setShowExifForm(false)} />
+            }
         </View>
     );
 }

@@ -85,51 +85,41 @@ export default function ExifForm({ setExif, initExif, exif, onSubmit } : {
                 <Text style={{ fontSize: 16, marginBottom: 40, fontFamily: "SpaceMono-Regular",
                     color: 'rgba(229,229,229,0.97)'}}>These attributes help your photo appear in more search results.</Text>
 
-                { (initExif?.GPSLatitude === undefined || initExif?.GPSLongitude === undefined)  &&
-                    <LocationInput setExif={setExif}></LocationInput>
-                }
+                <LocationInput setExif={setExif}></LocationInput>
 
-                { initExif?.Make === undefined && cameraMakes && <MultiSelectInput placeholder="Camera Make"
-                                                                                   onChangeText={(text) => onExifFieldChange("Make", text)}
+                { cameraMakes && <MultiSelectInput placeholder="Camera Make" onChangeText={(text) => onExifFieldChange("Make", text)}
                                                                                    value={exif?.Make ?? ''}
                                                                                    error={errors?.Make}
                                                                                    items={cameraMakes} zIndex={20} /> }
 
-                { initExif?.Model === undefined && cameraModels && <MultiSelectInput placeholder="Camera Model"
-                                                                                     onChangeText={(text) => onExifFieldChange("Model", text)}
+                { cameraModels && <MultiSelectInput placeholder="Camera Model" onChangeText={(text) => onExifFieldChange("Model", text)}
                                                                                      value={exif?.Model ?? ''}
                                                                                      error={errors?.Model}
                                                                                      items={cameraModels} zIndex={10} /> }
 
-                { initExif?.LensModel === undefined && <ExifInputField placeholder="Lens Model"
-                                                                               onChangeText={(text) => onExifFieldChange("LensModel", text)}
+                <ExifInputField placeholder="Lens Model" onChangeText={(text) => onExifFieldChange("LensModel", text)}
                                                                                value={exif?.LensModel ?? ''}
-                                                                               error={errors?.LensModel} /> }
+                                                                               error={errors?.LensModel} />
 
-                { initExif?.FocalLength === undefined && <ExifInputField placeholder="Focal Length"
-                                                                                 onChangeText={(text) => onExifFieldChange("FocalLength", text)}
+                <ExifInputField placeholder="Focal Length" onChangeText={(text) => onExifFieldChange("FocalLength", text)}
                                                                                  value={exif?.FocalLength ?? ''}
-                                                                                 error={errors?.FocalLength} /> }
+                                                                                 error={errors?.FocalLength} />
 
-                { initExif?.Flash === undefined && <ExifInputField placeholder="Flash"
-                                                                           onChangeText={(text) => onExifFieldChange("Flash", text)}
+                <ExifInputField placeholder="Flash" onChangeText={(text) => onExifFieldChange("Flash", text)}
                                                                            value={exif?.Flash ?? ''}
-                                                                           error={errors?.Flash} /> }
+                                                                           error={errors?.Flash} />
 
-                { initExif?.FNumber === undefined && <ExifInputField placeholder="FNumber"
-                                                                             onChangeText={(text) => onExifFieldChange("FNumber", text)}
+                <ExifInputField placeholder="FNumber" onChangeText={(text) => onExifFieldChange("FNumber", text)}
                                                                              value={exif?.FNumber ?? ''}
-                                                                             error={errors?.FNumber} /> }
+                                                                             error={errors?.FNumber} />
 
-                { initExif?.ISOSpeedRatings === undefined && <ExifInputField placeholder="ISO Speed"
-                                                                             onChangeText={(text) => onExifFieldChange("ISOSpeedRating", text)}
+                <ExifInputField placeholder="ISO Speed" onChangeText={(text) => onExifFieldChange("ISOSpeedRating", text)}
                                                                              value={exif?.ISOSpeedRatings ?? ''}
-                                                                             error={errors?.ISOSpeedRatings} /> }
+                                                                             error={errors?.ISOSpeedRatings} />
 
-                { initExif?.ShutterSpeedValue === undefined && <ExifInputField placeholder="Shutter Speed"
-                                                                               onChangeText={(text) => onExifFieldChange("ShutterSpeedValue", text)}
+                <ExifInputField placeholder="Shutter Speed" onChangeText={(text) => onExifFieldChange("ShutterSpeedValue", text)}
                                                                                value={exif?.ShutterSpeedValue ?? ''}
-                                                                               error={errors?.ShutterSpeedValue} /> }
+                                                                               error={errors?.ShutterSpeedValue} />
 
                 <Pressable onPress={onFormSubmit} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
                     borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
