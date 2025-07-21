@@ -1,9 +1,9 @@
 import {Animated, View} from "react-native";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import { Image } from 'expo-image';
-import { Dimensions } from 'react-native';
 import ScrollView = Animated.ScrollView;
 import Constants from 'expo-constants';
+import HeaderBar from "@/app/components/HeaderBar";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 interface image {
@@ -22,7 +22,6 @@ interface image {
 
 export default function Index() {
     const [images, setImages] = useState<image[]>([])
-    const screenWidth = Dimensions.get('window').width;
 
     async function searchPhotos(location = null, sort_by_time = "this_year", sort_by_popularity = "relevance") {
         let params = new URLSearchParams()
@@ -48,20 +47,23 @@ export default function Index() {
     }, []);
 
     return (
-        <ScrollView>
-            <View style={{
-                flex: 1,
-                flexDirection: "row",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                backgroundColor: "#181a1b"
-            }}>
-                { images &&
-                    images.map((image: image, index) => (
-                        <Image key={index} source={image.image_url} style={{ width: screenWidth / 3 - 5, height: 175, margin: 2.5 }} />
-                    ))
-                }
-            </View>
-        </ScrollView>
+        <View style={{position: "relative",  height: "100%", width: "100%", backgroundColor: "#181a1b" }}>
+            <HeaderBar />
+            <ScrollView>
+                <View style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    justifyContent: "center"
+                }}>
+                    { images &&
+                        images.map((image: image, index) => (
+                            <Image key={index} source={image.image_url} style={{ width: "32%", height: 200, margin: 2.5, zIndex: 50 }} />
+                        ))
+                    }
+                </View>
+            </ScrollView>
+        </View>
+
     );
 }

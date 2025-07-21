@@ -65,7 +65,6 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
         }
 
         if (exif) Object.entries(exif).map(([key, value]) => formData.append(key, value))
-
         await uploadPhoto(formData)
     }
 
