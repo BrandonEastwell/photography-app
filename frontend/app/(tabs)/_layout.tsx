@@ -1,24 +1,13 @@
-import {Tabs, useRouter} from 'expo-router';
+import {Tabs} from 'expo-router';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import PhotoUpload from '../components/PhotoUpload'
 import {Pressable} from "react-native";
 import {Entypo} from "@expo/vector-icons";
-import AuthService from "@/app/lib/AuthService";
-import {useState} from "react";
+import useUpload from "@/app/lib/useUpload";
 
 export default function TabLayout() {
-    const [showUpload, setShowUpload] = useState(false)
-    const router = useRouter()
-
-    const onUploadClick = async () => {
-        const isLoggedIn = await AuthService.isUserLoggedIn()
-        if (!isLoggedIn) {
-            let isAuthRefreshed: boolean = await AuthService.refreshAuthToken()
-            if (!isAuthRefreshed) return router.push("/auth/login")
-        }
-        return setShowUpload((prevState) => !prevState)
-    }
+    const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload()
 
     return (
         <>
@@ -68,7 +57,7 @@ export default function TabLayout() {
                 <Tabs.Screen name="auth/login" options={{ href: null }}></Tabs.Screen>
                 <Tabs.Screen name="auth/register" options={{ href: null }}></Tabs.Screen>
             </Tabs>
-            { showUpload && <PhotoUpload setShowUpload={setShowUpload} /> }
+            { showUploadScreen && <PhotoUpload setShowUpload={setShowUploadScreen} /> }
         </>
 
     );

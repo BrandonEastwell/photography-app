@@ -70,8 +70,6 @@ export default class AuthService {
 
         const curTime = new Date()
         const expiry = new Date(authTokenExp)
-        console.log(expiry)
-        console.log(curTime)
         return curTime <= expiry;
     }
 }
