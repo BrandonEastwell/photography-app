@@ -29,3 +29,16 @@ export interface ExifDataErrors {
 
 export type TimePeriodValue = "today" | "this_week" | "this_month" | "this_year";
 
+export interface Photo {
+    ISO: number | null
+    camera_make: string | null
+    camera_model: string | null
+    distance: number | null
+    focal_length: number | null
+    image_url: string
+    lens: string | null
+    relevance_score: number | null
+    shutter_speed: string | null
+    user_id: number
+    votes: number
+}

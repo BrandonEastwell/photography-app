@@ -84,7 +84,9 @@ export default function Profile() {
                             }}>
                                 { photos &&
                                     photos.map((photo: Photo, index) => (
-                                        <Image key={index} source={photo.url} style={{ width: "32%", height: 200 }} />
+                                        <Pressable style={{ width: "32%", height: 200 }}>
+                                            <Image key={index} source={photo.url} style={{ width: "100%", height: "100%" }} />
+                                        </Pressable>
                                     ))
                                 }
                             </View>

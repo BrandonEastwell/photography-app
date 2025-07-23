@@ -1,28 +1,15 @@
-import {Animated, View, Text} from "react-native";
+import {Animated, View, Text, Pressable} from "react-native";
 import React, {useEffect, useState} from "react";
 import { Image } from 'expo-image';
 import ScrollView = Animated.ScrollView;
 import Constants from 'expo-constants';
 import SearchBar from "@/app/components/SearchBar";
-import {ExifData, TimePeriodValue} from "@/app/lib/Types";
+import {ExifData, Photo, TimePeriodValue} from "@/app/lib/Types";
+import PhotoCard from "@/app/components/PhotoCard";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
-interface image {
-    ISO: number | null
-    camera_make: string | null
-    camera_model: string | null
-    distance: number | null
-    focal_length: number | null
-    image_url: string | null
-    lens: string | null
-    relevance_score: number | null
-    shutter_speed: string | null
-    user_id: number | null
-    votes: number | null
-}
-
 export default function Index() {
-    const [images, setImages] = useState<image[]>([])
+    const [images, setImages] = useState<Photo[]>([])
     const [message, setMessage] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
 
@@ -66,6 +53,9 @@ export default function Index() {
         getPhotos()
     }, []);
 
+    const onClickPhoto = () => {
+
+    }
 
     return (
         <View style={{position: "relative",  height: "100%", width: "100%", backgroundColor: "#181a1b" }}>
@@ -79,11 +69,9 @@ export default function Index() {
                     flexWrap: "wrap",
                     justifyContent: "center"
                 }}>
-                    { images &&
-                        images.map((image: image, index) => (
-                            <Image key={index} source={image.image_url} style={{ width: "32%", height: 200, margin: 2.5, zIndex: 50 }} />
-                        ))
-                    }
+                    { images && images.map((photo: Photo) => (
+                        <PhotoCard key={photo.image_url} photo={photo} />
+                    ))}
                 </View>
             </ScrollView>
         </View>
