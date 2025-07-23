@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import { Image } from 'expo-image';
 import ScrollView = Animated.ScrollView;
 import Constants from 'expo-constants';
-import HeaderBar from "@/app/components/HeaderBar";
+import SearchBar from "@/app/components/SearchBar";
 import {ExifData, TimePeriodValue} from "@/app/lib/Types";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
@@ -69,7 +69,7 @@ export default function Index() {
 
     return (
         <View style={{position: "relative",  height: "100%", width: "100%", backgroundColor: "#181a1b" }}>
-            <HeaderBar onSearch={(exif: ExifData | null, sort_by_time: TimePeriodValue) => searchPhotos(exif, sort_by_time)} />
+            <SearchBar onSearch={(exif: ExifData | null, sort_by_time: TimePeriodValue) => searchPhotos(exif, sort_by_time)} />
             { message && <Text style={{ color: "white", fontSize: 12, padding: 15, fontFamily: "SpaceMono-Regular" , flexDirection: "row", flexWrap: "wrap" }}>{message}</Text> }
             { error && <Text style={{ color: "red", fontSize: 12, padding: 15, fontFamily: "SpaceMono-Regular" , flexDirection: "row", flexWrap: "wrap" }}>{error}</Text> }
             <ScrollView>

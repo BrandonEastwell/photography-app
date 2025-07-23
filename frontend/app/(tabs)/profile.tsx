@@ -1,4 +1,4 @@
-import {View, Text, Platform, Pressable, Animated, Dimensions} from "react-native";
+import {View, Text, Platform, Pressable, Animated} from "react-native";
 import React, {useEffect, useState} from "react";
 import AuthService from "@/app/lib/AuthService";
 import {router} from "expo-router";
@@ -55,19 +55,19 @@ export default function Profile() {
     }, []);
 
     return (
-        <>
+        <View style={{ position: "relative", flex: 1, maxWidth: 600, width: '100%', height: "100%", marginHorizontal: "auto", backgroundColor: "#181a1b" }}>
             { profile &&
-                <View style={{ flex: 1, maxWidth: 600, width: '100%', marginHorizontal: "auto" }}>
-                    <View style={{ flexDirection: "row", maxHeight: 200, minHeight: 150, width: '100%', gap: 10, padding: 30, borderBottomWidth: 1, borderColor: "black" }}>
-                        <View style={{ height: '100%', maxWidth: 128, maxHeight: 128, aspectRatio: 1, borderRadius: 9999, backgroundColor: "black"}}>
+                <>
+                    <View style={{ flexDirection: "row", maxHeight: 200, minHeight: 150, width: '100%', gap: 10, padding: 30, borderBottomWidth: 1, borderColor: "white" }}>
+                        <View style={{ height: '100%', maxWidth: 128, maxHeight: 128, aspectRatio: 1, borderRadius: 9999, backgroundColor: "white"}}>
                             { profile.image && <Image source={ profile.image } style={{  }} /> }
                         </View>
                         <View style={{ flex: 2, flexDirection: "column", padding: 10 }}>
-                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 16, color: 'black', fontFamily: "SpaceMono-Regular" }}>{ profile.username }</Text>
-                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 12, color: 'black', fontFamily: "SpaceMono-Regular" }}>{ profile.firstName + ' ' +profile.lastName }</Text>
+                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 16, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.username }</Text>
+                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 12, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.firstName + ' ' +profile.lastName }</Text>
                             <View style={{ flex: 3, flexDirection: "row", flexWrap: "wrap", marginTop: 5, height: 'auto' }}>
-                                { profile.description && <Text style={{ fontSize: 12, color: 'black', fontFamily: "SpaceMono-Regular" }}>{ profile.description }</Text> }
-                                { !profile.description && <Text style={{ fontSize: 12, color: 'black', opacity: 0.5, fontFamily: "SpaceMono-Regular" }}>Add a description</Text> }
+                                { profile.description && <Text style={{ fontSize: 12, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.description }</Text> }
+                                { !profile.description && <Text style={{ fontSize: 12, color: 'white', opacity: 0.5, fontFamily: "SpaceMono-Regular" }}>Add a description</Text> }
                             </View>
                         </View>
                     </View>
@@ -100,7 +100,7 @@ export default function Profile() {
                             </Pressable>
                         </View>
                     }
-                </View>
+                </>
             }
 
             { showUploadScreen &&
@@ -109,6 +109,6 @@ export default function Profile() {
             { !profile && error &&
                 <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
             }
-        </>
+        </View>
     )
 }

@@ -20,7 +20,7 @@ const valueToLabelMap: Record<TimePeriodValue, string> = {
 
 const options: string[] = ["Today", "This Week", "This Month", "This Year"]
 
-export default function HeaderBar({ onSearch } : { onSearch: (exif: ExifData | null, sort_by_time: TimePeriodValue) => Promise<any> }) {
+export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData | null, sort_by_time: TimePeriodValue) => Promise<any> }) {
     const [exif, setExif] = useState<ExifData | null>(null);
     const [timePeriod, setTimePeriod] = useState<TimePeriodValue>("this_week")
     const [showOptions, setShowOptions] = useState<boolean>(false)
@@ -47,8 +47,6 @@ export default function HeaderBar({ onSearch } : { onSearch: (exif: ExifData | n
     return (
         <>
             <View style={{ position: "relative", zIndex: 100, flexDirection: "column" }}>
-                <Text style={{ fontSize: 32, fontFamily: "BethEllen-Regular", color: 'rgba(229,229,229,0.97)',
-                    alignSelf: "center" }}>Photography App</Text>
                 <View style={{ position: "relative", zIndex: 100, padding: 15, flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
                     <View style={{ position: "relative", zIndex: 100 }}>
                         <TextInput value={valueToLabelMap[timePeriod]} onFocus={() => setShowOptions(true)} onBlur={() => setTimeout(() => setShowOptions(false), 50)}

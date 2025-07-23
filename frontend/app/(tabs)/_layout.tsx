@@ -2,15 +2,18 @@ import {Tabs} from 'expo-router';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import PhotoUpload from '../components/PhotoUpload'
-import {Pressable} from "react-native";
+import {Pressable, View} from "react-native";
 import {Entypo} from "@expo/vector-icons";
 import useUpload from "@/app/lib/useUpload";
+import React from "react";
+import HeaderBar from "@/app/components/HeaderBar";
 
 export default function TabLayout() {
     const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload()
 
     return (
-        <>
+        <View style={{ flex: 1, backgroundColor: '#181a1b' }}>
+            <HeaderBar />
             <Tabs
                 screenOptions={{
                     tabBarActiveTintColor: '#ffffff',
@@ -58,7 +61,6 @@ export default function TabLayout() {
                 <Tabs.Screen name="auth/register" options={{ href: null }}></Tabs.Screen>
             </Tabs>
             { showUploadScreen && <PhotoUpload setShowUpload={setShowUploadScreen} /> }
-        </>
-
+        </View>
     );
 }
