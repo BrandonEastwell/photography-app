@@ -19,10 +19,11 @@ const exifSchema = yup.object().shape({
     ShutterSpeedValue: yup.string()
 });
 
-export default function ExifForm({ setExif, exif, onSubmit } : {
+export default function ExifForm({ setExif, exif, onSubmit, formMode } : {
     setExif: Dispatch<SetStateAction<ExifData | undefined>>;
     exif: ExifData | undefined;
     onSubmit: () => void;
+    formMode: "Filtering" | "Photo"
 }) {
     const [errors, setErrors] = useState<ExifDataErrors | undefined>(undefined);
     const [cameraMakes, setCameraMakes] = useState<string[] | null>(null)
@@ -77,12 +78,15 @@ export default function ExifForm({ setExif, exif, onSubmit } : {
     }
 
     return (
-        <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: 'rgba(12,12,12,0.80)', justifyContent: "center" }}>
+        <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: 'rgba(12,12,12,0.80)', justifyContent: "center", zIndex: 100 }}>
             <View style={{ width: "100%", height: "100%", maxWidth: 430, padding: 30, flexDirection: "column", justifyContent: "center", marginHorizontal: "auto" }}>
-                <Text style={{ fontSize: 24, marginBottom: 10, fontFamily: "SpaceMono-Regular",
-                    color: 'rgba(229,229,229,0.97)'}}>Add Missing Attributes</Text>
-                <Text style={{ fontSize: 16, marginBottom: 40, fontFamily: "SpaceMono-Regular",
-                    color: 'rgba(229,229,229,0.97)'}}>These attributes help your photo appear in more search results.</Text>
+                <View style={{ marginBottom: 20 }}>
+                    <Text style={{ fontSize: 24, marginBottom: 10, fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)'}}>
+                        { formMode === "Photo" ? "Add Missing Attributes" : "Filter Options" }</Text>
+                    { formMode == "Photo" && <Text style={{ fontSize: 16, fontFamily: "SpaceMono-Regular",
+                        color: 'rgba(229,229,229,0.97)'}}>These attributes help your photo appear in more search results.</Text> }
+                </View>
+
 
                 <LocationInput setExif={setExif}></LocationInput>
 
@@ -122,7 +126,7 @@ export default function ExifForm({ setExif, exif, onSubmit } : {
 
                 <Pressable onPress={onFormSubmit} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
                     borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
-                    <Text style={{ color: 'black' }}>Preview Photo</Text>
+                    <Text style={{ color: 'black' }}>{ formMode === "Photo" ? "Preview Photo" : "Apply Search Filters" }</Text>
                 </Pressable>
             </View>
         </View>

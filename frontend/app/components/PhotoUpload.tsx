@@ -123,7 +123,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                     { imageUpload && <Image style={{ width: "100%", height: "100%", borderRadius: 15 }} source={imageUpload.uri}></Image> }
                 </View>
                 { imageUpload && showExifForm &&
-                    <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} />
+                    <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} formMode={"Photo"} />
                 }
                 { imageUpload && !showExifForm &&
                     <>

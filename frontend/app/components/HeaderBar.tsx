@@ -1,5 +1,5 @@
 import {Pressable, Text, TextInput, View} from "react-native";
-import React, {useRef, useState} from "react";
+import React, {useState} from "react";
 import Constants from 'expo-constants';
 import {ExifData} from "@/app/lib/Types";
 import * as Location from "expo-location";
@@ -22,38 +22,38 @@ export default function HeaderBar() {
     }
 
     return (
-        <View style={{ position: "relative", zIndex: 100, flexDirection: "column" }}>
-            <Text style={{ fontSize: 32, fontFamily: "BethEllen-Regular", color: 'rgba(229,229,229,0.97)',
-                alignSelf: "center" }}>Photography App</Text>
-            <View style={{ position: "relative", zIndex: 100, padding: 15, flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-                <View style={{ position: "relative", zIndex: 100 }}>
-                    <TextInput value={timePeriod} onFocus={() => setShowOptions(true)} onBlur={() => setTimeout(() => setShowOptions(false), 50)}
-                               style={{ maxWidth: 120, fontFamily: "SpaceMono-Regular", color: "white", fontSize: 16, padding: 10, borderRadius: 15, flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
-                    </TextInput>
-                    { showOptions &&
-                        <View style={{ position: "absolute", paddingTop: 10, maxHeight: 250, width: '100%', top: 40, borderRadius: 6, backgroundColor: 'black', zIndex: 100 }}>
-                            { options.map((option) => (
-                                <Pressable key={option} onPress={() => setTimePeriod(option)} style={{ flexDirection: "row", paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%',
-                                    justifyContent: "center"}}>
-                                    <Text style={{flex: 1, height: '100%', justifyContent: "center", fontFamily: "SpaceMono-Regular", color: "white"}}>{ option }</Text>
-                                </Pressable>
-                            ))}
-                        </View> }
+        <>
+            <View style={{ position: "relative", zIndex: 100, flexDirection: "column" }}>
+                <Text style={{ fontSize: 32, fontFamily: "BethEllen-Regular", color: 'rgba(229,229,229,0.97)',
+                    alignSelf: "center" }}>Photography App</Text>
+                <View style={{ position: "relative", zIndex: 100, padding: 15, flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+                    <View style={{ position: "relative", zIndex: 100 }}>
+                        <TextInput value={timePeriod} onFocus={() => setShowOptions(true)} onBlur={() => setTimeout(() => setShowOptions(false), 50)}
+                                   style={{ maxWidth: 120, fontFamily: "SpaceMono-Regular", color: "white", fontSize: 16, padding: 10,
+                                       borderRadius: 15, flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
+                        </TextInput>
+                        { showOptions &&
+                            <View style={{ position: "absolute", paddingTop: 10, maxHeight: 250, width: '100%', top: 40, borderRadius: 6, backgroundColor: 'black', zIndex: 100 }}>
+                                { options.map((option) => (
+                                    <Pressable key={option} onPress={() => setTimePeriod(option)} style={{ flexDirection: "row", paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%',
+                                        justifyContent: "center"}}>
+                                        <Text style={{flex: 1, height: '100%', justifyContent: "center", fontFamily: "SpaceMono-Regular", color: "white"}}>{ option }</Text>
+                                    </Pressable>
+                                ))}
+                            </View> }
+                    </View>
+                    <Pressable onPress={getCurrentLocation} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 15,
+                        borderRadius: 15, flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
+                        <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 12, color: 'black' }}>Use current location</Text>
+                    </Pressable>
+                    <Pressable onPress={() => setShowExifForm(true)} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 15,
+                        borderRadius: 15, flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
+                        <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 12, color: 'black' }}>Filters</Text>
+                    </Pressable>
                 </View>
-                <Pressable onPress={getCurrentLocation} style={{ backgroundColor: "#ffffff",
-                    padding: 10, paddingHorizontal: 15, borderRadius: 15, flexDirection: "row",
-                    justifyContent: "center", alignItems: "center"}}>
-                    <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 12, color: 'black' }}>Use current location</Text>
-                </Pressable>
-                <Pressable onPress={getCurrentLocation} style={{ backgroundColor: "#ffffff",
-                    padding: 10, paddingHorizontal: 15, borderRadius: 15, flexDirection: "row",
-                    justifyContent: "center", alignItems: "center"}}>
-                    <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 12, color: 'black' }}>Filters</Text>
-                </Pressable>
             </View>
-            { showExifForm &&
-                <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} />
-            }
-        </View>
+            { showExifForm && <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} formMode={"Filtering"} /> }
+        </>
+
     );
 }
