@@ -20,7 +20,7 @@ const valueToLabelMap: Record<TimePeriodValue, string> = {
 
 const options: string[] = ["Today", "This Week", "This Month", "This Year"]
 
-export default function HeaderBar({ onSearch } : { onSearch: (exif: ExifData | null, sort_by_time: string) => Promise<any> }) {
+export default function HeaderBar({ onSearch } : { onSearch: (exif: ExifData | null, sort_by_time: TimePeriodValue) => Promise<any> }) {
     const [exif, setExif] = useState<ExifData | null>(null);
     const [timePeriod, setTimePeriod] = useState<TimePeriodValue>("this_week")
     const [showOptions, setShowOptions] = useState<boolean>(false)
@@ -32,6 +32,11 @@ export default function HeaderBar({ onSearch } : { onSearch: (exif: ExifData | n
         const location = await Location.getCurrentPositionAsync();
         setExif((prevState) => ({ ...prevState, GPSLatitude: location.coords.latitude,
             GPSLongitude: location.coords.longitude }))
+    }
+
+    const timePeriodChange = async (option: TimePeriodValue) => {
+        setTimePeriod(option)
+        await onSearch(exif, timePeriod)
     }
 
     const applyFilter = async () => {
@@ -53,7 +58,7 @@ export default function HeaderBar({ onSearch } : { onSearch: (exif: ExifData | n
                         { showOptions &&
                             <View style={{ position: "absolute", paddingTop: 10, maxHeight: 250, width: '100%', top: 40, borderRadius: 6, backgroundColor: 'black', zIndex: 100 }}>
                                 { options.map((option) => (
-                                    <Pressable key={option} onPress={() => setTimePeriod(labelToValueMap[option])} style={{ flexDirection: "row", paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%',
+                                    <Pressable key={option} onPress={() => timePeriodChange(labelToValueMap[option])} style={{ flexDirection: "row", paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%',
                                         justifyContent: "center"}}>
                                         <Text style={{flex: 1, height: '100%', justifyContent: "center", fontFamily: "SpaceMono-Regular", color: "white"}}>{ option }</Text>
                                     </Pressable>

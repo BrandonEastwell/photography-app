@@ -64,7 +64,7 @@ export default function Index() {
 
     return (
         <View style={{position: "relative",  height: "100%", width: "100%", backgroundColor: "#181a1b" }}>
-            <HeaderBar onSearch={(exif: ExifData | null, sort_by_time: string) => searchPhotos(exif, sort_by_time)} />
+            <HeaderBar onSearch={(exif: ExifData | null, sort_by_time: TimePeriodValue) => searchPhotos(exif, sort_by_time)} />
             <ScrollView>
                 <View style={{
                     flex: 1,
