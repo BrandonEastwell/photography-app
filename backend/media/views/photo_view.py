@@ -61,7 +61,7 @@ def image_search(req):
 
         fallback_qs = None
         if primary_qs.count() < items_limit:
-            message_response = "We couldn't find much, I hope you like what we found instead.."
+            if search_filters: message_response = "We couldn't find much, I hope you like what we found instead.."
             fallback_qs = PhotoService.sort_by_exif(time_filtered, search_filters, search_point)
 
 
