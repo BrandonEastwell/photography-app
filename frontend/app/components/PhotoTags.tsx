@@ -15,9 +15,12 @@ const keyToLabelMap: Record<string, string> = {
 
 export default function PhotoTags(exif : { exif: ExifData  }) {
     const { exif: exifData } = exif;
+    const values = Object.entries(exifData).map(([key, value]) => value)
+    const isExifEmpty = values.every((value) => value === undefined)
+
     return (
         <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", flexWrap: "wrap", marginBottom: 30 }}>
-            { Object.entries(exifData).map(([key, value]) => {
+            { !isExifEmpty && Object.entries(exifData).map(([key, value]) => {
                 if (value !== undefined && keyToLabelMap[key]) {
                     return (
                         <View key={key} style={{
@@ -40,6 +43,8 @@ export default function PhotoTags(exif : { exif: ExifData  }) {
                     )
                 }
             })}
+            { isExifEmpty && <Text style={{ fontSize: 14, padding: 5, fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)',
+                textAlign: "center" }}>This photo has no attributes.</Text> }
         </View>
     )
 }

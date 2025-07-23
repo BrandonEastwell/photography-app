@@ -1,7 +1,6 @@
 import {Modal, Pressable, View, Text, Platform} from "react-native";
 import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
 import * as ImagePicker from 'expo-image-picker';
-import { Image } from 'expo-image';
 import {ImagePickerAsset} from "expo-image-picker";
 import {ExifData} from "@/app/lib/Types";
 import ExifForm from "@/app/components/ExifForm";
@@ -9,7 +8,6 @@ import Constants from 'expo-constants';
 import * as SecureStore from "expo-secure-store";
 import AuthService from "@/app/lib/AuthService";
 import {router} from "expo-router";
-import PhotoTags from "@/app/components/PhotoTags";
 import PhotoPopup from "@/app/components/PhotoPopup";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
@@ -121,9 +119,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                     <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} onClose={() => setShowExifForm(false)} formMode={"Photo"} />
                 }
                 { imageUpload && !showExifForm &&
-                    <PhotoPopup setShowUpload={setShowUpload}>
-                        { imageUpload && <Image style={{ width: 340, height: 400, marginBottom: 30 }} source={imageUpload.uri}></Image> }
-                        { exif && <PhotoTags exif={exif} /> }
+                    <PhotoPopup setShowUpload={setShowUpload} photoSrc={imageUpload.uri} exif={exif}>
                         <View style={{ flexDirection: "row", gap: 15, alignItems: "center", marginBottom: 30, justifyContent: "center" }}>
                             <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: '#3091fc', padding: 10, paddingHorizontal: 20,
                                 borderRadius: 15, flexDirection: "row", alignItems: "center" }}>
