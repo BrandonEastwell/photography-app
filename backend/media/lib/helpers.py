@@ -36,6 +36,10 @@ def get_filters(req):
     for key in req.GET.keys():
         if key in filter_options:
             value = req.GET.get(key)
-            filters[filter_options[key]] = value
+            if key == "Flash":
+                filters[filter_options[key]] = True if value == "true" else False
+            else:
+                filters[filter_options[key]] = value
+
 
     return filters

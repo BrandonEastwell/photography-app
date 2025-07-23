@@ -30,6 +30,7 @@ class ImageView(View):
         return image_search(req)
 
 # URL params e.g. /images?sort_by=trending&sort_by_time=this_week&location=44.4647452,7.3553838&limit=20&page=1
+@csrf_exempt
 def image_search(req):
     if req.method != "GET":
         return HttpResponseNotAllowed(["GET"])
