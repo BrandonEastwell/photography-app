@@ -103,7 +103,8 @@ export default function Profile() {
                 </View>
             }
 
-            { showUploadScreen && <PhotoUpload setShowUpload={setShowUploadScreen} /> }
+            { showUploadScreen &&
+                <PhotoUpload setShowUpload={setShowUploadScreen} /> }
 
             { !profile && error &&
                 <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>

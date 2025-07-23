@@ -40,7 +40,7 @@ export default function Index() {
             exif.ISOSpeedRatings && params.set("ISOSpeedRatings", exif.ISOSpeedRatings)
             exif.FocalLength && params.set("FocalLength", String(exif.FocalLength))
             exif.ShutterSpeedValue && params.set("ShutterSpeedValue", exif.ShutterSpeedValue)
-            exif.Flash && params.set("Flash", String(exif.Flash))
+            exif.Flash && params.set("Flash", exif.Flash == "Yes" ? "true" : "false")
         }
 
         params.set("sort_by_time", sort_by_time)

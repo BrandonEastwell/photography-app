@@ -3,17 +3,18 @@ import React, {ChangeEvent, useState} from "react";
 import ScrollView = Animated.ScrollView;
 
 
-export default function MultiSelectInput({ placeholder, onChangeText, value, error, items, zIndex } : { placeholder: string,
-    onChangeText: (e: string | ChangeEvent<any>) => void, value: any, error: string | undefined, items: string[], zIndex: number}) {
+export default function MultiSelectInput({ placeholder, onChangeText, value, error, items, editable, zIndex } : { placeholder: string,
+    onChangeText: (e: string | ChangeEvent<any>) => void, value: any, error: string | undefined, items: string[], editable: boolean, zIndex: number}) {
     const [showOptions, setShowOptions] = useState<boolean>(false)
     const [options, setOptions] = useState<string[]>(items)
 
     const onChange = (text: string) => {
-        const filteredOptions = items.filter((value) => {
-            return value.toLowerCase().startsWith(text.toLowerCase())
-        })
-
-        setOptions(filteredOptions)
+        if (editable) {
+            const filteredOptions = items.filter((value) => {
+                return value.toLowerCase().startsWith(text.toLowerCase())
+            })
+            setOptions(filteredOptions)
+        }
         onChangeText(text)
     }
 
@@ -22,6 +23,7 @@ export default function MultiSelectInput({ placeholder, onChangeText, value, err
             <View style={styles.inputContainer}>
                 <View style={{ paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%' }}>
                     <TextInput
+                        editable={editable}
                         onFocus={() => setShowOptions(true)}
                         onBlur={() => setTimeout(() => setShowOptions(false), 50)} // delay hiding
                         style={styles.input}
@@ -32,11 +34,13 @@ export default function MultiSelectInput({ placeholder, onChangeText, value, err
                 </View>
             </View>
             { showOptions &&
-                <ScrollView style={{ position: "absolute", paddingTop: 10, maxHeight: 250, width: '100%', top: 40, borderRadius: 6, backgroundColor: 'black', zIndex: zIndex }}>
+                <ScrollView style={{ position: "absolute", paddingTop: 10, maxHeight: 250, width: '100%', top: 40,
+                    borderRadius: 6, backgroundColor: 'black', zIndex: zIndex }}>
                     { options.map((option) => (
-                        <Pressable key={option} onPress={() => onChange(option)} style={{ flexDirection: "row", paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%',
-                        justifyContent: "center"}}>
-                            <Text style={{flex: 1, height: '100%', justifyContent: "center", fontFamily: "SpaceMono-Regular", color: "white"}}>{ option }</Text>
+                        <Pressable key={option} onPress={() => onChange(option)} style={{ flexDirection: "row",
+                            paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%', justifyContent: "center"}}>
+                            <Text style={{flex: 1, height: '100%', justifyContent: "center", fontFamily: "SpaceMono-Regular",
+                                color: "white"}}>{ option }</Text>
                         </Pressable>
                     ))}
                 </ScrollView> }
