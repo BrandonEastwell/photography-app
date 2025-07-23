@@ -3,6 +3,7 @@ import {Image} from "expo-image";
 import React, {useState} from "react";
 import {Photo} from "@/app/lib/Types";
 import PhotoPopup from "@/app/components/PhotoPopup";
+import PhotoModal from "@/app/components/PhotoModal";
 
 export default function PhotoCard({ photo } : {
     photo: Photo
@@ -18,14 +19,11 @@ export default function PhotoCard({ photo } : {
                 <Image source={photo.image_url} style={{ width: "100%", height: "100%" }} />
             </Pressable>
             { showPhotoPopup &&
-                <Modal transparent>
-                    <View style={{ backgroundColor: 'rgba(0,0,0,0.70)', height: "95%", flexDirection: "column", gap: 15, justifyContent: "center", alignItems: "center"}}>
-                        <PhotoPopup onClose={setShowPhotoPopup} photoSrc={photo.image_url} exif={null}
-                                    children={undefined}>
-
-                        </PhotoPopup>
-                    </View>
-                </Modal>
+                <PhotoModal>
+                    <PhotoPopup onClose={setShowPhotoPopup} photoSrc={photo.image_url} exif={null}
+                                children={undefined}>
+                    </PhotoPopup>
+                </PhotoModal>
             }
         </>
 

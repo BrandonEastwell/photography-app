@@ -9,6 +9,7 @@ import * as SecureStore from "expo-secure-store";
 import AuthService from "@/app/lib/AuthService";
 import {router} from "expo-router";
 import PhotoPopup from "@/app/components/PhotoPopup";
+import PhotoModal from "@/app/components/PhotoModal";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatch<SetStateAction<boolean>> }) {
@@ -113,32 +114,30 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
     }
 
     return (
-        <Modal transparent>
-            <View style={{ backgroundColor: 'rgba(0,0,0,0.70)', height: "95%", flexDirection: "column", gap: 15, justifyContent: "center", alignItems: "center"}}>
-                { imageUpload && showExifForm &&
-                    <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} onClose={() => setShowExifForm(false)} formMode={"Photo"} />
-                }
-                { imageUpload && !showExifForm &&
-                    <PhotoPopup onClose={setShowUpload} photoSrc={imageUpload.uri} exif={exif}>
-                        <View style={{ flexDirection: "row", gap: 15, alignItems: "center", marginBottom: 30, justifyContent: "center" }}>
-                            <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: '#3091fc', padding: 10, paddingHorizontal: 20,
-                                borderRadius: 15, flexDirection: "row", alignItems: "center" }}>
-                                <Text style={{ color: 'white', fontFamily: "SpaceMono-Regular" }}>Upload</Text>
-                            </Pressable>
-                            <Pressable onPress={() => setShowExifForm(true)} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
-                                borderRadius: 15, flexDirection: "row", alignItems: "center" }}>
-                                <Text style={{ color: 'black', fontFamily: "SpaceMono-Regular" }}>Go Back</Text>
-                            </Pressable>
-                        </View>
-                        {error && (
-                            <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 30, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
-                        )}
-                        {message && (
-                            <Text style={{ color: '#3091fc', alignSelf: 'center', marginBottom: 30, fontFamily: "SpaceMono-Regular" }}>{message}</Text>
-                        )}
-                    </PhotoPopup>
-                }
-            </View>
-        </Modal>
+        <PhotoModal>
+            { imageUpload && showExifForm &&
+                <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} onClose={() => setShowExifForm(false)} formMode={"Photo"} />
+            }
+            { imageUpload && !showExifForm &&
+                <PhotoPopup onClose={setShowUpload} photoSrc={imageUpload.uri} exif={exif}>
+                    <View style={{ flexDirection: "row", gap: 15, alignItems: "center", marginBottom: 30, justifyContent: "center" }}>
+                        <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: '#3091fc', padding: 10, paddingHorizontal: 20,
+                            borderRadius: 15, flexDirection: "row", alignItems: "center" }}>
+                            <Text style={{ color: 'white', fontFamily: "SpaceMono-Regular" }}>Upload</Text>
+                        </Pressable>
+                        <Pressable onPress={() => setShowExifForm(true)} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
+                            borderRadius: 15, flexDirection: "row", alignItems: "center" }}>
+                            <Text style={{ color: 'black', fontFamily: "SpaceMono-Regular" }}>Go Back</Text>
+                        </Pressable>
+                    </View>
+                    {error && (
+                        <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 30, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
+                    )}
+                    {message && (
+                        <Text style={{ color: '#3091fc', alignSelf: 'center', marginBottom: 30, fontFamily: "SpaceMono-Regular" }}>{message}</Text>
+                    )}
+                </PhotoPopup>
+            }
+        </PhotoModal>
     )
 }
