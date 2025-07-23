@@ -13,14 +13,12 @@ class PhotoService:
         qs = qs.filter(uploaded_at__gte=timezone.now() - timedelta(days=SORT_FIELDS_TIME[time_period] if SORT_FIELDS_TIME.get(time_period) is not None else 7))
         return qs
 
-
     @staticmethod
     def filter_by_exif(qs, filter_options):
         for field, value in filter_options.items():
             if value is not None:
                 qs = qs.filter(**{field: value})
         return qs
-
 
     # Sort photos by EXIF data
     @staticmethod

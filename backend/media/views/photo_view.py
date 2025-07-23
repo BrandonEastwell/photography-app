@@ -81,6 +81,7 @@ def image_search(req):
             fallback_qs = fallback_qs.exclude(id__in=primary_ids)
             primary_qs = list(primary_qs) + list(fallback_qs)
 
+
         images = primary_qs[:items_limit]
         images_serialized = [
             {
@@ -99,8 +100,12 @@ def image_search(req):
             for image in images
         ]
 
+        if len(images_serialized) < 1:
+            message_response = "We couldn't find anything :("
+
         results = {
             "message": message_response,
+            "success": True,
             "items": len(images_serialized),
             "results": images_serialized
         }
@@ -108,7 +113,7 @@ def image_search(req):
         return JsonResponse(results, safe=False, status=200)
     except Exception as e:
         logging.exception(e)
-        JsonResponse({ "error": "Could not find any results at this time." }, status=500)
+        JsonResponse({ "success": False, "error": "Could not find any results at this time." }, status=500)
 
 @JWTAuthenticationMiddleware
 def image_upload(req):

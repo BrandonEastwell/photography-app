@@ -21,16 +21,21 @@ def _convert_to_degrees(value):
 
 def get_filters(req):
     # TODO Filter options need to be sanitized + check if lens and camera exist in DB (predefined options)
-    filter_options = ["camera", "lens", "focal_length", "flash", "f_stop", "ISO", "shutter_speed"]
+    filter_options = {
+        "Make": "camera__make",
+        "Model": "camera__model",
+        "LensModel": "lens__model",
+        "FocalLength": "focal_length",
+        "Flash": "flash",
+        "FNumber": "f_stop",
+        "ISOSpeedRatings": "ISO",
+        "ShutterSpeedValue": "shutter_speed"
+    }
+
     filters = {}
     for key in req.GET.keys():
-        if filter_options.count(key) == 1:
+        if key in filter_options:
             value = req.GET.get(key)
-            if key == "camera":
-                filters["camera__model"] = value
-            elif key == "lens":
-                filters["lens__model"] = value
-            else:
-                filters[key] = value
+            filters[filter_options[key]] = value
 
     return filters
