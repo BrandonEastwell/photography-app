@@ -6,6 +6,7 @@ import * as yup from "yup";
 import {ExifData, ExifDataErrors} from "@/app/lib/Types";
 import MultiSelectInput from "@/app/components/MultiSelectInput";
 import Constants from "expo-constants";
+import AntDesign from "@expo/vector-icons/AntDesign";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 const exifSchema = yup.object().shape({
@@ -19,10 +20,11 @@ const exifSchema = yup.object().shape({
     ShutterSpeedValue: yup.string()
 });
 
-export default function ExifForm({ setExif, exif, onSubmit, formMode } : {
+export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } : {
     setExif: Dispatch<SetStateAction<ExifData | null>>;
     exif: ExifData | null;
     onSubmit: () => void;
+    onClose: () => void;
     formMode: "Filtering" | "Photo"
 }) {
     const [errors, setErrors] = useState<ExifDataErrors | undefined>(undefined);
@@ -81,6 +83,10 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode } : {
         <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: 'rgba(12,12,12,0.90)', justifyContent: "center", zIndex: 100 }}>
             <View style={{ width: "100%", height: "100%", maxWidth: 430, padding: 30, flexDirection: "column", justifyContent: "center", marginHorizontal: "auto" }}>
                 <View style={{ marginBottom: 20 }}>
+                    <View style={{ padding: 7.5, borderRadius: 15, flexDirection: "row", gap: 10, zIndex: 100, width: "100%",
+                        justifyContent: "flex-end" }}>
+                        <AntDesign onPress={onClose} name="close" size={24} color="white" />
+                    </View>
                     <Text style={{ fontSize: 24, marginBottom: 10, fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)'}}>
                         { formMode === "Photo" ? "Add Missing Attributes" : "Search by Filters" }</Text>
                     { formMode == "Photo" && <Text style={{ fontSize: 16, fontFamily: "SpaceMono-Regular",
@@ -116,7 +122,7 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode } : {
                                 value={exif?.FNumber ?? ''}
                                 error={errors?.FNumber} />
 
-                <ExifInputField placeholder="ISO Speed" onChangeText={(text) => onExifFieldChange("ISOSpeedRating", text)}
+                <ExifInputField placeholder="ISO Speed" onChangeText={(text) => onExifFieldChange("ISOSpeedRatings", text)}
                                 value={exif?.ISOSpeedRatings ?? ''}
                                 error={errors?.ISOSpeedRatings} />
 

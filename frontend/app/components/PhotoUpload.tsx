@@ -9,6 +9,8 @@ import Constants from 'expo-constants';
 import * as SecureStore from "expo-secure-store";
 import AuthService from "@/app/lib/AuthService";
 import {router} from "expo-router";
+import PhotoTags from "@/app/components/PhotoTags";
+import PhotoPopup from "@/app/components/PhotoPopup";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatch<SetStateAction<boolean>> }) {
@@ -114,47 +116,31 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
 
     return (
         <Modal visible={!!imageUpload} transparent>
-            <View style={{ position: "absolute", padding: 5, paddingHorizontal: 20,
-                borderRadius: 15, flexDirection: "row", gap: 10, zIndex: 100, width: "100%", justifyContent: "flex-end", alignItems: "flex-end"}}>
-                <Text onPress={() => setShowUpload(false)} style={{ color: 'white', fontFamily: "BethEllen-Regular", fontSize: 20 }}>X</Text>
-            </View>
             <View style={{ backgroundColor: 'rgba(0,0,0,0.70)', height: "95%", flexDirection: "column", gap: 15, justifyContent: "center", alignItems: "center"}}>
-                <View style={{ width: 320, height: 540, backgroundColor: 'rgba(12,12,12,0.94)', borderRadius: 15, marginHorizontal: "auto" }}>
-                    { imageUpload && <Image style={{ width: "100%", height: "100%", borderRadius: 15 }} source={imageUpload.uri}></Image> }
-                </View>
                 { imageUpload && showExifForm &&
-                    <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} formMode={"Photo"} />
+                    <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} onClose={() => setShowExifForm(false)} formMode={"Photo"} />
                 }
                 { imageUpload && !showExifForm &&
-                    <>
-                        <View style={{ flexDirection: "row", gap: 15, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
-                            { exif && Object.entries(exif).map(([key, value]) => { if (value !== undefined) {
-                                    return (
-                                        <View key={key} style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 4 }}>
-                                            <Text style={{ color: "white" }}>{key}</Text>
-                                            <View style={{ backgroundColor: 'rgb(227,227,227)', borderRadius: 6, padding: 5 }}>
-                                                <Text style={{  }}>{value}</Text>
-                                            </View>
-                                        </View>
-                                    )
-                                }})}
-                            { !exif && <Text style={{ color: 'black', fontFamily: "SpaceMono-Regular", }}>Cancel Upload</Text> }
+                    <PhotoPopup setShowUpload={setShowUpload}>
+                        { imageUpload && <Image style={{ width: 340, height: 400, marginBottom: 30 }} source={imageUpload.uri}></Image> }
+                        { exif && <PhotoTags exif={exif} /> }
+                        <View style={{ flexDirection: "row", gap: 15, alignItems: "center", marginBottom: 30, justifyContent: "center" }}>
+                            <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: '#3091fc', padding: 10, paddingHorizontal: 20,
+                                borderRadius: 15, flexDirection: "row", alignItems: "center" }}>
+                                <Text style={{ color: 'white', fontFamily: "SpaceMono-Regular" }}>Upload</Text>
+                            </Pressable>
+                            <Pressable onPress={() => setShowExifForm(true)} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
+                                borderRadius: 15, flexDirection: "row", alignItems: "center" }}>
+                                <Text style={{ color: 'black', fontFamily: "SpaceMono-Regular" }}>Go Back</Text>
+                            </Pressable>
                         </View>
-                        <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: '#3091fc', padding: 10, paddingHorizontal: 20,
-                            borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
-                            <Text style={{ color: 'white', fontFamily: "SpaceMono-Regular" }}>Upload Photo</Text>
-                        </Pressable>
-                        <Pressable onPress={() => setShowExifForm(true)} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
-                            borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center"}}>
-                            <Text style={{ color: 'black', fontFamily: "SpaceMono-Regular" }}>Go Back</Text>
-                        </Pressable>
                         {error && (
-                            <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
+                            <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 30, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
                         )}
                         {message && (
-                            <Text style={{ color: '#3091fc', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{message}</Text>
+                            <Text style={{ color: '#3091fc', alignSelf: 'center', marginBottom: 30, fontFamily: "SpaceMono-Regular" }}>{message}</Text>
                         )}
-                    </>
+                    </PhotoPopup>
                 }
             </View>
         </Modal>

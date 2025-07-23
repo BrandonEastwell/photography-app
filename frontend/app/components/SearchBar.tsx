@@ -73,7 +73,7 @@ export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData | n
                     </Pressable>
                 </View>
             </View>
-            { showExifForm && <ExifForm setExif={setExif} exif={exif} onSubmit={applyFilter} formMode={"Filtering"} /> }
+            { showExifForm && <ExifForm setExif={setExif} exif={exif} onSubmit={applyFilter} formMode={"Filtering"} onClose={() => setShowExifForm(false)} /> }
         </>
 
     );

@@ -28,3 +28,4 @@ export interface ExifDataErrors {
 }
 
 export type TimePeriodValue = "today" | "this_week" | "this_month" | "this_year";
+
