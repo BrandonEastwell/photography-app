@@ -1,16 +1,29 @@
 import {Pressable, Text, TextInput, View} from "react-native";
 import React, {useState} from "react";
-import Constants from 'expo-constants';
-import {ExifData} from "@/app/lib/Types";
+import {ExifData, TimePeriodValue} from "@/app/lib/Types";
 import * as Location from "expo-location";
 import ExifForm from "@/app/components/ExifForm";
-const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
-export default function HeaderBar() {
-    const [exif, setExif] = useState<ExifData | undefined>(undefined);
-    const [timePeriod, setTimePeriod] = useState<string>("This Week")
+const labelToValueMap: Record<string, TimePeriodValue> = {
+    "Today": "today",
+    "This Week": "this_week",
+    "This Month": "this_month",
+    "This Year": "this_year",
+};
+
+const valueToLabelMap: Record<TimePeriodValue, string> = {
+    "today": "Today",
+    "this_week": "This Week",
+    "this_month": "This Month",
+    "this_year": "This Year",
+};
+
+const options: string[] = ["Today", "This Week", "This Month", "This Year"]
+
+export default function HeaderBar({ onSearch } : { onSearch: (exif: ExifData | null, sort_by_time: string) => Promise<any> }) {
+    const [exif, setExif] = useState<ExifData | null>(null);
+    const [timePeriod, setTimePeriod] = useState<TimePeriodValue>("this_week")
     const [showOptions, setShowOptions] = useState<boolean>(false)
-    const options: string[] = ["Today", "This Week", "This Month", "This Year"]
     const [showExifForm, setShowExifForm] = useState<boolean>(false)
 
     const getCurrentLocation = async () => {
@@ -21,6 +34,11 @@ export default function HeaderBar() {
             GPSLongitude: location.coords.longitude }))
     }
 
+    const applyFilter = async () => {
+        await onSearch(exif, timePeriod)
+        setShowExifForm(false)
+    }
+
     return (
         <>
             <View style={{ position: "relative", zIndex: 100, flexDirection: "column" }}>
@@ -28,14 +46,14 @@ export default function HeaderBar() {
                     alignSelf: "center" }}>Photography App</Text>
                 <View style={{ position: "relative", zIndex: 100, padding: 15, flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
                     <View style={{ position: "relative", zIndex: 100 }}>
-                        <TextInput value={timePeriod} onFocus={() => setShowOptions(true)} onBlur={() => setTimeout(() => setShowOptions(false), 50)}
+                        <TextInput value={valueToLabelMap[timePeriod]} onFocus={() => setShowOptions(true)} onBlur={() => setTimeout(() => setShowOptions(false), 50)}
                                    style={{ maxWidth: 120, fontFamily: "SpaceMono-Regular", color: "white", fontSize: 16, padding: 10,
                                        borderRadius: 15, flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
                         </TextInput>
                         { showOptions &&
                             <View style={{ position: "absolute", paddingTop: 10, maxHeight: 250, width: '100%', top: 40, borderRadius: 6, backgroundColor: 'black', zIndex: 100 }}>
                                 { options.map((option) => (
-                                    <Pressable key={option} onPress={() => setTimePeriod(option)} style={{ flexDirection: "row", paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%',
+                                    <Pressable key={option} onPress={() => setTimePeriod(labelToValueMap[option])} style={{ flexDirection: "row", paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%',
                                         justifyContent: "center"}}>
                                         <Text style={{flex: 1, height: '100%', justifyContent: "center", fontFamily: "SpaceMono-Regular", color: "white"}}>{ option }</Text>
                                     </Pressable>
@@ -52,7 +70,7 @@ export default function HeaderBar() {
                     </Pressable>
                 </View>
             </View>
-            { showExifForm && <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} formMode={"Filtering"} /> }
+            { showExifForm && <ExifForm setExif={setExif} exif={exif} onSubmit={applyFilter} formMode={"Filtering"} /> }
         </>
 
     );

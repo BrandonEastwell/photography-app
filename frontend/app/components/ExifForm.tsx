@@ -20,8 +20,8 @@ const exifSchema = yup.object().shape({
 });
 
 export default function ExifForm({ setExif, exif, onSubmit, formMode } : {
-    setExif: Dispatch<SetStateAction<ExifData | undefined>>;
-    exif: ExifData | undefined;
+    setExif: Dispatch<SetStateAction<ExifData | null>>;
+    exif: ExifData | null;
     onSubmit: () => void;
     formMode: "Filtering" | "Photo"
 }) {

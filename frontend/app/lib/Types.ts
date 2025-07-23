@@ -26,3 +26,5 @@ export interface ExifDataErrors {
     ISOSpeedRatings?: string,
     ShutterSpeedValue?: string,
 }
+
+export type TimePeriodValue = "today" | "this_week" | "this_month" | "this_year";

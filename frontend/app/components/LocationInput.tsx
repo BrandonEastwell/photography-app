@@ -4,7 +4,7 @@ import * as Location from "expo-location";
 import {ExifData} from "@/app/lib/Types";
 import LocationPicker from "@/components/LocationPicker";
 
-export default function LocationInput({ setExif } : { setExif: React.Dispatch<React.SetStateAction<ExifData | undefined>> }) {
+export default function LocationInput({ setExif } : { setExif: React.Dispatch<React.SetStateAction<ExifData | null>> }) {
     const [showMap, setShowMap] = useState<boolean>(false);
 
     const getCurrentLocation = async () => {

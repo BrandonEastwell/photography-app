@@ -1,5 +1,5 @@
 import {Modal, Pressable, View, Text, Platform} from "react-native";
-import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from "react";
+import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import {ImagePickerAsset} from "expo-image-picker";
@@ -11,9 +11,9 @@ import AuthService from "@/app/lib/AuthService";
 import {router} from "expo-router";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
-export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatch<SetStateAction<boolean>>  }) {
+export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatch<SetStateAction<boolean>> }) {
     const [imageUpload, setImageUpload] = useState<ImagePickerAsset | undefined>(undefined);
-    const [exif, setExif] = useState<ExifData | undefined>(undefined);
+    const [exif, setExif] = useState<ExifData | null>(null);
     const [showExifForm, setShowExifForm] = useState<boolean>(false)
     const [error, setError] = useState<string | undefined>(undefined)
     const [message, setMessage] = useState<string | undefined>(undefined)
@@ -118,7 +118,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                 borderRadius: 15, flexDirection: "row", gap: 10, zIndex: 100, width: "100%", justifyContent: "flex-end", alignItems: "flex-end"}}>
                 <Text onPress={() => setShowUpload(false)} style={{ color: 'white', fontFamily: "BethEllen-Regular", fontSize: 20 }}>X</Text>
             </View>
-            <View style={{ backgroundColor: 'rgba(0,0,0,0.70)', height: "95vh", flexDirection: "column", gap: 15, justifyContent: "center", alignItems: "center"}}>
+            <View style={{ backgroundColor: 'rgba(0,0,0,0.70)', height: "95%", flexDirection: "column", gap: 15, justifyContent: "center", alignItems: "center"}}>
                 <View style={{ width: 320, height: 540, backgroundColor: 'rgba(12,12,12,0.94)', borderRadius: 15, marginHorizontal: "auto" }}>
                     { imageUpload && <Image style={{ width: "100%", height: "100%", borderRadius: 15 }} source={imageUpload.uri}></Image> }
                 </View>
@@ -146,7 +146,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                         </Pressable>
                         <Pressable onPress={() => setShowExifForm(true)} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
                             borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center"}}>
-                            <Text style={{ color: 'black', fontFamily: "SpaceMono-Regular", }}>Go Back</Text>
+                            <Text style={{ color: 'black', fontFamily: "SpaceMono-Regular" }}>Go Back</Text>
                         </Pressable>
                         {error && (
                             <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
