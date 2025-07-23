@@ -12,7 +12,7 @@ export default function TabLayout() {
     const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload()
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#181a1b' }}>
+        <View style={{ flex: 1, backgroundColor: '#181a1b', maxWidth: 800, width: "100%", alignSelf: "center", overflow: "hidden" }}>
             <HeaderBar />
             <Tabs
                 screenOptions={{

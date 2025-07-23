@@ -55,9 +55,9 @@ export default function Profile() {
     }, []);
 
     return (
-        <View style={{ position: "relative", flex: 1, maxWidth: 600, width: '100%', height: "100%", marginHorizontal: "auto", backgroundColor: "#181a1b" }}>
+        <View style={{ width: '100%', height: "100%", backgroundColor: "#181a1b", alignItems: "center" }}>
             { profile &&
-                <>
+                <View style={{ position: "relative", maxWidth: 600, width: '100%', height: "100%", justifyContent: "center" }}>
                     <View style={{ flexDirection: "row", maxHeight: 200, minHeight: 150, width: '100%', gap: 10, padding: 30, borderBottomWidth: 1, borderColor: "white" }}>
                         <View style={{ height: '100%', maxWidth: 128, maxHeight: 128, aspectRatio: 1, borderRadius: 9999, backgroundColor: "white"}}>
                             { profile.image && <Image source={ profile.image } style={{  }} /> }
@@ -100,7 +100,7 @@ export default function Profile() {
                             </Pressable>
                         </View>
                     }
-                </>
+                </View>
             }
 
             { showUploadScreen &&
