@@ -1,4 +1,4 @@
-import {Animated, View} from "react-native";
+import {Animated, View, Text} from "react-native";
 import React, {useEffect, useState} from "react";
 import { Image } from 'expo-image';
 import ScrollView = Animated.ScrollView;
@@ -23,6 +23,8 @@ interface image {
 
 export default function Index() {
     const [images, setImages] = useState<image[]>([])
+    const [message, setMessage] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
 
     async function searchPhotos(exif: ExifData | null = null, sort_by_time: TimePeriodValue = "this_year", sort_by_popularity = "relevance") {
         let params = new URLSearchParams()
@@ -49,15 +51,18 @@ export default function Index() {
             method: "GET"
         })
 
-        return await res.json()
+        const data = await res.json()
+        if (!data.success) return setError(data.error)
+
+        setImages(data.results)
+        data.message ? setMessage(data.message) : setMessage(null)
+        setError(null)
     }
 
     useEffect(() => {
         async function getPhotos() {
-            let res = await searchPhotos()
-            setImages(res.results)
+            await searchPhotos()
         }
-
         getPhotos()
     }, []);
 
@@ -65,6 +70,8 @@ export default function Index() {
     return (
         <View style={{position: "relative",  height: "100%", width: "100%", backgroundColor: "#181a1b" }}>
             <HeaderBar onSearch={(exif: ExifData | null, sort_by_time: TimePeriodValue) => searchPhotos(exif, sort_by_time)} />
+            { message && <Text style={{ color: "white", fontSize: 12, padding: 15, fontFamily: "SpaceMono-Regular" , flexDirection: "row", flexWrap: "wrap" }}>{message}</Text> }
+            { error && <Text style={{ color: "red", fontSize: 12, padding: 15, fontFamily: "SpaceMono-Regular" , flexDirection: "row", flexWrap: "wrap" }}>{error}</Text> }
             <ScrollView>
                 <View style={{
                     flex: 1,
@@ -80,6 +87,5 @@ export default function Index() {
                 </View>
             </ScrollView>
         </View>
-
     );
 }

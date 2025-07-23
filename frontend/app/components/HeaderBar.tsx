@@ -36,7 +36,7 @@ export default function HeaderBar({ onSearch } : { onSearch: (exif: ExifData | n
 
     const timePeriodChange = async (option: TimePeriodValue) => {
         setTimePeriod(option)
-        await onSearch(exif, timePeriod)
+        await onSearch(exif, option)
     }
 
     const applyFilter = async () => {
