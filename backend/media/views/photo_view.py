@@ -90,6 +90,8 @@ def image_search(req):
                 "relevance_score": image.relevance if hasattr(image, "relevance") else None,
                 "image_url": image.image.url,
                 "distance": str(image.distance) if hasattr(image, "distance") and image.distance is not None else None,
+                "latitude": image.location.y if not types.NoneType else None,
+                "longitude": image.location.x if not types.NoneType else None,
                 "camera_model": image.camera.model,
                 "camera_make": image.camera.make,
                 "flash": image.flash,
