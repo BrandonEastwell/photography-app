@@ -1,15 +1,18 @@
-import {Pressable} from "react-native";
+import {Pressable, Text, View} from "react-native";
 import {Image} from "expo-image";
 import React, {useState} from "react";
-import {ExifData, Photo, photoKeyToExifKeyMap} from "@/app/lib/Types";
+import {ExifData, Photo, photoKeyToExifKeyMap, UserProfile} from "@/app/lib/Types";
 import PhotoPopup from "@/app/components/PhotoPopup";
 import PhotoModal from "@/app/components/PhotoModal";
+import Constants from 'expo-constants';
+const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function PhotoCard({ photo } : {
     photo: Photo
 }) {
     const [showPhotoPopup, setShowPhotoPopup] = useState<boolean>(false)
     const [exif, setExif] = useState<Partial<ExifData>>({})
+    const [profile, setProfile] = useState<UserProfile | null>(null)
     const onClickPhoto = () => {
         const exifData: Partial<ExifData> = {}
         for (const key in photoKeyToExifKeyMap) {
@@ -50,7 +53,20 @@ export default function PhotoCard({ photo } : {
         }
 
         setExif(exifData)
-        setShowPhotoPopup(true)
+        getUserDetails().then(() => {
+            setShowPhotoPopup(true)
+        })
+    }
+
+    const getUserDetails = async () => {
+        const res = await fetch(`${apiUrl}/api/user/${photo.user_id}/profile`, {
+            method: "GET"
+        })
+
+        const data = await res.json()
+        if (!data.success) return
+        const user = data.user
+        setProfile({ username: user.username, description: user.description, image: user.image, firstName: user.firstName, lastName: user.lastName })
     }
 
     return (
@@ -60,12 +76,10 @@ export default function PhotoCard({ photo } : {
             </Pressable>
             { showPhotoPopup &&
                 <PhotoModal>
-                    <PhotoPopup onClose={setShowPhotoPopup} photoSrc={photo.image_url} exif={exif} children={undefined}>
-
+                    <PhotoPopup onClose={setShowPhotoPopup} photoSrc={photo.image_url} exif={exif} children={undefined} profile={profile}>
                     </PhotoPopup>
                 </PhotoModal>
             }
         </>
-
     )
 }

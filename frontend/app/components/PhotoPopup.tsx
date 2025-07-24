@@ -1,15 +1,16 @@
-import {View} from "react-native";
+import {Text, View} from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React from "react";
 import {Image} from "expo-image";
 import PhotoTags from "@/app/components/PhotoTags";
-import {ExifData} from "@/app/lib/Types";
+import {ExifData, UserProfile} from "@/app/lib/Types";
 
-export default function PhotoPopup({ children, onClose, photoSrc, exif } : {
+export default function PhotoPopup({ children, onClose, photoSrc, exif, profile } : {
     children: React.ReactNode
     onClose: React.Dispatch<React.SetStateAction<boolean>>
     photoSrc: string
     exif: ExifData | null
+    profile: UserProfile | null
 }) {
 
     return (
@@ -18,9 +19,22 @@ export default function PhotoPopup({ children, onClose, photoSrc, exif } : {
                 justifyContent: "flex-end", alignItems: "flex-end" }}>
                 <AntDesign onPress={() => onClose(false)} name="close" size={22} color="white" />
             </View>
-            <Image style={{ width: 340, height: 400, marginBottom: 30 }} source={photoSrc}></Image>
-            { exif && <PhotoTags exif={exif} /> }
-            { children }
+            <Image style={{ width: 340, height: 400, marginBottom: 5 }} source={photoSrc}></Image>
+            <View style={{ padding: 7.5 }}>
+                { profile &&
+                    <View style={{ flexDirection: "row", marginBottom: 15, gap: 5, marginHorizontal: 10, alignItems: "center" }}>
+                        <View style={{ height: '100%', maxWidth: 32, maxHeight: 32, aspectRatio: 1, borderRadius: 9999, backgroundColor: "white" }}>
+                            { profile.image && <Image source={ profile.image } style={{  }} /> }
+                        </View>
+                        <View style={{ flex: 1, flexDirection: "column", justifyContent: "center", padding: 10 }}>
+                            <Text style={{ fontSize: 14, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.username }</Text>
+                        </View>
+                    </View>
+                }
+                { exif && <PhotoTags exif={exif} /> }
+                { children }
+            </View>
+
         </View>
     )
 }

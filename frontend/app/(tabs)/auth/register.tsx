@@ -1,4 +1,4 @@
-import {View, Text, TextInput, StyleSheet, TouchableOpacity, Platform} from "react-native";
+import {View, Text, StyleSheet, TouchableOpacity, Platform} from "react-native";
 import {useRouter} from "expo-router";
 import React, {useState} from 'react';
 import { Formik } from 'formik';

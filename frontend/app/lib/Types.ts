@@ -58,3 +58,11 @@ export const photoKeyToExifKeyMap: {
     longitude: "GPSLongitude",
     f_stop: "FNumber"
 };
+
+export interface UserProfile {
+    username: string
+    firstName: string
+    lastName: string
+    description: string | null
+    image: string | null
+}

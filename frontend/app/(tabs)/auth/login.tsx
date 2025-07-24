@@ -1,7 +1,7 @@
-import {View, Text, TextInput, StyleSheet, TouchableOpacity, Platform} from "react-native";
+import {View, Text, StyleSheet, TouchableOpacity, Platform} from "react-native";
 import {useRouter} from "expo-router";
 import React, {useState} from 'react';
-import {Form, Formik} from 'formik';
+import {Formik} from 'formik';
 import * as yup from 'yup';
 import {useAuth} from "@/app/lib/AuthContext";
 import Constants from 'expo-constants';

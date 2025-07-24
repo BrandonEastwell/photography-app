@@ -6,6 +6,7 @@ import Constants from "expo-constants";
 import {Image} from "expo-image";
 import useUpload from "@/app/lib/useUpload";
 import PhotoUpload from "@/app/components/PhotoUpload";
+import { UserProfile } from "@/app/lib/Types";
 import ScrollView = Animated.ScrollView;
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
@@ -14,17 +15,9 @@ interface Photo {
     url: string
 }
 
-interface Profile {
-    username: string
-    firstName: string
-    lastName: string
-    description: string | null
-    image: string | null
-}
-
 export default function Profile() {
     const [photos, setPhotos] = useState<Photo[] | null>(null)
-    const [profile, setProfile] = useState<Profile | null>(null)
+    const [profile, setProfile] = useState<UserProfile | null>(null)
     const [error, setError] = useState(null)
     const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload()
 
