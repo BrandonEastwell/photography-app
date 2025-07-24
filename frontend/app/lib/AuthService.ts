@@ -20,11 +20,9 @@ export default class AuthService {
         })
 
         const { success, session_id, user } = await res.json()
-        console.log(user)
         if (success) {
-            if (Platform.OS !== "web") {
-                await SecureStore.setItemAsync("session_id", session_id)
-            }
+            if (Platform.OS !== "web") await SecureStore.setItemAsync("session_id", session_id)
+            if (user) return { username: user.username, userId: user.user_id }
         }
     }
 
