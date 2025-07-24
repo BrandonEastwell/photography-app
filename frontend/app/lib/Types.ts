@@ -1,44 +1,54 @@
 export interface ExifData {
-    Make?: string,
-    Model?: string,
-    LensModel?: string,
-    FocalLength?: number,
-    Flash?: "Yes" | "No",
-    FNumber?: string,
-    GPSLatitude?: number,
-    GPSLongitude?: number,
-    ISOSpeedRatings?: string,
-    ShutterSpeedValue?: string,
-    DateTimeOriginal?: string,
-    ExifImageWidth?: string,
-    ExifImageHeight?: string
+    Make?: string
+    Model?: string
+    LensModel?: string
+    FocalLength?: number
+    Flash?: "Yes" | "No"
+    FNumber?: string
+    GPSLatitude?: number
+    GPSLongitude?: number
+    ISOSpeedRatings?: number
+    ShutterSpeedValue?: string
 }
 
 export interface ExifDataErrors {
-    Make?: string,
-    Model?: string,
-    LensModel?: string,
-    FocalLength?: string,
-    Flash?: "Yes" | "No",
-    FNumber?: string,
-    GPSLatitude?: string,
-    GPSLongitude?: string,
-    ISOSpeedRatings?: string,
-    ShutterSpeedValue?: string,
+    Make?: string
+    Model?: string
+    LensModel?: string
+    FocalLength?: number
+    Flash?: "Yes" | "No"
+    FNumber?: number
+    GPSLatitude?: string
+    GPSLongitude?: string
+    ISOSpeedRatings?: number
+    ShutterSpeedValue?: number
 }
 
 export type TimePeriodValue = "today" | "this_week" | "this_month" | "this_year";
 
 export interface Photo {
-    ISO: number | null
-    camera_make: string | null
-    camera_model: string | null
-    distance: number | null
-    focal_length: number | null
+    ISO?: number
+    camera_make?: string
+    camera_model?: string
+    distance?: number
+    focal_length?: number
     image_url: string
-    lens: string | null
-    relevance_score: number | null
-    shutter_speed: string | null
+    lens?: string
+    flash?: boolean
+    relevance_score?: number
+    shutter_speed?: number
     user_id: number
-    votes: number
+    votes?: number
 }
+
+export const photoKeyToExifKeyMap: {
+    [K in keyof Photo]?: keyof ExifData;
+} = {
+    ISO: "ISOSpeedRatings",
+    camera_make: "Make",
+    camera_model: "Model",
+    lens: "LensModel",
+    focal_length: "FocalLength",
+    shutter_speed: "ShutterSpeedValue",
+    flash: "Flash",
+};

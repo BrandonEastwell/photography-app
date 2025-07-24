@@ -1,6 +1,5 @@
-import {Animated, View, Text, Pressable} from "react-native";
+import {Animated, View, Text} from "react-native";
 import React, {useEffect, useState} from "react";
-import { Image } from 'expo-image';
 import ScrollView = Animated.ScrollView;
 import Constants from 'expo-constants';
 import SearchBar from "@/app/components/SearchBar";
@@ -24,7 +23,7 @@ export default function Index() {
             exif.Model && params.set("Model", exif.Model)
             exif.LensModel && params.set("LensModel", exif.LensModel)
             exif.FNumber && params.set("FNumber", exif.FNumber)
-            exif.ISOSpeedRatings && params.set("ISOSpeedRatings", exif.ISOSpeedRatings)
+            exif.ISOSpeedRatings && params.set("ISOSpeedRatings", String(exif.ISOSpeedRatings))
             exif.FocalLength && params.set("FocalLength", String(exif.FocalLength))
             exif.ShutterSpeedValue && params.set("ShutterSpeedValue", exif.ShutterSpeedValue)
             exif.Flash && params.set("Flash", exif.Flash == "Yes" ? "true" : "false")
@@ -50,12 +49,9 @@ export default function Index() {
         async function getPhotos() {
             await searchPhotos()
         }
+
         getPhotos()
     }, []);
-
-    const onClickPhoto = () => {
-
-    }
 
     return (
         <View style={{position: "relative",  height: "100%", width: "100%", backgroundColor: "#181a1b" }}>

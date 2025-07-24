@@ -82,8 +82,7 @@ export default function Profile() {
                                 marginTop: 2.5,
                                 gap: 2.5
                             }}>
-                                { photos &&
-                                    photos.map((photo: Photo, index) => (
+                                { photos.map((photo: Photo, index) => (
                                         <Pressable style={{ width: "32%", height: 200 }}>
                                             <Image key={index} source={photo.url} style={{ width: "100%", height: "100%" }} />
                                         </Pressable>
