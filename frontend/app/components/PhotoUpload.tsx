@@ -119,7 +119,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                 <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} onClose={() => setShowExifForm(false)} formMode={"Photo"} />
             }
             { imageUpload && !showExifForm &&
-                <PhotoPopup onClose={setShowUpload} photoSrc={imageUpload.uri} exif={exif}>
+                <PhotoPopup onClose={setShowUpload} photoSrc={imageUpload.uri} exif={exif} profile={null}>
                     <View style={{ flexDirection: "row", gap: 15, alignItems: "center", marginBottom: 30, justifyContent: "center" }}>
                         <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: '#3091fc', padding: 10, paddingHorizontal: 20,
                             borderRadius: 15, flexDirection: "row", alignItems: "center" }}>

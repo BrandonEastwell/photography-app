@@ -15,26 +15,24 @@ export default function PhotoPopup({ children, onClose, photoSrc, exif, profile 
 
     return (
         <View style={{ flexDirection: "column", backgroundColor: "#181a1b", borderRadius: 15, maxWidth: 340, height: "auto" }}>
-            <View style={{ padding: 7.5, borderRadius: 15, flexDirection: "row", gap: 10, zIndex: 100, width: "100%",
-                justifyContent: "flex-end", alignItems: "flex-end" }}>
-                <AntDesign onPress={() => onClose(false)} name="close" size={22} color="white" />
-            </View>
-            <Image style={{ width: 340, height: 400, marginBottom: 5 }} source={photoSrc}></Image>
-            <View style={{ padding: 7.5 }}>
+            <View style={{ padding: 10, borderRadius: 15, flexDirection: "row", zIndex: 100, width: "100%", justifyContent: "space-between"}}>
                 { profile &&
-                    <View style={{ flexDirection: "row", marginBottom: 15, gap: 5, marginHorizontal: 10, alignItems: "center" }}>
-                        <View style={{ height: '100%', maxWidth: 32, maxHeight: 32, aspectRatio: 1, borderRadius: 9999, backgroundColor: "white" }}>
-                            { profile.image && <Image source={ profile.image } style={{  }} /> }
+                    <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+                        <View style={{ width: 28, height: 28, aspectRatio: 1, borderRadius: 9999, backgroundColor: "white" }}>
+                            { profile.image && <Image source={ profile.image } style={{ width: "100%", height: "100%", aspectRatio: 1 }} /> }
                         </View>
-                        <View style={{ flex: 1, flexDirection: "column", justifyContent: "center", padding: 10 }}>
+                        <View style={{ flex: 1, flexDirection: "column", justifyContent: "center" }}>
                             <Text style={{ fontSize: 14, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.username }</Text>
                         </View>
                     </View>
                 }
+                <AntDesign style={{ alignSelf: "center" }} onPress={() => onClose(false)} name="close" size={20} color="white" />
+            </View>
+            <Image style={{ width: 340, height: 400 }} source={photoSrc}></Image>
+            <View style={{ paddingHorizontal: 15, paddingVertical: 15 }}>
                 { exif && <PhotoTags exif={exif} /> }
                 { children }
             </View>
-
         </View>
     )
 }

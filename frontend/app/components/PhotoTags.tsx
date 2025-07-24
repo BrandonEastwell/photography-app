@@ -19,7 +19,7 @@ export default function PhotoTags(exif : { exif: ExifData  }) {
     const isExifEmpty = values.every((value) => value === undefined)
 
     return (
-        <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", flexWrap: "wrap", marginBottom: 30 }}>
+        <View style={{ flexDirection: "row", gap: 10, justifyContent: "flex-start", alignItems: "center", flexWrap: "wrap" }}>
             { !isExifEmpty && Object.entries(exifData).map(([key, value]) => {
                 if (value !== undefined && keyToLabelMap[key]) {
                     return (
@@ -27,23 +27,28 @@ export default function PhotoTags(exif : { exif: ExifData  }) {
                             flexDirection: "column",
                             justifyContent: "center",
                             alignItems: "center",
-                            gap: 4
+                            gap: 4,
+                            minWidth: 40
                         }}>
-                            <Text style={{color: "white"}}>{keyToLabelMap[key]}</Text>
+                            <Text style={{ color: "white", fontFamily: "SpaceMono-Regular", fontSize: 10 }}>{keyToLabelMap[key]}</Text>
                             <View style={{
-                                backgroundColor: 'rgb(227,227,227)',
-                                borderRadius: 6,
+                                backgroundColor: 'rgba(56,52,52,0.86)',
+                                borderRadius: 8,
                                 padding: 5,
                                 width: "100%",
                                 alignItems: "center"
                             }}>
-                                <Text style={{}}>{String(value)}</Text>
+                                <Text style={{ color: "white", fontFamily: "SpaceMono-Regular", fontSize: 12 }}>{String(value)}</Text>
                             </View>
                         </View>
                     )
                 }
             })}
-            { isExifEmpty && <Text style={{ fontSize: 14, padding: 5, fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)',
+            { isExifEmpty && <Text style={{
+                fontSize: 14,
+                padding: 5,
+                fontFamily: "SpaceMono-Regular",
+                color: 'rgba(229,229,229,0.97)',
                 textAlign: "center" }}>This photo has no attributes.</Text> }
         </View>
     )
