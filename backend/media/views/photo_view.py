@@ -92,6 +92,8 @@ def image_search(req):
                 "distance": str(image.distance) if hasattr(image, "distance") and image.distance is not None else None,
                 "camera_model": image.camera.model,
                 "camera_make": image.camera.make,
+                "flash": image.flash,
+                "f_stop": image.f_stop if not types.NoneType else None,
                 "lens": image.lens.model if not types.NoneType else None,
                 "ISO": image.ISO if not None else None,
                 "shutter_speed": image.shutter_speed if not None else None,
