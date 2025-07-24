@@ -59,14 +59,21 @@ export default function PhotoCard({ photo } : {
     }
 
     const getUserDetails = async () => {
-        const res = await fetch(`${apiUrl}/api/user/${photo.user_id}/profile`, {
-            method: "GET"
-        })
+        if (!photo.user_id) return
 
-        const data = await res.json()
-        if (!data.success) return
-        const user = data.user
-        setProfile({ username: user.username, description: user.description, image: user.image, firstName: user.firstName, lastName: user.lastName })
+        try {
+            const res = await fetch(`${apiUrl}/api/user/${photo.user_id}/profile`, {
+                method: "GET"
+            })
+
+            const data = await res.json()
+            if (!data.success) return
+            const user = data.user
+            setProfile({ username: user.username, description: user.description, image: user.image, firstName: user.firstName, lastName: user.lastName })
+        } catch (e) {
+            console.log(e)
+        }
+
     }
 
     return (

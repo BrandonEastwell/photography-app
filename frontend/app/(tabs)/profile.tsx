@@ -1,4 +1,4 @@
-import {View, Text, Platform, Pressable, Animated} from "react-native";
+import {View, Text, Platform, Pressable, Animated, FlatList} from "react-native";
 import React, {useEffect, useState} from "react";
 import AuthService from "@/app/lib/AuthService";
 import {router} from "expo-router";
@@ -6,14 +6,10 @@ import Constants from "expo-constants";
 import {Image} from "expo-image";
 import useUpload from "@/app/lib/useUpload";
 import PhotoUpload from "@/app/components/PhotoUpload";
-import { UserProfile } from "@/app/lib/Types";
-import ScrollView = Animated.ScrollView;
-const apiUrl = Constants.expoConfig?.extra?.API_URL;
+import {Photo, UserProfile} from "@/app/lib/Types";
 
-interface Photo {
-    id: string
-    url: string
-}
+import PhotoCard from "@/app/components/PhotoCard";
+const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Profile() {
     const [photos, setPhotos] = useState<Photo[] | null>(null)
@@ -47,6 +43,10 @@ export default function Profile() {
         onLoad()
     }, []);
 
+    const Item = ({ photo }: { photo: Photo }) => (
+        <PhotoCard photo={photo} />
+    )
+
     return (
         <View style={{ width: '100%', height: "100%", backgroundColor: "#181a1b", alignItems: "center" }}>
             { profile &&
@@ -66,23 +66,7 @@ export default function Profile() {
                     </View>
 
                     { photos &&
-                        <ScrollView>
-                            <View style={{
-                                flex: 1,
-                                flexDirection: "row",
-                                flexWrap: "wrap",
-                                justifyContent: "center",
-                                marginTop: 2.5,
-                                gap: 2.5
-                            }}>
-                                { photos.map((photo: Photo, index) => (
-                                        <Pressable style={{ width: "32%", height: 200 }}>
-                                            <Image key={index} source={photo.url} style={{ width: "100%", height: "100%" }} />
-                                        </Pressable>
-                                    ))
-                                }
-                            </View>
-                        </ScrollView>
+                        <FlatList numColumns={3} keyExtractor={item => item.image_url} data={photos} renderItem={(photo) => <Item photo={photo.item} />} />
                     }
 
                     { !photos &&
