@@ -4,6 +4,7 @@ import React from "react";
 import {Image} from "expo-image";
 import PhotoTags from "@/app/components/PhotoTags";
 import {ExifData, UserProfile} from "@/app/lib/Types";
+import {useRouter} from "expo-router";
 
 export default function PhotoPopup({ children, onClose, photoSrc, exif, profile } : {
     children: React.ReactNode
@@ -13,16 +14,24 @@ export default function PhotoPopup({ children, onClose, photoSrc, exif, profile 
     profile: UserProfile | null
 }) {
 
+    const router = useRouter();
     const navigateToProfile = () => {
-
+        if (profile) {
+            router.push({
+                pathname: `/[username]`,
+                params: {
+                    username: encodeURIComponent(profile.username)
+                }
+            })
+        }
     }
 
     return (
         <View style={{ flexDirection: "column", backgroundColor: "#181a1b", borderRadius: 15, maxWidth: 340, height: "auto" }}>
             <View style={{ padding: 10, borderRadius: 15, flexDirection: "row", zIndex: 100, width: "100%", justifyContent: "space-between"}}>
-                <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+                <View>
                     { profile &&
-                        <Pressable >
+                        <Pressable onPress={navigateToProfile} style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
                             <View style={{ width: 28, height: 28, aspectRatio: 1, borderRadius: 9999, backgroundColor: "white" }}>
                                 { profile.image && <Image source={ profile.image } style={{ width: "100%", height: "100%", aspectRatio: 1 }} /> }
                             </View>

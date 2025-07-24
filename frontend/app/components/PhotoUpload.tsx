@@ -69,7 +69,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
     }
 
     const uploadPhoto = async (formData: FormData) => {
-        const isUserLoggedIn = await AuthService.isUserLoggedIn()
+        const isUserLoggedIn = await AuthService.isTokenExpired()
         if (!isUserLoggedIn) {
             const refreshed = await AuthService.refreshAuthToken()
             if (!refreshed) return router.replace("/auth/login")

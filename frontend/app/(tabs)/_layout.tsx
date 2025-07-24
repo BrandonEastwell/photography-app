@@ -7,13 +7,25 @@ import {Entypo} from "@expo/vector-icons";
 import useUpload from "@/app/lib/useUpload";
 import React from "react";
 import HeaderBar from "@/app/components/HeaderBar";
+import {useAuth} from "@/app/lib/AuthContext";
 
 export default function TabLayout() {
     const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload();
+    const { user, isAuthenticated } = useAuth();
     const router = useRouter();
 
-    const onProfileClick = () => {
-        return router.push(`/${encodeURIComponent(username)}--${userId}`)
+    const onProfileClick = async () => {
+        const isUserAuthenticated = await isAuthenticated()
+        if (!isUserAuthenticated) return router.push("/auth/login")
+        if (user && user.username) {
+            return router.push({
+                pathname: `/[username]`,
+                params: {
+                    username: encodeURIComponent(user.username),
+                }
+            })
+        }
+
     }
 
     const onIndexClick = () => {
@@ -67,7 +79,7 @@ export default function TabLayout() {
                             )
                         }}
                     />
-                    <Tabs.Screen name="[profile]" options={{ href: null }}></Tabs.Screen>
+                    <Tabs.Screen name="[username]" options={{ href: null }}></Tabs.Screen>
                     <Tabs.Screen name="auth/login" options={{ href: null }}></Tabs.Screen>
                     <Tabs.Screen name="auth/register" options={{ href: null }}></Tabs.Screen>
                 </Tabs>

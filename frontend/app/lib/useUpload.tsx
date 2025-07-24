@@ -7,7 +7,7 @@ export default function useUpload() {
     const router = useRouter()
 
     const onUploadClick = async () => {
-        const isLoggedIn = await AuthService.isUserLoggedIn()
+        const isLoggedIn = await AuthService.isTokenExpired()
         if (!isLoggedIn) {
             let isAuthRefreshed: boolean = await AuthService.refreshAuthToken()
             if (!isAuthRefreshed) return router.push("/auth/login")

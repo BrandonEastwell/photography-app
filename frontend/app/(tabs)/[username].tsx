@@ -1,7 +1,7 @@
 import {View, Text, Platform, Pressable, Animated, FlatList} from "react-native";
 import React, {useEffect, useState} from "react";
 import AuthService from "@/app/lib/AuthService";
-import {router} from "expo-router";
+import {router, useLocalSearchParams} from "expo-router";
 import Constants from "expo-constants";
 import {Image} from "expo-image";
 import useUpload from "@/app/lib/useUpload";
@@ -11,21 +11,22 @@ import {Photo, UserProfile} from "@/app/lib/Types";
 import PhotoCard from "@/app/components/PhotoCard";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
-export default function Profile() {
+export default function Username() {
     const [photos, setPhotos] = useState<Photo[] | null>(null)
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [error, setError] = useState(null)
     const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload()
+    const { username, userId } = useLocalSearchParams();
 
     useEffect(() => {
         const onLoad = async () => {
-            const isLoggedIn = await AuthService.isUserLoggedIn()
+            const isLoggedIn = await AuthService.isTokenExpired()
             if (!isLoggedIn) {
                 let isAuthRefreshed: boolean = await AuthService.refreshAuthToken()
                 if (!isAuthRefreshed) return router.push("/auth/login")
             }
 
-            const res = await fetch(`${apiUrl}/api/user/profile`, {
+            const res = await fetch(`${apiUrl}/api/users/${userId}`, {
                 method: "GET",
                 headers: {
                     "Platform": Platform.OS

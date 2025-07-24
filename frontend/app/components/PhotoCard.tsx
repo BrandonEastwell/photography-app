@@ -62,7 +62,7 @@ export default function PhotoCard({ photo } : {
         if (!photo.user_id) return
 
         try {
-            const res = await fetch(`${apiUrl}/api/user/${photo.user_id}/profile`, {
+            const res = await fetch(`${apiUrl}/api/users/${photo.user_id}`, {
                 method: "GET"
             })
 
@@ -71,7 +71,7 @@ export default function PhotoCard({ photo } : {
             const user = data.user
             setProfile({ username: user.username, description: user.description, image: user.image, firstName: user.firstName, lastName: user.lastName })
         } catch (e) {
-            console.log(e)
+            console.error(e)
         }
 
     }

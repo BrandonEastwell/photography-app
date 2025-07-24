@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     return (
         <AuthContext.Provider value={{
             user,
-            isAuthenticated: () => AuthService.isUserLoggedIn(),
+            isAuthenticated: () => AuthService.isUserLoggedInWithRefresh(),
             logout: () => setUser(null),
             login: (user: User) => setUser({ username: user.username, userId: user.userId}),
         }} >
