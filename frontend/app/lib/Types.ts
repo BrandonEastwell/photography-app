@@ -32,6 +32,9 @@ export interface Photo {
     camera_model?: string
     distance?: number
     focal_length?: number
+    latitude?: number
+    longitude?: number
+    f_stop?: number
     image_url: string
     lens?: string
     flash?: boolean
@@ -51,4 +54,7 @@ export const photoKeyToExifKeyMap: {
     focal_length: "FocalLength",
     shutter_speed: "ShutterSpeedValue",
     flash: "Flash",
+    latitude: "GPSLatitude",
+    longitude: "GPSLongitude",
+    f_stop: "FNumber"
 };

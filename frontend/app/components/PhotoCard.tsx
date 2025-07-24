@@ -40,14 +40,18 @@ export default function PhotoCard({ photo } : {
                 case "FocalLength":
                     exifData[exifKey] = Number(photo[typedKey])
                     break
+                case "GPSLongitude":
+                    exifData[exifKey] = Number(photo[typedKey])
+                    break
+                case "GPSLatitude":
+                    exifData[exifKey] = Number(photo[typedKey])
+                    break
             }
         }
 
         setExif(exifData)
         setShowPhotoPopup(true)
     }
-
-
 
     return (
         <>
