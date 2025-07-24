@@ -24,6 +24,6 @@ urlpatterns = [
     path("refresh-token", views.refresh_token),
     path("session", views.session),
     path("api/account/", include('accounts.account_urls')),
-    path("api/user/", include('accounts.user_urls')),
+    path("api/users/", include('accounts.user_urls')),
     path("api/media/", include('media.urls'))
 ]

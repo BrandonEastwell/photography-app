@@ -45,16 +45,18 @@ def get_user_lens(req):
         return JsonResponse( { "success": False, "error": "Unable to retrieve data at this time." }, status=500)
 
 
-@JWTAuthenticationMiddleware
-def profile(req):
+def get_user_with_username(req, username):
     if req.method != "GET":
         return HttpResponseNotAllowed(["GET"])
 
-    user_id = req.user_id
+    try:
+        user_id = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return JsonResponse( { "success": False, "error": "User does not exist." }, status=404)
+
     return get_user_profile(user_id)
 
-
-def users_profile(req, user_id):
+def get_user_with_id(req, user_id):
     if req.method != "GET":
         return HttpResponseNotAllowed(["GET"])
 
@@ -65,7 +67,7 @@ def get_user_profile(user_id):
     try:
         user_profile = Profile.objects.get(user__id=user_id)
         if user_profile is None:
-            return JsonResponse( { "success": False, "error": "User does not exist." }, status=400)
+            return JsonResponse( { "success": False, "error": "User does not exist." }, status=404)
 
         images = Photo.objects.filter(user_id=user_id)
         user = {
@@ -94,6 +96,10 @@ def get_user_profile(user_id):
         }
 
         return JsonResponse( { "success": True, "user": user }, status=200)
+
+    except Profile.DoesNotExist:
+        return JsonResponse( { "success": False, "error": "User does not exist." }, status=404)
+
     except Exception as e:
         logging.exception(e)
         return JsonResponse( { "success": False, "error": "Unable to retrieve user at this time." }, status=500)
