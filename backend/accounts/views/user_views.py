@@ -1,5 +1,6 @@
 import json
 import logging
+import types
 
 from accounts.models import Profile
 from django.contrib.auth import get_user_model
@@ -75,8 +76,18 @@ def get_user_profile(user_id):
             "image": user_profile.image.url if user_profile.image else None,
             "photos": [
                 {
-                    "id": image.id,
-                    "url": image.image.url
+                    "image_url": image.image.url,
+                    "latitude": image.location.y if not types.NoneType else None,
+                    "longitude": image.location.x if not types.NoneType else None,
+                    "camera_model": image.camera.model,
+                    "camera_make": image.camera.make,
+                    "flash": image.flash,
+                    "f_stop": image.f_stop if not types.NoneType else None,
+                    "lens": image.lens.model if not types.NoneType else None,
+                    "ISO": image.ISO if not None else None,
+                    "shutter_speed": image.shutter_speed if not None else None,
+                    "focal_length": image.focal_length if not None else None,
+                    "votes": image.total_votes
                 }
                 for image in images
             ]

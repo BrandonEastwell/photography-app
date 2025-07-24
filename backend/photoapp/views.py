@@ -1,3 +1,5 @@
+import logging
+
 import environ
 from accounts.models import Session
 from django.http import JsonResponse
@@ -5,7 +7,9 @@ from django.middleware.csrf import get_token
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from lib.auth_helpers import create_session, create_jwt, get_session, SessionNotFoundError, set_token_to_response
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 env = environ.Env()
 
 def csrf(req):
@@ -17,7 +21,9 @@ def session(req):
     try:
         session = get_session(req)
         if session:
-            return JsonResponse({ "success": True, "message": "Session already exists" }, status=200)
+            user = User.objects.only("username").filter(pk=session.user_id).first() if session.user_id is not None else None
+            return JsonResponse({ "success": True, "message": "Session already exists",
+                                  "user": { "username": user.username, "user_id": session.user_id } if user is not None else None }, status=200)
 
     except (ValueError, SessionNotFoundError):
         platform = req.META.get('HTTP_PLATFORM')
@@ -33,6 +39,7 @@ def session(req):
 
     except Exception as e:
         # Unexpected server error
+        logging.error(e)
         return JsonResponse({ "success": False, "error": str(e) }, status=500)
 
 # returns a new jwt if session is valid or redirects user to login page if login session is invalid
@@ -41,8 +48,8 @@ def session(req):
 def refresh_token(req):
     session = get_session(req)
 
+    # Session expired or doesnt exist
     if session is None or session.expire_at < timezone.now():
-        # Recreate updated session cookie
         return JsonResponse({ "success": False, "error": "Invalid session" }, status=400)
 
     # If user is not logged in
