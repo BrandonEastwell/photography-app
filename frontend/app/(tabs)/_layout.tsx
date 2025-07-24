@@ -1,4 +1,4 @@
-import {Tabs} from 'expo-router';
+import {Tabs, useRouter} from 'expo-router';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import PhotoUpload from '../components/PhotoUpload'
@@ -9,7 +9,16 @@ import React from "react";
 import HeaderBar from "@/app/components/HeaderBar";
 
 export default function TabLayout() {
-    const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload()
+    const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload();
+    const router = useRouter();
+
+    const onProfileClick = () => {
+        return router.push(`/${encodeURIComponent(username)}--${userId}`)
+    }
+
+    const onIndexClick = () => {
+        return router.push("/(tabs)")
+    }
 
     return (
         <View style={{ flex: 1, backgroundColor: '#181a1b', width: "100%", alignItems: "center" }}>
@@ -31,8 +40,8 @@ export default function TabLayout() {
                     <Tabs.Screen
                         name="index"
                         options={{
-                            tabBarIcon: () => (
-                                <Pressable style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+                            tabBarButton: () => (
+                                <Pressable onPress={onIndexClick} style={{ justifyContent: 'center', alignItems: 'center', flex: 1, padding: 5 }}>
                                     <Entypo name="home" size={24} color="white" />
                                 </Pressable>
                             )
@@ -51,13 +60,14 @@ export default function TabLayout() {
                     <Tabs.Screen
                         name="profile"
                         options={{
-                            tabBarIcon: () => (
-                                <Pressable style={{ justifyContent: 'center', alignItems: 'center', flex: 1  }}>
+                            tabBarButton: () => (
+                                <Pressable onPress={onProfileClick} style={{ justifyContent: 'center', alignItems: 'center', flex: 1, padding: 5 }}>
                                     <Ionicons name={'person-circle-sharp'} color={'#ffffff'} size={24} />
                                 </Pressable>
                             )
                         }}
                     />
+                    <Tabs.Screen name="[profile]" options={{ href: null }}></Tabs.Screen>
                     <Tabs.Screen name="auth/login" options={{ href: null }}></Tabs.Screen>
                     <Tabs.Screen name="auth/register" options={{ href: null }}></Tabs.Screen>
                 </Tabs>

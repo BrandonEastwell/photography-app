@@ -4,28 +4,29 @@ import AuthService from "@/app/lib/AuthService";
 const AuthContext = createContext<{
     login: () => void;
     logout: () => void;
-    user: string | null;
-    isLoading: boolean;
+    user: { username: string, userId: number } | null;
     isAuthenticated: () => Promise<boolean>;
 }>({
     login: () => null,
     logout: () => null,
     user: null,
-    isLoading: false,
     isAuthenticated: async () => false,
 });
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
     const [user, setUser] = useState(null)
-    const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
         AuthService.createSession()
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: () => AuthService.isUserLoggedIn(),
-        logout: () => null, login: () => null,  isLoading, }} >
+        <AuthContext.Provider value={{
+            user,
+            isAuthenticated: () => AuthService.isUserLoggedIn(),
+            logout: () => null,
+            login: () => null,
+        }} >
             {children}
         </AuthContext.Provider>
     )

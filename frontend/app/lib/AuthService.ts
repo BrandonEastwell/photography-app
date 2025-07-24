@@ -6,7 +6,7 @@ const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default class AuthService {
     static async createSession() {
-        const headers: Record<string, string> = {"Platform": Platform.OS}
+        const headers: Record<string, string> = { "Platform": Platform.OS }
 
         if (Platform.OS !== "web") {
             const sessionId = await SecureStore.getItemAsync('session_id');
@@ -19,8 +19,9 @@ export default class AuthService {
             headers
         })
 
-        if (res.ok) {
-            let { session_id } = await res.json()
+        const { success, session_id, user } = await res.json()
+        console.log(user)
+        if (success) {
             if (Platform.OS !== "web") {
                 await SecureStore.setItemAsync("session_id", session_id)
             }
@@ -28,7 +29,7 @@ export default class AuthService {
     }
 
     static async refreshAuthToken() {
-        const headers: Record<string, string> = {"Platform": Platform.OS}
+        const headers: Record<string, string> = { "Platform": Platform.OS }
         if (Platform.OS !== "web") {
             const sessionId = await SecureStore.getItemAsync('session_id');
             if (sessionId) headers["Session"] = sessionId
@@ -41,7 +42,6 @@ export default class AuthService {
         })
 
         let data = await res.json()
-
         if (data.success) {
             await this.saveAuthToken(data.auth_token, data.auth_token_exp)
         }
@@ -60,11 +60,8 @@ export default class AuthService {
 
     static async isUserLoggedIn() {
         let authTokenExp;
-        if (Platform.OS !== "web") {
-            authTokenExp = await SecureStore.getItemAsync("auth_token_exp")
-        } else {
-            authTokenExp = await AsyncStorage.getItem("auth_token_exp")
-        }
+        if (Platform.OS !== "web") authTokenExp = await SecureStore.getItemAsync("auth_token_exp")
+        else authTokenExp = await AsyncStorage.getItem("auth_token_exp")
 
         if (!authTokenExp) return false
 
