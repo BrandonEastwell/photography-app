@@ -33,8 +33,8 @@ const defaultExifDataError: ExifDataError = {
 };
 
 const initExifFormFields: ExifFields = {
-    Make: { editable: true, type: "Dropdown", zIndex: 10, items: [], placeholder: "Camera Make" },
-    Model: { editable: true, type: "Dropdown", zIndex: 20, items: [], placeholder: "Camera Model" },
+    Make: { editable: true, type: "Dropdown", zIndex: 20, items: [], placeholder: "Camera Make" },
+    Model: { editable: true, type: "Dropdown", zIndex: 10, items: [], placeholder: "Camera Model" },
     LensModel: { editable: true, type: "Text", zIndex: 0, items: [], placeholder: "Lens" },
     FocalLength: {editable: true, type: "Text", zIndex: 0, items: [], placeholder: "Focal Length" },
     Flash: { editable: false,  type: "Dropdown",  zIndex: 10 , items: ["Yes", "No"], placeholder: "Flash" },
@@ -52,6 +52,7 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
 }) {
     const [errors, setErrors] = useState<ExifDataError>(defaultExifDataError);
     const [exifFormFields, setExifFormFields] = useState<ExifFields>(initExifFormFields);
+    const [currentErrorField, setCurrentErrorField] = useState<keyof ExifFields | null>(null);
 
     useEffect(() => {
         const getCameras = async () => {
@@ -94,9 +95,10 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
 
     const onExifFieldChange = async (field: keyof ExifData, value: string | React.ChangeEvent<any>) => {
         setExif(prevState => ({...prevState, [field]: value !== "" ? value : undefined}))
-        value !== "" && await validateField(field, value)
+        value !== "" ? await validateField(field, value) : setErrors(prev => ({ ...prev, [field]: undefined }));
 
         const firstError = Object.entries(errors).find(([field, error]) => error !== undefined)
+        if (firstError) setCurrentErrorField(firstError[0] as keyof ExifFields);
     }
 
     const onFormSubmit = async () => {
@@ -126,14 +128,17 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
 
                     { Object.entries(exif).map(([field]) => {
                         if (field in exifFormFields) {
-                            return <InputField placeholder={exifFormFields[field as keyof ExifData]?.placeholder ?? ""}
-                                        onChangeText={(text) => onExifFieldChange(field as keyof ExifData, text)}
-                                        value={exif[field as keyof ExifData] ?? ''}
-                                        items={exifFormFields[field as keyof ExifData]?.items ?? []}
-                                        zIndex={exifFormFields[field as keyof ExifData]?.zIndex ?? 0}
-                                        editable={exifFormFields[field as keyof ExifData]?.editable ?? true}
-                                        error={errors[field as keyof ExifData]}
-                                        type={exifFormFields[field as keyof ExifData]?.type ?? "Text"}/>
+                            return <InputField key={field}
+                                placeholder={exifFormFields[field as keyof ExifData]?.placeholder ?? ""}
+                                onChangeText={(text) => onExifFieldChange(field as keyof ExifData, text)}
+                                value={exif[field as keyof ExifData] ?? ''}
+                                items={exifFormFields[field as keyof ExifData]?.items ?? []}
+                                zIndex={exifFormFields[field as keyof ExifData]?.zIndex ?? 0}
+                                editable={exifFormFields[field as keyof ExifData]?.editable ?? true}
+                                error={errors[field as keyof ExifData]}
+                                type={exifFormFields[field as keyof ExifData]?.type ?? "Text"}
+                                showError={field === currentErrorField}
+                            />
                         }
                     })}
 

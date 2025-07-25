@@ -3,7 +3,7 @@ import React, {ChangeEvent, useState} from "react";
 import ScrollView = Animated.ScrollView;
 
 
-export default function InputField({ placeholder, onChangeText, value, error, items, editable, type, zIndex } : {
+export default function InputField({ placeholder, onChangeText, value, error, items, editable, type, zIndex, showError } : {
     placeholder: string,
     onChangeText: (e: string | ChangeEvent<any>) => void,
     value: any,
@@ -12,6 +12,7 @@ export default function InputField({ placeholder, onChangeText, value, error, it
     editable: boolean,
     type: "Dropdown" | "Text"
     zIndex: number
+    showError: boolean
 }) {
 
     const [showOptions, setShowOptions] = useState<boolean>(false)
@@ -72,6 +73,9 @@ export default function InputField({ placeholder, onChangeText, value, error, it
                     ))}
                 </ScrollView>
             }
+            { showError && error && (
+                <Text style={{ color: 'red', paddingHorizontal: 5, paddingTop: 2.5, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
+            )}
         </View>
     )
 }
