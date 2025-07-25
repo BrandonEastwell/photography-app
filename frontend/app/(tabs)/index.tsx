@@ -53,9 +53,7 @@ export default function Index() {
         getPhotos()
     }, []);
 
-    const Item = ({ photo }: { photo: Photo }) => (
-        <PhotoCard photo={photo} />
-    )
+    const Item = ({ photo }: { photo: Photo }) => <PhotoCard photo={photo} userId={photo.user_id} />
 
     return (
         <View style={{position: "relative",  height: "100%", width: "100%", backgroundColor: "#181a1b" }}>

@@ -8,7 +8,7 @@ import Constants from 'expo-constants';
 import * as SecureStore from "expo-secure-store";
 import AuthService from "@/app/lib/AuthService";
 import {router} from "expo-router";
-import PhotoPopup from "@/app/components/PhotoPopup";
+import PhotoCardContent from "@/app/components/PhotoCardContent";
 import PhotoModal from "@/app/components/PhotoModal";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
@@ -119,7 +119,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                 <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} onClose={() => setShowExifForm(false)} formMode={"Photo"} />
             }
             { imageUpload && !showExifForm &&
-                <PhotoPopup onClose={setShowUpload} photoSrc={imageUpload.uri} exif={exif} profile={null}>
+                <PhotoCardContent onClose={setShowUpload} photoSrc={imageUpload.uri} exif={exif} profile={null}>
                     <View style={{ flexDirection: "row", gap: 15, alignItems: "center", marginBottom: 30, justifyContent: "center" }}>
                         <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: '#3091fc', padding: 10, paddingHorizontal: 20,
                             borderRadius: 15, flexDirection: "row", alignItems: "center" }}>
@@ -136,7 +136,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                     {message && (
                         <Text style={{ color: '#3091fc', alignSelf: 'center', marginBottom: 30, fontFamily: "SpaceMono-Regular" }}>{message}</Text>
                     )}
-                </PhotoPopup>
+                </PhotoCardContent>
             }
         </PhotoModal>
     )

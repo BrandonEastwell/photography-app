@@ -35,6 +35,9 @@ export default function TabLayout() {
     return (
         <View style={{ flex: 1, backgroundColor: '#181a1b', width: "100%", alignItems: "center" }}>
             <View style={{ flex: 1, maxWidth: 800, width: "100%", overflow: "hidden" }}>
+                <View style={{ position: "absolute", backgroundColor: "black", height: 200, width: 200, minWidth: 200 }}>
+
+                </View>
                 <HeaderBar />
                 <Tabs
                     screenOptions={{

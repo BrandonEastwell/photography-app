@@ -1,22 +1,27 @@
 import {Pressable, Text, View} from "react-native";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import React from "react";
 import {Image} from "expo-image";
 import PhotoTags from "@/app/components/PhotoTags";
 import {ExifData, UserProfile} from "@/app/lib/Types";
 import {useRouter} from "expo-router";
+import {useAuth} from "@/app/lib/AuthContext";
+import AntDesign from '@expo/vector-icons/AntDesign';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
-export default function PhotoPopup({ children, onClose, photoSrc, exif, profile } : {
+export default function PhotoCardContent({ children, onClose, photoSrc, exif, profile, userId } : {
     children: React.ReactNode
     onClose: React.Dispatch<React.SetStateAction<boolean>>
     photoSrc: string
     exif: ExifData | null
-    profile: UserProfile | null
+    profile: Partial<UserProfile> | null
+    userId: number
 }) {
-
+    const { user } = useAuth()
     const router = useRouter();
+    const isUserPhoto = user?.userId === userId
+
     const navigateToProfile = () => {
-        if (profile) {
+        if (profile?.username) {
             router.push({
                 pathname: `/[username]`,
                 params: {
@@ -30,7 +35,7 @@ export default function PhotoPopup({ children, onClose, photoSrc, exif, profile 
         <View style={{ flexDirection: "column", backgroundColor: "#181a1b", borderRadius: 15, maxWidth: 340, height: "auto" }}>
             <View style={{ padding: 10, borderRadius: 15, flexDirection: "row", zIndex: 100, width: "100%", justifyContent: "space-between"}}>
                 <View>
-                    { profile &&
+                    { profile && !isUserPhoto &&
                         <Pressable onPress={navigateToProfile} style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
                             <View style={{ width: 28, height: 28, aspectRatio: 1, borderRadius: 9999, backgroundColor: "white" }}>
                                 { profile.image && <Image source={ profile.image } style={{ width: "100%", height: "100%", aspectRatio: 1 }} /> }
@@ -38,6 +43,11 @@ export default function PhotoPopup({ children, onClose, photoSrc, exif, profile 
                             <View style={{ flex: 1, flexDirection: "column", justifyContent: "center" }}>
                                 <Text style={{ fontSize: 14, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.username }</Text>
                             </View>
+                        </Pressable>
+                    }
+                    { isUserPhoto &&
+                        <Pressable onPress={navigateToProfile} style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+                            <MaterialCommunityIcons name="delete-outline" size={24} color="white" />
                         </Pressable>
                     }
                 </View>

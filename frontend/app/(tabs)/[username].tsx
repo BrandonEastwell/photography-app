@@ -37,14 +37,15 @@ export default function Username() {
             const data = await res.json()
             if (!data.success) return setError(data.error)
             const user = data.user
-            setProfile({ username: user.username, description: user.description, image: user.image, firstName: user.firstName, lastName: user.lastName })
+            setProfile({ username: user.username, description: user.description, image: user.image,
+                first_name: user.first_name, last_name: user.last_name, user_id: user.user_id })
             setPhotos(user.photos)
         }
 
         onLoad()
     }, []);
 
-    const Item = ({ photo }: { photo: Photo }) => <PhotoCard photo={photo} />
+    const Item = ({ photo }: { photo: Photo }) => <PhotoCard photo={photo} userId={profile?.user_id ?? photo.user_id} />
 
     return (
         <View style={{ width: '100%', height: "100%", backgroundColor: "#181a1b", alignItems: "center" }}>
@@ -57,7 +58,7 @@ export default function Username() {
                         <View style={{ flex: 2, flexDirection: "column", padding: 10 }}>
                             <Text style={{ fontSize: 12, color: 'white', opacity: 0.5, fontFamily: "SpaceMono-Regular" }}>Portfolio</Text>
                             <Text style={{ flex: 1, flexShrink: 1, fontSize: 24, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.username }</Text>
-                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 12, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.firstName + ' ' +profile.lastName }</Text>
+                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 12, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.first_name + ' ' +profile.last_name }</Text>
                         </View>
                     </View>
 
@@ -65,7 +66,8 @@ export default function Username() {
 
                     { photos &&
                         <FlatList columnWrapperStyle={{ justifyContent: 'space-evenly' }}
-                                  numColumns={3} keyExtractor={item => item.image_url} data={photos} renderItem={(photo) => <Item photo={photo.item} />} />
+                                  numColumns={3} keyExtractor={item => item.image_url} data={photos}
+                                  renderItem={(photo) => <Item photo={photo.item} />} />
                     }
 
                     { !photos &&

@@ -60,9 +60,10 @@ export const photoKeyToExifKeyMap: {
 };
 
 export interface UserProfile {
+    user_id: number
     username: string
-    firstName: string
-    lastName: string
+    first_name: string
+    last_name: string
     description: string | null
     image: string | null
 }
