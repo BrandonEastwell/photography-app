@@ -2,7 +2,7 @@ import {Pressable, Text, View} from "react-native";
 import LocationInput from "@/app/components/LocationInput";
 import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
 import * as yup from "yup";
-import {ExifData} from "@/app/lib/Types";
+import {ExifData, ExifDataError, ExifField} from "@/app/lib/Types";
 import InputField from "@/app/components/InputField";
 import Constants from "expo-constants";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -19,14 +19,38 @@ const exifSchema = yup.object().shape({
     ShutterSpeedValue: yup.number().typeError("Must be a number")
 });
 
+const defaultExifDataError: ExifDataError = {
+    Make: undefined,
+    Model: undefined,
+    LensModel: undefined,
+    FocalLength: undefined,
+    Flash: undefined,
+    FNumber: undefined,
+    GPSLatitude: undefined,
+    GPSLongitude: undefined,
+    ISOSpeedRatings: undefined,
+    ShutterSpeedValue: undefined,
+};
+
+const exifFormFields: ExifField = {
+    Make: { editable: true, type: "Dropdown", zIndex: 10 },
+    Model: { editable: true, type: "Dropdown", zIndex: 20 },
+    LensModel: { editable: true, type: "Text", zIndex: 0 },
+    FocalLength: {editable: true, type: "Text", zIndex: 0 },
+    Flash: { editable: false,  type: "Dropdown",  zIndex: 10 },
+    FNumber: { editable: true,  type: "Text",  zIndex: 0 },
+    ISOSpeedRatings: { editable: true,  type: "Text",  zIndex: 0 },
+    ShutterSpeedValue: { editable: true,  type: "Text",  zIndex: 0 },
+}
+
 export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } : {
     setExif: Dispatch<SetStateAction<ExifData | null>>;
-    exif: ExifData | null;
+    exif: ExifData;
     onSubmit: () => void;
     onClose: () => void;
     formMode: "Filtering" | "Photo"
 }) {
-    const [errors, setErrors] = useState<ExifData>({});
+    const [errors, setErrors] = useState<ExifDataError>(defaultExifDataError);
     const [cameraMakes, setCameraMakes] = useState<string[] | null>(null)
     const [cameraModels, setCameraModels] = useState<string[] | null>(null)
 
@@ -50,7 +74,7 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
         getCameras()
     }, []);
 
-    const validateField = async (field: string, value: string | React.ChangeEvent<any>) => {
+    const validateField = async (field: keyof ExifData, value: string | React.ChangeEvent<any>) => {
         try {
             const fieldSchema = exifSchema.fields[field as keyof typeof exifSchema.fields] as yup.Schema
             await fieldSchema.validate(value)
@@ -64,15 +88,12 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
         }
     }
 
-    const onExifFieldChange = async (field: string, value: string | React.ChangeEvent<any>) => {
+    const onExifFieldChange = async (field: keyof ExifData, value: string | React.ChangeEvent<any>) => {
         setExif(prevState => ({...prevState, [field]: value !== "" ? value : undefined}))
         value !== "" && await validateField(field, value)
 
-        const errorsArray = Object.entries(errors).map(([key, value]) => {
-            if (value !== undefined) return [key, value]
-        })
+        const firstError = Object.entries(errors).find(([field, error]) => error !== undefined)
 
-        console.log(errorsArray)
     }
 
     const onFormSubmit = async () => {
@@ -100,36 +121,33 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
 
                     <LocationInput setExif={setExif}></LocationInput>
 
-                    <InputField placeholder="Camera Make" onChangeText={(text) => onExifFieldChange("Make", text)}
-                                value={exif?.Make ?? ''} items={cameraMakes} zIndex={20} editable={true}
-                                errors={[]} type={"Dropdown"} />
 
                     <InputField placeholder="Camera Model" onChangeText={(text) => onExifFieldChange("Model", text)}
-                                value={exif?.Model ?? ''} items={cameraModels} zIndex={10} editable={true}
-                                errors={[]} type={"Dropdown"} />
+                                value={exif.Model ?? ''} items={cameraModels} zIndex={10} editable={true}
+                                error={errors.Model} type={"Dropdown"} />
 
                     <InputField placeholder="Lens Model" onChangeText={(text) => onExifFieldChange("LensModel", text)}
-                                value={exif?.LensModel ?? ''} errors={[]} items={[]} editable={true}
+                                value={exif.LensModel ?? ''} error={errors.LensModel} items={[]} editable={true}
                                 type={"Text"} zIndex={0} />
 
                     <InputField placeholder="Focal Length" onChangeText={(text) => onExifFieldChange("FocalLength", text)}
-                                value={exif?.FocalLength ?? ''} errors={[]} items={[]} editable={true}
+                                value={exif.FocalLength ?? ''} error={errors.FocalLength} items={[]} editable={true}
                                 type={"Text"} zIndex={0} />
 
                     <InputField placeholder="Flash" onChangeText={(text) => onExifFieldChange("Flash", text)}
-                                value={exif?.Flash ?? ''} items={["Yes", "No"]} zIndex={10} editable={false}
-                                errors={[]} type={"Text"} />
+                                value={exif.Flash ?? ''} items={["Yes", "No"]} zIndex={10} editable={false}
+                                error={errors.Flash} type={"Dropdown"} />
 
                     <InputField placeholder="FNumber" onChangeText={(text) => onExifFieldChange("FNumber", text)}
-                                value={exif?.FNumber ?? ''} errors={[]} items={[]} editable={true}
+                                value={exif.FNumber ?? ''} error={errors.FNumber} items={[]} editable={true}
                                 type={"Text"} zIndex={0} />
 
                     <InputField placeholder="ISO Speed" onChangeText={(text) => onExifFieldChange("ISOSpeedRatings", text)}
-                                value={exif?.ISOSpeedRatings ?? ''} errors={[]} items={[]} editable={true}
+                                value={exif.ISOSpeedRatings ?? ''} error={errors.ISOSpeedRatings} items={[]} editable={true}
                                 type={"Text"} zIndex={0} />
 
                     <InputField placeholder="Shutter Speed" onChangeText={(text) => onExifFieldChange("ShutterSpeedValue", text)}
-                                value={exif?.ShutterSpeedValue ?? ''} errors={[]} items={[]} editable={true}
+                                value={exif.ShutterSpeedValue ?? ''} error={errors.ShutterSpeedValue} items={[]} editable={true}
                                 type={"Text"} zIndex={0} />
 
                     <Pressable onPress={onFormSubmit} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,

@@ -11,6 +11,11 @@ export interface ExifData {
     ShutterSpeedValue?: string
 }
 
+export type ExifDataError = Record<keyof ExifData, string | undefined>
+
+type ExifFieldProperty = { editable: boolean, type: "Dropdown" | "Text", zIndex: number }
+export type ExifField = { [K in keyof ExifData]?: ExifFieldProperty }
+
 export type TimePeriodValue = "today" | "this_week" | "this_month" | "this_year";
 
 export interface Photo {
