@@ -90,7 +90,6 @@ export default function TabLayout() {
                 </Tabs>
                 { showUploadScreen && <PhotoUpload setShowUpload={setShowUploadScreen} /> }
             </View>
-
         </View>
     );
 }

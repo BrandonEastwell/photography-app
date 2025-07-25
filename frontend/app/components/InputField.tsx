@@ -3,7 +3,7 @@ import React, {ChangeEvent, useState} from "react";
 import ScrollView = Animated.ScrollView;
 
 
-export default function MultiSelectInput({ placeholder, onChangeText, value, errors, items, editable, type, zIndex } : {
+export default function InputField({ placeholder, onChangeText, value, errors, items, editable, type, zIndex } : {
     placeholder: string,
     onChangeText: (e: string | ChangeEvent<any>) => void,
     value: any,
@@ -29,7 +29,14 @@ export default function MultiSelectInput({ placeholder, onChangeText, value, err
 
     return (
         <View style={{ position: "relative", zIndex: zIndex, marginBottom: 20 }}>
-            <View style={styles.inputContainer}>
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                width: '100%',
+                height: 40,
+                backgroundColor: 'rgb(227,227,227)',
+                borderRadius: 6
+            }}>
                 <View style={{ paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%' }}>
                     { type === "Dropdown" &&
                         <TextInput
@@ -70,15 +77,6 @@ export default function MultiSelectInput({ placeholder, onChangeText, value, err
 }
 
 const styles = StyleSheet.create({
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '100%',
-        height: 40,
-        backgroundColor: 'rgb(227,227,227)',
-        borderRadius: 6,
-        paddingHorizontal: 10
-    },
     input: {
         flex: 1,
         height: '100%',

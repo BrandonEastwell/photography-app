@@ -1,23 +1,22 @@
 import {Pressable, Text, View} from "react-native";
 import LocationInput from "@/app/components/LocationInput";
-import ExifInputField from "@/app/components/ExifInputField";
 import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
 import * as yup from "yup";
-import {ExifData, ExifDataErrors} from "@/app/lib/Types";
-import MultiSelectInput from "@/app/components/MultiSelectInput";
+import {ExifData} from "@/app/lib/Types";
+import InputField from "@/app/components/InputField";
 import Constants from "expo-constants";
 import AntDesign from "@expo/vector-icons/AntDesign";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 const exifSchema = yup.object().shape({
-    Make: yup.string(),
-    Model: yup.string(),
-    LensModel: yup.string(),
-    FocalLength: yup.string(),
+    Make: yup.string().typeError("Must be a string"),
+    Model: yup.string().typeError("Must be a string"),
+    LensModel: yup.string().typeError("Must be a string"),
+    FocalLength: yup.number().typeError("Must be a number"),
     Flash: yup.string(),
-    FNumber: yup.string(),
-    ISOSpeedRatings: yup.string(),
-    ShutterSpeedValue: yup.string()
+    FNumber: yup.number().typeError("Must be a number"),
+    ISOSpeedRatings: yup.number().typeError("Must be a number"),
+    ShutterSpeedValue: yup.number().typeError("Must be a number")
 });
 
 export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } : {
@@ -27,7 +26,7 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
     onClose: () => void;
     formMode: "Filtering" | "Photo"
 }) {
-    const [errors, setErrors] = useState<ExifDataErrors | undefined>(undefined);
+    const [errors, setErrors] = useState<ExifData>({});
     const [cameraMakes, setCameraMakes] = useState<string[] | null>(null)
     const [cameraModels, setCameraModels] = useState<string[] | null>(null)
 
@@ -68,6 +67,12 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
     const onExifFieldChange = async (field: string, value: string | React.ChangeEvent<any>) => {
         setExif(prevState => ({...prevState, [field]: value !== "" ? value : undefined}))
         value !== "" && await validateField(field, value)
+
+        const errorsArray = Object.entries(errors).map(([key, value]) => {
+            if (value !== undefined) return [key, value]
+        })
+
+        console.log(errorsArray)
     }
 
     const onFormSubmit = async () => {
@@ -80,61 +85,59 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
     }
 
     return (
-        <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: 'rgba(12,12,12,0.90)', justifyContent: "center", zIndex: 100 }}>
-            <View style={{ width: "100%", height: "100%", maxWidth: 430, padding: 30, flexDirection: "column", justifyContent: "center", marginHorizontal: "auto" }}>
-                <View style={{ marginBottom: 20 }}>
-                    <View style={{ padding: 7.5, borderRadius: 15, flexDirection: "row", gap: 10, zIndex: 100, width: "100%",
-                        justifyContent: "flex-end" }}>
-                        <AntDesign onPress={onClose} name="close" size={24} color="white" />
+        cameraMakes && cameraModels && (
+            <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: 'rgba(12,12,12,0.90)', justifyContent: "center", zIndex: 100 }}>
+                <View style={{ width: "100%", height: "100%", maxWidth: 430, padding: 30, flexDirection: "column", justifyContent: "center", marginHorizontal: "auto" }}>
+                    <View style={{ marginBottom: 20 }}>
+                        <View style={{ padding: 7.5, borderRadius: 15, flexDirection: "row", gap: 10, zIndex: 100, width: "100%", justifyContent: "flex-end" }}>
+                            <AntDesign onPress={onClose} name="close" size={24} color="white" />
+                        </View>
+                        <Text style={{ fontSize: 24, marginBottom: 10, fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)'}}>
+                            { formMode === "Photo" ? "Add Missing Attributes" : "Search Filters" }</Text>
+                        { formMode == "Photo" && <Text style={{ fontSize: 16, fontFamily: "SpaceMono-Regular",
+                            color: 'rgba(229,229,229,0.97)'}}>These attributes help your photo appear in more search results.</Text> }
                     </View>
-                    <Text style={{ fontSize: 24, marginBottom: 10, fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)'}}>
-                        { formMode === "Photo" ? "Add Missing Attributes" : "Search by Filters" }</Text>
-                    { formMode == "Photo" && <Text style={{ fontSize: 16, fontFamily: "SpaceMono-Regular",
-                        color: 'rgba(229,229,229,0.97)'}}>These attributes help your photo appear in more search results.</Text> }
+
+                    <LocationInput setExif={setExif}></LocationInput>
+
+                    <InputField placeholder="Camera Make" onChangeText={(text) => onExifFieldChange("Make", text)}
+                                value={exif?.Make ?? ''} items={cameraMakes} zIndex={20} editable={true}
+                                errors={[]} type={"Dropdown"} />
+
+                    <InputField placeholder="Camera Model" onChangeText={(text) => onExifFieldChange("Model", text)}
+                                value={exif?.Model ?? ''} items={cameraModels} zIndex={10} editable={true}
+                                errors={[]} type={"Dropdown"} />
+
+                    <InputField placeholder="Lens Model" onChangeText={(text) => onExifFieldChange("LensModel", text)}
+                                value={exif?.LensModel ?? ''} errors={[]} items={[]} editable={true}
+                                type={"Text"} zIndex={0} />
+
+                    <InputField placeholder="Focal Length" onChangeText={(text) => onExifFieldChange("FocalLength", text)}
+                                value={exif?.FocalLength ?? ''} errors={[]} items={[]} editable={true}
+                                type={"Text"} zIndex={0} />
+
+                    <InputField placeholder="Flash" onChangeText={(text) => onExifFieldChange("Flash", text)}
+                                value={exif?.Flash ?? ''} items={["Yes", "No"]} zIndex={10} editable={false}
+                                errors={[]} type={"Text"} />
+
+                    <InputField placeholder="FNumber" onChangeText={(text) => onExifFieldChange("FNumber", text)}
+                                value={exif?.FNumber ?? ''} errors={[]} items={[]} editable={true}
+                                type={"Text"} zIndex={0} />
+
+                    <InputField placeholder="ISO Speed" onChangeText={(text) => onExifFieldChange("ISOSpeedRatings", text)}
+                                value={exif?.ISOSpeedRatings ?? ''} errors={[]} items={[]} editable={true}
+                                type={"Text"} zIndex={0} />
+
+                    <InputField placeholder="Shutter Speed" onChangeText={(text) => onExifFieldChange("ShutterSpeedValue", text)}
+                                value={exif?.ShutterSpeedValue ?? ''} errors={[]} items={[]} editable={true}
+                                type={"Text"} zIndex={0} />
+
+                    <Pressable onPress={onFormSubmit} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
+                        borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
+                        <Text style={{ color: 'black' }}>{ formMode === "Photo" ? "Preview Photo" : "Search Photos" }</Text>
+                    </Pressable>
                 </View>
-
-
-                <LocationInput setExif={setExif}></LocationInput>
-
-                { cameraMakes && <MultiSelectInput placeholder="Camera Make"
-                                                   onChangeText={(text) => onExifFieldChange("Make", text)}
-                                                   value={exif?.Make ?? ''} error={errors?.Make}
-                                                   items={cameraMakes} zIndex={20} editable={true} /> }
-
-                { cameraModels && <MultiSelectInput placeholder="Camera Model"
-                                                    onChangeText={(text) => onExifFieldChange("Model", text)}
-                                                    value={exif?.Model ?? ''} error={errors?.Model}
-                                                    items={cameraModels} zIndex={10} editable={true} /> }
-
-                <ExifInputField placeholder="Lens Model" onChangeText={(text) => onExifFieldChange("LensModel", text)}
-                                value={exif?.LensModel ?? ''}
-                                error={errors?.LensModel} />
-
-                <ExifInputField placeholder="Focal Length" onChangeText={(text) => onExifFieldChange("FocalLength", text)}
-                                value={exif?.FocalLength ?? ''}
-                                error={errors?.FocalLength} />
-
-                <MultiSelectInput placeholder="Flash" onChangeText={(text) => onExifFieldChange("Flash", text)}
-                                  value={exif?.Flash ?? ''} error={errors?.Flash}
-                                  items={["Yes", "No"]} zIndex={10} editable={false} />
-
-                <ExifInputField placeholder="FNumber" onChangeText={(text) => onExifFieldChange("FNumber", text)}
-                                value={exif?.FNumber ?? ''}
-                                error={errors?.FNumber} />
-
-                <ExifInputField placeholder="ISO Speed" onChangeText={(text) => onExifFieldChange("ISOSpeedRatings", text)}
-                                value={exif?.ISOSpeedRatings ?? ''}
-                                error={errors?.ISOSpeedRatings} />
-
-                <ExifInputField placeholder="Shutter Speed" onChangeText={(text) => onExifFieldChange("ShutterSpeedValue", text)}
-                                value={exif?.ShutterSpeedValue ?? ''}
-                                error={errors?.ShutterSpeedValue} />
-
-                <Pressable onPress={onFormSubmit} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
-                    borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
-                    <Text style={{ color: 'black' }}>{ formMode === "Photo" ? "Preview Photo" : "Search Photos" }</Text>
-                </Pressable>
             </View>
-        </View>
+        )
     )
 }

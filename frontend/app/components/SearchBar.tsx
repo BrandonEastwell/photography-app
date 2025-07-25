@@ -3,6 +3,7 @@ import React, {useState} from "react";
 import {ExifData, TimePeriodValue} from "@/app/lib/Types";
 import * as Location from "expo-location";
 import ExifForm from "@/app/components/ExifForm";
+import PhotoModal from "@/app/components/PhotoModal";
 
 const labelToValueMap: Record<string, TimePeriodValue> = {
     "Today": "today",
@@ -73,7 +74,11 @@ export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData | n
                     </View>
                 </View>
             </View>
-            { showExifForm && <ExifForm setExif={setExif} exif={exif} onSubmit={applyFilter} formMode={"Filtering"} onClose={() => setShowExifForm(false)} /> }
+            { showExifForm &&
+                <PhotoModal>
+                    <ExifForm setExif={setExif} exif={exif} onSubmit={applyFilter} formMode={"Filtering"} onClose={() => setShowExifForm(false)} />
+                </PhotoModal>
+            }
         </>
     );
 }

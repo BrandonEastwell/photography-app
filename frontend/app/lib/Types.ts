@@ -11,19 +11,6 @@ export interface ExifData {
     ShutterSpeedValue?: string
 }
 
-export interface ExifDataErrors {
-    Make?: string
-    Model?: string
-    LensModel?: string
-    FocalLength?: number
-    Flash?: "Yes" | "No"
-    FNumber?: number
-    GPSLatitude?: string
-    GPSLongitude?: string
-    ISOSpeedRatings?: number
-    ShutterSpeedValue?: number
-}
-
 export type TimePeriodValue = "today" | "this_week" | "this_month" | "this_year";
 
 export interface Photo {
