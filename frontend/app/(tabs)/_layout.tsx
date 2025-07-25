@@ -5,11 +5,12 @@ import PhotoUpload from '../components/PhotoUpload'
 import {Pressable, View} from "react-native";
 import {Entypo} from "@expo/vector-icons";
 import useUpload from "@/app/lib/useUpload";
-import React from "react";
+import React, {useState} from "react";
 import HeaderBar from "@/app/components/HeaderBar";
 import {useAuth} from "@/app/lib/AuthContext";
 
 export default function TabLayout() {
+    const [containerWidth, setContainerWidth] = useState(0);
     const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload();
     const { user, isAuthenticated } = useAuth();
     const router = useRouter();
@@ -34,11 +35,12 @@ export default function TabLayout() {
 
     return (
         <View style={{ flex: 1, backgroundColor: '#181a1b', width: "100%", alignItems: "center" }}>
-            <View style={{ flex: 1, maxWidth: 800, width: "100%", overflow: "hidden" }}>
-                <View style={{ position: "absolute", backgroundColor: "black", height: 200, width: 200, minWidth: 200 }}>
-
-                </View>
-                <HeaderBar />
+            <View style={{ flex: 1, maxWidth: 800, width: "100%" }}
+                  onLayout={(event) => {
+                      const { width } = event.nativeEvent.layout;
+                      setContainerWidth(width);
+                  }}>
+                <HeaderBar containerWidth={containerWidth} />
                 <Tabs
                     screenOptions={{
                         tabBarActiveTintColor: '#ffffff',

@@ -1,6 +1,5 @@
-import {Animated, View, Text, FlatList} from "react-native";
+import {View, Text, FlatList} from "react-native";
 import React, {useEffect, useState} from "react";
-import ScrollView = Animated.ScrollView;
 import Constants from 'expo-constants';
 import SearchBar from "@/app/components/SearchBar";
 import {ExifData, Photo, TimePeriodValue} from "@/app/lib/Types";
@@ -8,7 +7,7 @@ import PhotoCard from "@/app/components/PhotoCard";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Index() {
-    const [images, setimages] = useState<Photo[]>([])
+    const [images, setImages] = useState<Photo[]>([])
     const [message, setMessage] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
 
@@ -40,7 +39,7 @@ export default function Index() {
         const data = await res.json()
         if (!data.success) return setError(data.error)
 
-        setimages(data.results)
+        setImages(data.results)
         data.message ? setMessage(data.message) : setMessage(null)
         setError(null)
     }
@@ -58,9 +57,16 @@ export default function Index() {
     return (
         <View style={{position: "relative",  height: "100%", width: "100%", backgroundColor: "#181a1b" }}>
             <SearchBar onSearch={(exif: ExifData | null, sort_by_time: TimePeriodValue) => searchPhotos(exif, sort_by_time)} />
-            { message && <Text style={{ color: "white", fontSize: 12, padding: 15, fontFamily: "SpaceMono-Regular" , flexDirection: "row", flexWrap: "wrap" }}>{message}</Text> }
-            { error && <Text style={{ color: "red", fontSize: 12, padding: 15, fontFamily: "SpaceMono-Regular" , flexDirection: "row", flexWrap: "wrap" }}>{error}</Text> }
-            { images && <FlatList numColumns={3} keyExtractor={item => item.image_url} data={images} renderItem={(photo) => <Item photo={photo.item} />} /> }
+            { message &&
+                <Text style={{ color: "white", fontSize: 12, padding: 15, fontFamily: "SpaceMono-Regular",
+                    flexDirection: "row", flexWrap: "wrap" }}>{message}</Text> }
+            { error &&
+                <Text style={{ color: "red", fontSize: 12, padding: 15, fontFamily: "SpaceMono-Regular",
+                    flexDirection: "row", flexWrap: "wrap" }}>{error}</Text> }
+            { images &&
+                <FlatList columnWrapperStyle={{ justifyContent: 'space-evenly' }}
+                          numColumns={3} keyExtractor={item => item.image_url} data={images}
+                          renderItem={(photo) => <Item photo={photo.item} />} /> }
         </View>
     );
 }
