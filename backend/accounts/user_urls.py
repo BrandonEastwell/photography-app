@@ -4,7 +4,7 @@ from .views.user_views import get_user_camera, get_user_lens, get_user_with_user
 
 urlpatterns = [
     #path('photos', get_user_photos),
-    path('username/<string:username>', get_user_with_username),
+    path('username/<str:username>', get_user_with_username),
     path('id/<int:user_id>', get_user_with_id),
     path('camera', get_user_camera),
     path('lens', get_user_lens)

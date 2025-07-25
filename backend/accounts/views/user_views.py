@@ -50,11 +50,11 @@ def get_user_with_username(req, username):
         return HttpResponseNotAllowed(["GET"])
 
     try:
-        user_id = User.objects.get(username=username)
+        user = User.objects.only("id").get(username=username)
     except User.DoesNotExist:
         return JsonResponse( { "success": False, "error": "User does not exist." }, status=404)
 
-    return get_user_profile(user_id)
+    return get_user_profile(user.id)
 
 def get_user_with_id(req, user_id):
     if req.method != "GET":
