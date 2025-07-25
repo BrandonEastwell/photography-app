@@ -3,8 +3,17 @@ import React, {ChangeEvent, useState} from "react";
 import ScrollView = Animated.ScrollView;
 
 
-export default function MultiSelectInput({ placeholder, onChangeText, value, error, items, editable, zIndex } : { placeholder: string,
-    onChangeText: (e: string | ChangeEvent<any>) => void, value: any, error: string | undefined, items: string[], editable: boolean, zIndex: number}) {
+export default function MultiSelectInput({ placeholder, onChangeText, value, errors, items, editable, type, zIndex } : {
+    placeholder: string,
+    onChangeText: (e: string | ChangeEvent<any>) => void,
+    value: any,
+    errors: string[],
+    items: string[],
+    editable: boolean,
+    type: "Dropdown" | "Text"
+    zIndex: number
+}) {
+
     const [showOptions, setShowOptions] = useState<boolean>(false)
     const [options, setOptions] = useState<string[]>(items)
 
@@ -19,18 +28,29 @@ export default function MultiSelectInput({ placeholder, onChangeText, value, err
     }
 
     return (
-        <View style={{ position: "relative", zIndex: zIndex }}>
+        <View style={{ position: "relative", zIndex: zIndex, marginBottom: 20 }}>
             <View style={styles.inputContainer}>
                 <View style={{ paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%' }}>
-                    <TextInput
-                        editable={editable}
-                        onFocus={() => setShowOptions(true)}
-                        onBlur={() => setTimeout(() => setShowOptions(false), 50)} // delay hiding
-                        style={styles.input}
-                        placeholder={placeholder}
-                        onChangeText={onChange}
-                        value={value}
-                    />
+                    { type === "Dropdown" &&
+                        <TextInput
+                            editable={editable}
+                            onFocus={() => setShowOptions(true)}
+                            onBlur={() => setTimeout(() => setShowOptions(false), 50)} // delay hiding
+                            style={styles.input}
+                            placeholder={placeholder}
+                            onChangeText={onChange}
+                            value={value}
+                        />
+                    }
+                    { type === "Text" &&
+                        <TextInput
+                            editable={editable}
+                            style={styles.input}
+                            placeholder={placeholder}
+                            onChangeText={onChangeText}
+                            value={value}
+                        />
+                    }
                 </View>
             </View>
             { showOptions &&
@@ -43,24 +63,21 @@ export default function MultiSelectInput({ placeholder, onChangeText, value, err
                                 color: "white"}}>{ option }</Text>
                         </Pressable>
                     ))}
-                </ScrollView> }
-            {error && (
-                <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
-            )}
+                </ScrollView>
+            }
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     inputContainer: {
-        flexDirection: 'column',
+        flexDirection: 'row',
         alignItems: 'center',
         width: '100%',
-        height: 'auto',
-        minHeight: 40,
+        height: 40,
         backgroundColor: 'rgb(227,227,227)',
         borderRadius: 6,
-        marginBottom: 15
+        paddingHorizontal: 10
     },
     input: {
         flex: 1,
