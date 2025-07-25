@@ -34,7 +34,7 @@ export default function PhotoCardContent({ children, onClose, photoSrc, exif, pr
     return (
         <View style={{ flexDirection: "column", backgroundColor: "#181a1b", borderRadius: 15, maxWidth: 340, height: "auto" }}>
             <View style={{ padding: 10, borderRadius: 15, flexDirection: "row", zIndex: 100, width: "100%", justifyContent: "space-between"}}>
-                <View>
+                <>
                     { profile && !isUserPhoto &&
                         <Pressable onPress={navigateToProfile} style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
                             <View style={{ width: 28, height: 28, aspectRatio: 1, borderRadius: 9999, backgroundColor: "white" }}>
@@ -50,7 +50,7 @@ export default function PhotoCardContent({ children, onClose, photoSrc, exif, pr
                             <MaterialCommunityIcons name="delete-outline" size={24} color="white" />
                         </Pressable>
                     }
-                </View>
+                </>
                 <AntDesign style={{ alignSelf: "center" }} onPress={() => onClose(false)} name="close" size={20} color="white" />
             </View>
             <Image style={{ width: 340, height: 400 }} source={photoSrc}></Image>
