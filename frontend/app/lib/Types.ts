@@ -13,8 +13,8 @@ export interface ExifData {
 
 export type ExifDataError = Record<keyof ExifData, string | undefined>
 
-type ExifFieldProperty = { editable: boolean, type: "Dropdown" | "Text", zIndex: number }
-export type ExifField = { [K in keyof ExifData]?: ExifFieldProperty }
+export type ExifFieldProperties = { editable: boolean, type: "Dropdown" | "Text", zIndex: number, items: string[], placeholder: string }
+export type ExifFields = { [K in keyof ExifData]?: ExifFieldProperties }
 
 export type TimePeriodValue = "today" | "this_week" | "this_month" | "this_year";
 

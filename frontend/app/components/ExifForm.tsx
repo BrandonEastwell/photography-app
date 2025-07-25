@@ -2,7 +2,7 @@ import {Pressable, Text, View} from "react-native";
 import LocationInput from "@/app/components/LocationInput";
 import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
 import * as yup from "yup";
-import {ExifData, ExifDataError, ExifField} from "@/app/lib/Types";
+import {ExifData, ExifDataError, ExifFieldProperties, ExifFields} from "@/app/lib/Types";
 import InputField from "@/app/components/InputField";
 import Constants from "expo-constants";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -32,15 +32,15 @@ const defaultExifDataError: ExifDataError = {
     ShutterSpeedValue: undefined,
 };
 
-const exifFormFields: ExifField = {
-    Make: { editable: true, type: "Dropdown", zIndex: 10 },
-    Model: { editable: true, type: "Dropdown", zIndex: 20 },
-    LensModel: { editable: true, type: "Text", zIndex: 0 },
-    FocalLength: {editable: true, type: "Text", zIndex: 0 },
-    Flash: { editable: false,  type: "Dropdown",  zIndex: 10 },
-    FNumber: { editable: true,  type: "Text",  zIndex: 0 },
-    ISOSpeedRatings: { editable: true,  type: "Text",  zIndex: 0 },
-    ShutterSpeedValue: { editable: true,  type: "Text",  zIndex: 0 },
+const initExifFormFields: ExifFields = {
+    Make: { editable: true, type: "Dropdown", zIndex: 10, items: [], placeholder: "Camera Make" },
+    Model: { editable: true, type: "Dropdown", zIndex: 20, items: [], placeholder: "Camera Model" },
+    LensModel: { editable: true, type: "Text", zIndex: 0, items: [], placeholder: "Lens" },
+    FocalLength: {editable: true, type: "Text", zIndex: 0, items: [], placeholder: "Focal Length" },
+    Flash: { editable: false,  type: "Dropdown",  zIndex: 10 , items: ["Yes", "No"], placeholder: "Flash" },
+    FNumber: { editable: true,  type: "Text",  zIndex: 0, items: [], placeholder: "FNumber" },
+    ISOSpeedRatings: { editable: true,  type: "Text",  zIndex: 0, items: [], placeholder: "ISO Speed" },
+    ShutterSpeedValue: { editable: true,  type: "Text",  zIndex: 0, items: [], placeholder: "Shutter Speed" },
 }
 
 export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } : {
@@ -51,8 +51,7 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
     formMode: "Filtering" | "Photo"
 }) {
     const [errors, setErrors] = useState<ExifDataError>(defaultExifDataError);
-    const [cameraMakes, setCameraMakes] = useState<string[] | null>(null)
-    const [cameraModels, setCameraModels] = useState<string[] | null>(null)
+    const [exifFormFields, setExifFormFields] = useState<ExifFields>(initExifFormFields);
 
     useEffect(() => {
         const getCameras = async () => {
@@ -64,10 +63,15 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
             if (data.items && data.items > 0) {
                 const filtered = data.results.filter((item: { model: string; make: string; }) =>
                     item.model !== "undefined" && item.make !== "undefined")
+
                 const cameraMakes = filtered.map((camera: { make: string; }) => camera.make)
                 const cameraModels = filtered.map((camera: { model: string; }) => camera.model)
-                setCameraMakes(Array.from(new Set<string>(cameraMakes)))
-                setCameraModels(Array.from(new Set<string>(cameraModels)))
+
+                setExifFormFields(prev => ({
+                    ...prev,
+                    Make: { ...prev.Make, items: Array.from(new Set<string>(cameraMakes)) } as ExifFieldProperties,
+                    Model: { ...prev.Model, items: Array.from(new Set<string>(cameraModels)) } as ExifFieldProperties,
+                }))
             }
         }
 
@@ -93,7 +97,6 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
         value !== "" && await validateField(field, value)
 
         const firstError = Object.entries(errors).find(([field, error]) => error !== undefined)
-
     }
 
     const onFormSubmit = async () => {
@@ -106,7 +109,7 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
     }
 
     return (
-        cameraMakes && cameraModels && (
+        exifFormFields.Make?.items && exifFormFields.Model?.items && (
             <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: 'rgba(12,12,12,0.90)', justifyContent: "center", zIndex: 100 }}>
                 <View style={{ width: "100%", height: "100%", maxWidth: 430, padding: 30, flexDirection: "column", justifyContent: "center", marginHorizontal: "auto" }}>
                     <View style={{ marginBottom: 20 }}>
@@ -121,34 +124,15 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
 
                     <LocationInput setExif={setExif}></LocationInput>
 
-
-                    <InputField placeholder="Camera Model" onChangeText={(text) => onExifFieldChange("Model", text)}
-                                value={exif.Model ?? ''} items={cameraModels} zIndex={10} editable={true}
-                                error={errors.Model} type={"Dropdown"} />
-
-                    <InputField placeholder="Lens Model" onChangeText={(text) => onExifFieldChange("LensModel", text)}
-                                value={exif.LensModel ?? ''} error={errors.LensModel} items={[]} editable={true}
-                                type={"Text"} zIndex={0} />
-
-                    <InputField placeholder="Focal Length" onChangeText={(text) => onExifFieldChange("FocalLength", text)}
-                                value={exif.FocalLength ?? ''} error={errors.FocalLength} items={[]} editable={true}
-                                type={"Text"} zIndex={0} />
-
-                    <InputField placeholder="Flash" onChangeText={(text) => onExifFieldChange("Flash", text)}
-                                value={exif.Flash ?? ''} items={["Yes", "No"]} zIndex={10} editable={false}
-                                error={errors.Flash} type={"Dropdown"} />
-
-                    <InputField placeholder="FNumber" onChangeText={(text) => onExifFieldChange("FNumber", text)}
-                                value={exif.FNumber ?? ''} error={errors.FNumber} items={[]} editable={true}
-                                type={"Text"} zIndex={0} />
-
-                    <InputField placeholder="ISO Speed" onChangeText={(text) => onExifFieldChange("ISOSpeedRatings", text)}
-                                value={exif.ISOSpeedRatings ?? ''} error={errors.ISOSpeedRatings} items={[]} editable={true}
-                                type={"Text"} zIndex={0} />
-
-                    <InputField placeholder="Shutter Speed" onChangeText={(text) => onExifFieldChange("ShutterSpeedValue", text)}
-                                value={exif.ShutterSpeedValue ?? ''} error={errors.ShutterSpeedValue} items={[]} editable={true}
-                                type={"Text"} zIndex={0} />
+                    { Object.entries(exif).map(([field, value]) => (
+                        <InputField placeholder="Camera Make" onChangeText={(text) => onExifFieldChange(field as keyof ExifData, text)}
+                                    value={value ?? ''}
+                                    items={exifFormFields[field as keyof ExifData]?.items ?? []}
+                                    zIndex={exifFormFields[field as keyof ExifData]?.zIndex ?? 0}
+                                    editable={exifFormFields[field as keyof ExifData]?.editable ?? true}
+                                    error={errors[field as keyof ExifData]}
+                                    type={exifFormFields[field as keyof ExifData]?.type ?? "Text"} />
+                    ))}
 
                     <Pressable onPress={onFormSubmit} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
                         borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
