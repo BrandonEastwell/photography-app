@@ -46,8 +46,8 @@ export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData | n
 
     return (
         <>
-            <View style={{ position: "relative", zIndex: 100, flexDirection: "column" }}>
-                <View style={{ position: "relative", zIndex: 100, padding: 15, flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+            <View style={{ position: "relative", zIndex: 100, flexDirection: "column", paddingHorizontal: 15, paddingVertical: 10 }}>
+                <View style={{ position: "relative", zIndex: 100, flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
                     <View style={{ position: "relative", zIndex: 100 }}>
                         <TextInput value={valueToLabelMap[timePeriod]} onFocus={() => setShowOptions(true)} onBlur={() => setTimeout(() => setShowOptions(false), 50)}
                                    style={{ maxWidth: 120, fontFamily: "SpaceMono-Regular", color: "white", fontSize: 16, padding: 10,
@@ -63,14 +63,16 @@ export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData | n
                                 ))}
                             </View> }
                     </View>
-                    <Pressable onPress={getCurrentLocation} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 15,
-                        borderRadius: 15, flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
-                        <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 12, color: 'black' }}>Use current location</Text>
-                    </Pressable>
-                    <Pressable onPress={() => setShowExifForm(true)} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 15,
-                        borderRadius: 15, flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
-                        <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 12, color: 'black' }}>Filters</Text>
-                    </Pressable>
+                    <View style={{ flexDirection: "row", gap: 10 }}>
+                        <Pressable onPress={getCurrentLocation} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 15,
+                            borderRadius: 15, flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
+                            <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 12, color: 'black' }}>Use current location</Text>
+                        </Pressable>
+                        <Pressable onPress={() => setShowExifForm(true)} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 15,
+                            borderRadius: 15, flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
+                            <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 12, color: 'black' }}>Filters</Text>
+                        </Pressable>
+                    </View>
                 </View>
             </View>
             { showExifForm && <ExifForm setExif={setExif} exif={exif} onSubmit={applyFilter} formMode={"Filtering"} onClose={() => setShowExifForm(false)} /> }

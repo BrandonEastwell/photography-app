@@ -16,7 +16,7 @@ export default function Username() {
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [error, setError] = useState(null)
     const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload()
-    const { username, userId } = useLocalSearchParams();
+    const { username } = useLocalSearchParams();
 
     useEffect(() => {
         const onLoad = async () => {
@@ -26,7 +26,7 @@ export default function Username() {
                 if (!isAuthRefreshed) return router.push("/auth/login")
             }
 
-            const res = await fetch(`${apiUrl}/api/users/${userId}`, {
+            const res = await fetch(`${apiUrl}/api/users/username/${username}`, {
                 method: "GET",
                 headers: {
                     "Platform": Platform.OS
@@ -44,30 +44,28 @@ export default function Username() {
         onLoad()
     }, []);
 
-    const Item = ({ photo }: { photo: Photo }) => (
-        <PhotoCard photo={photo} />
-    )
+    const Item = ({ photo }: { photo: Photo }) => <PhotoCard photo={photo} />
 
     return (
         <View style={{ width: '100%', height: "100%", backgroundColor: "#181a1b", alignItems: "center" }}>
             { profile &&
-                <View style={{ position: "relative", maxWidth: 600, width: '100%', height: "100%", justifyContent: "center" }}>
-                    <View style={{ flexDirection: "row", maxHeight: 200, minHeight: 150, width: '100%', gap: 10, padding: 30, borderBottomWidth: 1, borderColor: "white" }}>
+                <View style={{ position: "relative", width: '100%', height: "100%" }}>
+                    <View style={{ flexDirection: "row", alignSelf: "center", maxHeight: 200, minHeight: 150, gap: 10, padding: 30 }}>
                         <View style={{ height: '100%', maxWidth: 128, maxHeight: 128, aspectRatio: 1, borderRadius: 9999, backgroundColor: "white"}}>
                             { profile.image && <Image source={ profile.image } style={{  }} /> }
                         </View>
                         <View style={{ flex: 2, flexDirection: "column", padding: 10 }}>
-                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 16, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.username }</Text>
+                            <Text style={{ fontSize: 12, color: 'white', opacity: 0.5, fontFamily: "SpaceMono-Regular" }}>Portfolio</Text>
+                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 24, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.username }</Text>
                             <Text style={{ flex: 1, flexShrink: 1, fontSize: 12, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.firstName + ' ' +profile.lastName }</Text>
-                            <View style={{ flex: 3, flexDirection: "row", flexWrap: "wrap", marginTop: 5, height: 'auto' }}>
-                                { profile.description && <Text style={{ fontSize: 12, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.description }</Text> }
-                                { !profile.description && <Text style={{ fontSize: 12, color: 'white', opacity: 0.5, fontFamily: "SpaceMono-Regular" }}>Add a description</Text> }
-                            </View>
                         </View>
                     </View>
 
+                    <View style={{ width: "100%", borderBottomWidth: 1, borderColor: "white" }}></View>
+
                     { photos &&
-                        <FlatList numColumns={3} keyExtractor={item => item.image_url} data={photos} renderItem={(photo) => <Item photo={photo.item} />} />
+                        <FlatList columnWrapperStyle={{ justifyContent: 'space-evenly' }}
+                                  numColumns={3} keyExtractor={item => item.image_url} data={photos} renderItem={(photo) => <Item photo={photo.item} />} />
                     }
 
                     { !photos &&

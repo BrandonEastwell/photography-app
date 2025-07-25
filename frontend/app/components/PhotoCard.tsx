@@ -62,7 +62,7 @@ export default function PhotoCard({ photo } : {
         if (!photo.user_id) return
 
         try {
-            const res = await fetch(`${apiUrl}/api/users/${photo.user_id}`, {
+            const res = await fetch(`${apiUrl}/api/users/id/${photo.user_id}`, {
                 method: "GET"
             })
 
