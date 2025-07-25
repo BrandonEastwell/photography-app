@@ -19,7 +19,7 @@ export default function PhotoTags(exif : { exif: ExifData  }) {
     const isExifEmpty = values.every((value) => value === undefined)
 
     return (
-        <View style={{ flexDirection: "row", gap: 10, justifyContent: "flex-start", alignItems: "center", flexWrap: "wrap" }}>
+        <View style={{ flexDirection: "row", gap: 10, justifyContent: "flex-start", alignItems: "center", flexWrap: "wrap", marginBottom: 20 }}>
             { !isExifEmpty && Object.entries(exifData).map(([key, value]) => {
                 if (value !== undefined && keyToLabelMap[key]) {
                     return (
@@ -46,6 +46,7 @@ export default function PhotoTags(exif : { exif: ExifData  }) {
             })}
             { isExifEmpty && <Text style={{
                 fontSize: 14,
+                width: "100%",
                 padding: 5,
                 fontFamily: "SpaceMono-Regular",
                 color: 'rgba(229,229,229,0.97)',

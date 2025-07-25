@@ -119,14 +119,12 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                 <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} onClose={() => setShowExifForm(false)} formMode={"Photo"} />
             }
             { imageUpload && !showExifForm &&
-                <PhotoCardContent onClose={setShowUpload} photoSrc={imageUpload.uri} exif={exif} profile={null}>
-                    <View style={{ flexDirection: "row", gap: 15, alignItems: "center", marginBottom: 30, justifyContent: "center" }}>
-                        <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: '#3091fc', padding: 10, paddingHorizontal: 20,
-                            borderRadius: 15, flexDirection: "row", alignItems: "center" }}>
+                <PhotoCardContent onClose={setShowUpload} photoSrc={imageUpload.uri} exif={exif} profile={null} userId={null}>
+                    <View style={{ flexDirection: "row", gap: 15, alignItems: "center", justifyContent: "center" }}>
+                        <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: '#3091fc', padding: 10, borderRadius: 15 }}>
                             <Text style={{ color: 'white', fontFamily: "SpaceMono-Regular" }}>Upload</Text>
                         </Pressable>
-                        <Pressable onPress={() => setShowExifForm(true)} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
-                            borderRadius: 15, flexDirection: "row", alignItems: "center" }}>
+                        <Pressable onPress={() => setShowExifForm(true)} style={{ backgroundColor: "#ffffff", padding: 10, borderRadius: 15 }}>
                             <Text style={{ color: 'black', fontFamily: "SpaceMono-Regular" }}>Go Back</Text>
                         </Pressable>
                     </View>
