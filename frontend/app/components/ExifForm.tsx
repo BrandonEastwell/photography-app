@@ -53,6 +53,7 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
     const [errors, setErrors] = useState<ExifDataError>(defaultExifDataError);
     const [exifFormFields, setExifFormFields] = useState<ExifFields>(initExifFormFields);
     const [currentErrorField, setCurrentErrorField] = useState<keyof ExifFields | null>(null);
+    const [loading, setLoading] = useState<boolean>(false)
 
     useEffect(() => {
         const getCameras = async () => {
@@ -74,6 +75,8 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
                     Model: { ...prev.Model, items: Array.from(new Set<string>(cameraModels)) } as ExifFieldProperties,
                 }))
             }
+
+            setLoading(true)
         }
 
         getCameras()
@@ -111,7 +114,7 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
     }
 
     return (
-        exifFormFields.Make?.items && exifFormFields.Model?.items && (
+        loading && (
             <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: 'rgba(12,12,12,0.90)', justifyContent: "center", zIndex: 100 }}>
                 <View style={{ width: "100%", height: "100%", maxWidth: 430, padding: 30, flexDirection: "column", justifyContent: "center", marginHorizontal: "auto" }}>
                     <View style={{ marginBottom: 20 }}>

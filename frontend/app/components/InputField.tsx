@@ -1,5 +1,5 @@
 import {Animated, Pressable, StyleSheet, Text, TextInput, View} from "react-native";
-import React, {ChangeEvent, useState} from "react";
+import React, {ChangeEvent, useEffect, useRef, useState} from "react";
 import ScrollView = Animated.ScrollView;
 
 
@@ -17,6 +17,7 @@ export default function InputField({ placeholder, onChangeText, value, error, it
 
     const [showOptions, setShowOptions] = useState<boolean>(false)
     const [options, setOptions] = useState<string[]>(items)
+    const borderColorAnimated = useRef(new Animated.Value(0)).current;
 
     const onChange = (text: string) => {
         if (editable) {
@@ -28,6 +29,32 @@ export default function InputField({ placeholder, onChangeText, value, error, it
         onChangeText(text)
     }
 
+    useEffect(() => {
+        if (error) fadeInOutline()
+        else fadeOutOutline()
+    }, [error]);
+
+    const fadeInOutline = () => {
+        Animated.timing(borderColorAnimated, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: false
+        }).start()
+    }
+
+    const fadeOutOutline = () => {
+        Animated.timing(borderColorAnimated, {
+            toValue: 0,
+            duration: 600,
+            useNativeDriver: false
+        }).start()
+    }
+
+    const borderColor = borderColorAnimated.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['rgba(255,0,0,0)', 'rgba(255,0,0,1)'],
+    });
+
     return (
         <View style={{ position: "relative", zIndex: zIndex, marginBottom: 20 }}>
             <View style={{
@@ -38,7 +65,7 @@ export default function InputField({ placeholder, onChangeText, value, error, it
                 backgroundColor: 'rgb(227,227,227)',
                 borderRadius: 6
             }}>
-                <View style={{ paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%' }}>
+                <Animated.View style={{ paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%', borderWidth: 1, borderColor }}>
                     { type === "Dropdown" &&
                         <TextInput
                             editable={editable}
@@ -59,7 +86,7 @@ export default function InputField({ placeholder, onChangeText, value, error, it
                             value={value}
                         />
                     }
-                </View>
+                </Animated.View>
             </View>
             { showOptions &&
                 <ScrollView style={{ position: "absolute", paddingTop: 10, maxHeight: 250, width: '100%', top: 40,
@@ -85,5 +112,6 @@ const styles = StyleSheet.create({
         flex: 1,
         height: '100%',
         fontFamily: "SpaceMono-Regular",
+        outlineWidth: 0
     }
 });
