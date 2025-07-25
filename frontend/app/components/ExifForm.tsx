@@ -44,7 +44,7 @@ const initExifFormFields: ExifFields = {
 }
 
 export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } : {
-    setExif: Dispatch<SetStateAction<ExifData | null>>;
+    setExif: Dispatch<SetStateAction<ExifData>>;
     exif: ExifData;
     onSubmit: () => void;
     onClose: () => void;
@@ -124,15 +124,18 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
 
                     <LocationInput setExif={setExif}></LocationInput>
 
-                    { Object.entries(exif).map(([field, value]) => (
-                        <InputField placeholder="Camera Make" onChangeText={(text) => onExifFieldChange(field as keyof ExifData, text)}
-                                    value={value ?? ''}
-                                    items={exifFormFields[field as keyof ExifData]?.items ?? []}
-                                    zIndex={exifFormFields[field as keyof ExifData]?.zIndex ?? 0}
-                                    editable={exifFormFields[field as keyof ExifData]?.editable ?? true}
-                                    error={errors[field as keyof ExifData]}
-                                    type={exifFormFields[field as keyof ExifData]?.type ?? "Text"} />
-                    ))}
+                    { Object.entries(exif).map(([field]) => {
+                        if (field in exifFormFields) {
+                            return <InputField placeholder={exifFormFields[field as keyof ExifData]?.placeholder ?? ""}
+                                        onChangeText={(text) => onExifFieldChange(field as keyof ExifData, text)}
+                                        value={exif[field as keyof ExifData] ?? ''}
+                                        items={exifFormFields[field as keyof ExifData]?.items ?? []}
+                                        zIndex={exifFormFields[field as keyof ExifData]?.zIndex ?? 0}
+                                        editable={exifFormFields[field as keyof ExifData]?.editable ?? true}
+                                        error={errors[field as keyof ExifData]}
+                                        type={exifFormFields[field as keyof ExifData]?.type ?? "Text"}/>
+                        }
+                    })}
 
                     <Pressable onPress={onFormSubmit} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
                         borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>

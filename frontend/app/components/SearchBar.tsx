@@ -21,8 +21,21 @@ const valueToLabelMap: Record<TimePeriodValue, string> = {
 
 const options: string[] = ["Today", "This Week", "This Month", "This Year"]
 
-export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData | null, sort_by_time: TimePeriodValue) => Promise<any> }) {
-    const [exif, setExif] = useState<ExifData | null>(null);
+const emptyExifData: ExifData = {
+    Make: undefined,
+    Model: undefined,
+    LensModel: undefined,
+    FocalLength: undefined,
+    Flash: undefined,
+    FNumber: undefined,
+    GPSLatitude: undefined,
+    GPSLongitude: undefined,
+    ISOSpeedRatings: undefined,
+    ShutterSpeedValue: undefined,
+};
+
+export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData, sort_by_time: TimePeriodValue) => Promise<any> }) {
+    const [exif, setExif] = useState<ExifData>(emptyExifData);
     const [timePeriod, setTimePeriod] = useState<TimePeriodValue>("this_week")
     const [showOptions, setShowOptions] = useState<boolean>(false)
     const [showExifForm, setShowExifForm] = useState<boolean>(false)

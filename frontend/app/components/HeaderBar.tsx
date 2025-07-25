@@ -1,4 +1,4 @@
-import {Animated, Easing, EasingFunction, Pressable, Text, View} from "react-native";
+import {Animated, Easing, Pressable, View} from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React, {useRef, useState} from "react";
 

@@ -12,9 +12,22 @@ import PhotoCardContent from "@/app/components/PhotoCardContent";
 import PhotoModal from "@/app/components/PhotoModal";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
+const emptyExifData: ExifData = {
+    Make: undefined,
+    Model: undefined,
+    LensModel: undefined,
+    FocalLength: undefined,
+    Flash: undefined,
+    FNumber: undefined,
+    GPSLatitude: undefined,
+    GPSLongitude: undefined,
+    ISOSpeedRatings: undefined,
+    ShutterSpeedValue: undefined,
+};
+
 export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatch<SetStateAction<boolean>> }) {
     const [imageUpload, setImageUpload] = useState<ImagePickerAsset | undefined>(undefined);
-    const [exif, setExif] = useState<ExifData | null>(null);
+    const [exif, setExif] = useState<ExifData>(emptyExifData);
     const [showExifForm, setShowExifForm] = useState<boolean>(false)
     const [error, setError] = useState<string | undefined>(undefined)
     const [message, setMessage] = useState<string | undefined>(undefined)
