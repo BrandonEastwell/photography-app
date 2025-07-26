@@ -1,21 +1,25 @@
 import {Tabs, useRouter} from 'expo-router';
-
 import Ionicons from '@expo/vector-icons/Ionicons';
 import PhotoUpload from '../components/PhotoUpload'
-import {Pressable, View} from "react-native";
+import {Pressable, View, Text, Animated} from "react-native";
 import {Entypo} from "@expo/vector-icons";
 import useUpload from "@/app/lib/useUpload";
-import React, {useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import HeaderBar from "@/app/components/HeaderBar";
 import {useAuth} from "@/app/lib/AuthContext";
+import {useMessage} from "@/app/lib/MessagingContext";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 export default function TabLayout() {
     const [containerWidth, setContainerWidth] = useState(0);
     const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload();
     const { user, isAuthenticated } = useAuth();
+    const { message, setMessage } = useMessage()
     const router = useRouter();
+    const animatedMessage = useRef(new Animated.Value(0)).current;
 
     const onProfileClick = async () => {
+        setMessage({ message: "hi my name is brandon", error: false })
         const isUserAuthenticated = await isAuthenticated()
         if (!isUserAuthenticated) return router.push("/auth/login")
         if (user && user.username) {
@@ -33,6 +37,36 @@ export default function TabLayout() {
         return router.push("/(tabs)")
     }
 
+    const animateInMessage = () => {
+        Animated.timing(animatedMessage, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: false
+        }).start()
+    }
+
+    const animateOutMessage = () => {
+        Animated.timing(animatedMessage, {
+            toValue: 0,
+            duration: 1000,
+            useNativeDriver: false
+        }).start(() => setMessage(null))
+    }
+
+    const opacity = animatedMessage.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, 1]
+    });
+
+    useEffect(() => {
+        if (message) {
+            animateInMessage()
+            setTimeout(() => {
+                animateOutMessage()
+            }, 5000);
+        }
+    }, [message]);
+
     return (
         <View style={{ flex: 1, backgroundColor: '#181a1b', width: "100%", alignItems: "center" }}>
             <View style={{ flex: 1, maxWidth: 800, width: "100%", overflow: "hidden" }}
@@ -41,6 +75,22 @@ export default function TabLayout() {
                       setContainerWidth(width);
                   }}>
                 <HeaderBar containerWidth={containerWidth} />
+                { message &&
+                    <Animated.View style={{
+                        position: "absolute",
+                        top: "80%",
+                        opacity,
+                        alignSelf: "center",
+                        backgroundColor: 'rgba(56,52,52,0.86)',
+                        borderRadius: 12,
+                        zIndex: 999,
+                        borderBottomWidth: 1,
+                        borderColor: message.error ? "red" : '#3091fc'
+                    }}>
+                        <Text style={{ paddingVertical: 10, paddingHorizontal: 20, fontSize: 14,
+                            fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)' }}>{ message.message }</Text>
+                    </Animated.View>
+                }
                 <Tabs
                     screenOptions={{
                         tabBarActiveTintColor: '#ffffff',

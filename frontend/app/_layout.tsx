@@ -2,6 +2,8 @@ import { Stack } from "expo-router";
 import {AuthProvider} from "@/app/lib/AuthContext";
 import {useFonts} from "expo-font";
 import { View} from "react-native";
+import {MessageProvider} from "@/app/lib/MessagingContext";
+import {LoadingProvider} from "@/app/lib/LoadingContext";
 
 export default function RootLayout() {
     const [loaded, error] = useFonts({
@@ -14,10 +16,14 @@ export default function RootLayout() {
     }
 
     return (
-        <AuthProvider>
-            <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            </Stack>
-        </AuthProvider>
+        <LoadingProvider>
+            <MessageProvider>
+                <AuthProvider>
+                    <Stack>
+                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    </Stack>
+                </AuthProvider>
+            </MessageProvider>
+        </LoadingProvider>
     );
 }

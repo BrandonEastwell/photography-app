@@ -104,7 +104,7 @@ export default function HeaderBar({ containerWidth } : { containerWidth: number 
 
     return (
         <>
-            <View style={{ height: 40, flexDirection: "row", alignItems: "center", justifyContent: "flex-end", zIndex: 10 }}>
+            <View style={{ height: 40, flexDirection: "row", alignItems: "center", justifyContent: "flex-end", zIndex: 1001 }}>
                 <View style={{ position: "absolute", width: "100%", justifyContent: "center" }}>
                     <Animated.Text style={{ fontSize: 20, fontFamily: "BethEllen-Regular", color: 'white',
                         alignSelf: "center", marginHorizontal: "auto", transform: [{ translateX: titleSlide }] }}>Photography App</Animated.Text>
@@ -130,7 +130,7 @@ export default function HeaderBar({ containerWidth } : { containerWidth: number 
                 </Pressable>
             </View>
             { showSidebar && <View style={{ position: "absolute", flexDirection: "row", width: "100%",
-                height: "100%", zIndex: 9 }}>
+                height: "100%", zIndex: 1000 }}>
                 <Pressable onPress={() => closeSidebar()} style={{ flex: 1 }}></Pressable>
                 <Animated.View style={{ width: sidebarWidth, height: "100%", backgroundColor: '#121212',
                     borderLeftWidth: 0.5, borderColor: "rgba(179,179,179,0.74)" }}>
