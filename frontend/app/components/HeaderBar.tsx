@@ -1,11 +1,18 @@
-import {Animated, Easing, Pressable, View} from "react-native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import React, {useRef, useState} from "react";
+import {Animated, Easing, Pressable, Text, View} from "react-native";
+import React, {useEffect, useRef, useState} from "react";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import AnimatedButton from "@/app/components/AnimatedButton";
+import {useAuth} from "@/app/lib/AuthContext";
 
 export default function HeaderBar({ containerWidth } : { containerWidth: number }) {
     const [showSidebar, setShowSidebar] = useState<boolean>(false)
     const sidebarWidth = useRef(new Animated.Value(0)).current;
     const titleSlide = useRef(new Animated.Value(0)).current;
+    const { logout, isAuthenticated, authenticated } = useAuth()
+
+    useEffect(() => {
+        isAuthenticated
+    }, []);
 
     const closeSidebar = () => {
         toggleMenu()
@@ -46,8 +53,8 @@ export default function HeaderBar({ containerWidth } : { containerWidth: number 
             })
         ]).start();
     };
-    const animation = useRef(new Animated.Value(0)).current;
 
+    const animation = useRef(new Animated.Value(0)).current;
     const toggleMenu = () => {
         Animated.timing(animation, {
             toValue: showSidebar ? 0 : 1,
@@ -127,8 +134,11 @@ export default function HeaderBar({ containerWidth } : { containerWidth: number 
                 <Pressable onPress={() => closeSidebar()} style={{ flex: 1 }}></Pressable>
                 <Animated.View style={{ width: sidebarWidth, height: "100%", backgroundColor: '#121212',
                     borderLeftWidth: 0.5, borderColor: "rgba(179,179,179,0.74)" }}>
-                    <View style={{ position: "absolute", width: "100%", height: "100%" }}>
-
+                    <View style={{ width: containerWidth * 0.4, height: "100%", flexDirection: "column", padding: 15, marginTop: 60 }}>
+                        { authenticated && <AnimatedButton onClick={() => logout} defaultBgColor={'transparent'}>
+                            <MaterialIcons name="logout" size={20} color="white" />
+                            <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 14, color: 'white' }}>Sign out</Text>
+                        </AnimatedButton> }
                     </View>
                 </Animated.View>
             </View> }

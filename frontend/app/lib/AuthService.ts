@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import {router} from "expo-router";
+
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default class AuthService {
@@ -54,6 +54,15 @@ export default class AuthService {
             await SecureStore.setItemAsync("auth_token_exp", authTokenExp)
         }  else {
             await AsyncStorage.setItem("auth_token_exp", authTokenExp)
+        }
+    }
+
+    static async deleteAuthToken() {
+        if (Platform.OS !== "web") {
+            await SecureStore.deleteItemAsync("auth_token")
+            await SecureStore.deleteItemAsync("auth_token_exp")
+        }  else {
+            await AsyncStorage.removeItem("auth_token_exp")
         }
     }
 
