@@ -10,6 +10,7 @@ import AuthService from "@/app/lib/AuthService";
 import {router} from "expo-router";
 import PhotoCardContent from "@/app/components/PhotoCardContent";
 import PhotoModal from "@/app/components/PhotoModal";
+import AnimatedButton from "@/app/components/AnimatedButton";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 const emptyExifData: ExifData = {
@@ -134,12 +135,12 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
             { imageUpload && !showExifForm &&
                 <PhotoCardContent onClose={setShowUpload} photoSrc={imageUpload.uri} exif={exif} profile={null} userId={null}>
                     <View style={{ flexDirection: "row", gap: 15, alignItems: "center", justifyContent: "center" }}>
-                        <Pressable onPress={uploadBtnOnClick} style={{ backgroundColor: '#3091fc', padding: 10, borderRadius: 15 }}>
+                        <AnimatedButton onClick={uploadBtnOnClick} defaultBgColor={'transparent'}>
                             <Text style={{ color: 'white', fontFamily: "SpaceMono-Regular" }}>Upload</Text>
-                        </Pressable>
-                        <Pressable onPress={() => setShowExifForm(true)} style={{ backgroundColor: "#ffffff", padding: 10, borderRadius: 15 }}>
-                            <Text style={{ color: 'black', fontFamily: "SpaceMono-Regular" }}>Go Back</Text>
-                        </Pressable>
+                        </AnimatedButton>
+                        <AnimatedButton onClick={() => setShowExifForm(true)} defaultBgColor={"transparent"}>
+                            <Text style={{ color: 'white', fontFamily: "SpaceMono-Regular" }}>Go Back</Text>
+                        </AnimatedButton>
                     </View>
                     {error && (
                         <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 30, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
