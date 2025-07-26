@@ -135,10 +135,15 @@ export default function HeaderBar({ containerWidth } : { containerWidth: number 
                 <Animated.View style={{ width: sidebarWidth, height: "100%", backgroundColor: '#121212',
                     borderLeftWidth: 0.5, borderColor: "rgba(179,179,179,0.74)" }}>
                     <View style={{ width: containerWidth * 0.4, height: "100%", flexDirection: "column", padding: 15, marginTop: 60 }}>
-                        { authenticated && <AnimatedButton onClick={() => logout} defaultBgColor={'transparent'}>
-                            <MaterialIcons name="logout" size={20} color="white" />
-                            <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 14, color: 'white' }}>Sign out</Text>
-                        </AnimatedButton> }
+                        { authenticated &&
+                            <AnimatedButton onClick={() => {
+                                logout()
+                                closeSidebar()
+                            }} defaultBgColor={'transparent'}>
+                                <MaterialIcons name="logout" size={20} color="white" />
+                                <Text style={{ fontFamily: "SpaceMono-Regular", fontSize: 14, color: 'white' }}>Sign out</Text>
+                            </AnimatedButton>
+                        }
                     </View>
                 </Animated.View>
             </View> }

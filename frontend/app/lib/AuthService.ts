@@ -2,18 +2,13 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import {getReqHeaders} from "@/app/lib/Helpers";
 
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default class AuthService {
     static async createSession() {
-        const headers: Record<string, string> = { "Platform": Platform.OS }
-
-        if (Platform.OS !== "web") {
-            const sessionId = await SecureStore.getItemAsync('session_id');
-            if (sessionId) headers["Session"] = sessionId
-        }
-
+        const headers = await getReqHeaders()
         let res = await fetch(`${apiUrl}/session`, {
             method: "GET",
             credentials: 'include',
@@ -28,24 +23,23 @@ export default class AuthService {
     }
 
     static async refreshAuthToken() {
-        const headers: Record<string, string> = { "Platform": Platform.OS }
-        if (Platform.OS !== "web") {
-            const sessionId = await SecureStore.getItemAsync('session_id');
-            if (sessionId) headers["Session"] = sessionId
+        const headers = await getReqHeaders()
+        try {
+            let res = await fetch(`${apiUrl}/refresh-token`, {
+                method: "GET",
+                headers,
+                credentials: "include"
+            })
+
+            let data = await res.json()
+            if (data.success) {
+                await this.saveAuthToken(data.auth_token, data.auth_token_exp)
+            }
+
+            return data.success
+        } catch (e) {
+            console.error(e)
         }
-
-        let res = await fetch(`${apiUrl}/refresh-token`, {
-            method: "GET",
-            headers,
-            credentials: "include"
-        })
-
-        let data = await res.json()
-        if (data.success) {
-            await this.saveAuthToken(data.auth_token, data.auth_token_exp)
-        }
-
-        return data.success
     }
 
     static async saveAuthToken(authToken: string, authTokenExp: string) {
@@ -68,7 +62,7 @@ export default class AuthService {
 
     static async isUserLoggedInWithRefresh() {
         const isTokenExpired = await AuthService.isTokenExpired()
-        if (!isTokenExpired) {
+        if (isTokenExpired) {
             let isAuthRefreshed: boolean = await AuthService.refreshAuthToken()
             if (!isAuthRefreshed) return false
         }
@@ -79,7 +73,6 @@ export default class AuthService {
         let authTokenExp;
         if (Platform.OS !== "web") authTokenExp = await SecureStore.getItemAsync("auth_token_exp")
         else authTokenExp = await AsyncStorage.getItem("auth_token_exp")
-
         if (!authTokenExp) return true
 
         const curTime = new Date()

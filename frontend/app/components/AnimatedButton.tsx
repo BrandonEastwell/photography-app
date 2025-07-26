@@ -39,7 +39,7 @@ export default function AnimatedButton({ children, onClick, defaultBgColor } : {
                            onPressOut={handlePressOut}
                            onHoverIn={() => setIsHovered(true)}
                            onHoverOut={() => setIsHovered(false)}
-                           onPress={onClick}
+                           onPress={() => onClick()}
                            style={{ backgroundColor, paddingVertical: 10, paddingHorizontal: 15,
                                borderRadius: 10, flexDirection: "row", gap: 10, alignItems: "center" }}>
             { children }

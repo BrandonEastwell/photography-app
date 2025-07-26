@@ -17,6 +17,7 @@ export default function TabLayout() {
 
     const onProfileClick = async () => {
         const isUserAuthenticated = await isAuthenticated()
+        console.log(isUserAuthenticated)
         if (!isUserAuthenticated) return router.push("/auth/login")
         if (user && user.username) {
             return router.push({
@@ -35,7 +36,7 @@ export default function TabLayout() {
 
     return (
         <View style={{ flex: 1, backgroundColor: '#181a1b', width: "100%", alignItems: "center" }}>
-            <View style={{ flex: 1, maxWidth: 800, width: "100%" }}
+            <View style={{ flex: 1, maxWidth: 800, width: "100%", overflow: "hidden" }}
                   onLayout={(event) => {
                       const { width } = event.nativeEvent.layout;
                       setContainerWidth(width);

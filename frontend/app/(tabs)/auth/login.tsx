@@ -7,6 +7,7 @@ import {useAuth} from "@/app/lib/AuthContext";
 import Constants from 'expo-constants';
 import AuthService from "@/app/lib/AuthService";
 import FormInput from "@/app/components/FormInput";
+import {getReqHeaders} from "@/app/lib/Helpers";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Login() {
@@ -30,11 +31,10 @@ export default function Login() {
         formData.append("username", values.username)
         formData.append("password", values.password)
 
+        const headers = await getReqHeaders()
         let res = await fetch(`${apiUrl}/api/account/login`, {
             method: "POST",
-            headers: {
-                "Platform": Platform.OS
-            },
+            headers,
             credentials: "include",
             body: formData
         })

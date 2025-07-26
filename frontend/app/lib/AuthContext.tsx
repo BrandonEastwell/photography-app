@@ -4,6 +4,7 @@ import Constants from "expo-constants";
 import {Platform} from "react-native";
 import * as SecureStore from "expo-secure-store";
 import {useRouter} from "expo-router";
+import {getReqHeaders} from "@/app/lib/Helpers";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 type User = { username: string, userId: number };
@@ -31,7 +32,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         const initializeSession = async () => {
             const user = await AuthService.createSession()
             if (user) {
-                setUser({ username: user.username, userId: user.userId})
+                setUser({ username: user.username, userId: user.userId })
                 setAuthenticated(true)
             }
         }
@@ -45,25 +46,27 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     }
 
     const logout = async () => {
-        const headers: Record<string, string> = { "Platform": Platform.OS }
-        if (Platform.OS !== "web") {
-            const sessionId = await SecureStore.getItemAsync('session_id');
-            if (sessionId) headers["Session"] = sessionId
+        const headers = await getReqHeaders()
+
+        try {
+            const res = await fetch(`${apiUrl}/api/account/logout`, {
+                credentials: "include",
+                method: "POST",
+                headers
+            })
+
+            if (res.ok) {
+                await AuthService.deleteAuthToken()
+                setUser(null)
+                setAuthenticated(false)
+
+                setTimeout(() => {
+                    router.push('/auth/login')
+                }, 300)
+            }
+        } catch (e) {
+            console.error(e)
         }
-
-        await fetch(`${apiUrl}/accounts/logout`, {
-            credentials: "include",
-            method: "POST",
-            headers
-        })
-
-        await AuthService.deleteAuthToken()
-        setUser(null)
-        setAuthenticated(false)
-
-        setTimeout(() => {
-            router.push('/auth/login')
-        }, 300)
     }
 
     return (
@@ -71,7 +74,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
             user,
             authenticated,
             isAuthenticated: async () => await isAuthenticated(),
-            logout: () => logout,
+            logout,
             login: (user: User) => setUser({ username: user.username, userId: user.userId}),
         }}>
             {children}
