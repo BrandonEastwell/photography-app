@@ -49,6 +49,7 @@ export default function Login() {
         setMessage(data.message)
         console.log(data.auth_token_exp)
         await AuthService.saveAuthToken(data.auth_token, data.auth_token_exp)
+        login({ username: data.username, userId: data.user_id })
 
         setTimeout(() => {
             router.replace('/profile')
