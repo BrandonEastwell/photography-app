@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from lib.auth_helpers import create_jwt, create_session, get_session, set_token_to_response
 
 from ..models import Profile
+from accounts.models import Session
 
 User = get_user_model()
 env = environ.Env()
@@ -94,7 +95,11 @@ def login_user(req):
 
         platform = req.META.get('HTTP_PLATFORM')
         if platform == "web":
-            response = JsonResponse({ "success": True, "auth_token_exp": expiry, "message": "You have successfully logged in." })
+            response = JsonResponse({ "success": True,
+                                      "auth_token_exp": expiry,
+                                      "username": username,
+                                      "user_id": user.id,
+                                      "message": "You have successfully logged in." })
             set_token_to_response(response, token)
             expires_in_seconds = int((session.expire_at - timezone.now()).total_seconds())
             response.set_cookie(key="session_id", value=str(session.id), max_age=expires_in_seconds, samesite="None", secure=True, httponly=True)
@@ -105,6 +110,8 @@ def login_user(req):
             "session_id": session.id,
             "auth_token_exp": expiry,
             "auth_token": token,
+            "username": username,
+            "user_id": user.id,
             "message": "You have successfully logged in."
         })
 
@@ -116,16 +123,27 @@ def login_user(req):
         logging.exception(error)
         return JsonResponse({ "success": False, "error": "Internal Server Error" }, status=500)
 
-
+@csrf_exempt
 def logout_user(req):
     if req.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    jwt_token = req.COOKIES.get("auth_token")
-    if jwt_token is None:
-        return JsonResponse({ "message": "You are already logged out." }, status=200)
+    try:
+        session = get_session(req)
+        if session.user_id:
+            session.user_id = None
+            session.save()
 
-    res = HttpResponseRedirect(env("ORIGIN"))
-    res.delete_cookie("auth_token")
-    res.status_code = 200
-    return res
+        res = JsonResponse({ "success": True, "message": "You have been logged out." })
+        res.delete_cookie("auth_token")
+        return res
+
+    except ValueError:
+        res = JsonResponse({ "success": False, "error": "Could not get session" }, status=400)
+        res.delete_cookie("auth_token")
+        return res
+
+    except Session.DoesNotExist:
+        res = JsonResponse({ "success": True, "message": "Session already expired." }, status=200)
+        res.delete_cookie("auth_token")
+        return res

@@ -71,9 +71,10 @@ def get_user_profile(user_id):
 
         images = Photo.objects.filter(user_id=user_id)
         user = {
+            "user_id": user_id,
             "username": user_profile.user.username,
-            "firstName": user_profile.user.first_name,
-            "lastName": user_profile.user.last_name,
+            "first_name": user_profile.user.first_name,
+            "last_name": user_profile.user.last_name,
             "description": user_profile.desc if user_profile.desc else None,
             "image": user_profile.image.url if user_profile.image else None,
             "photos": [
