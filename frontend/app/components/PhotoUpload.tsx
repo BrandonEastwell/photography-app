@@ -31,7 +31,8 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
     const [imageUpload, setImageUpload] = useState<ImagePickerAsset | undefined>(undefined);
     const [exif, setExif] = useState<ExifData>(emptyExifData);
     const [showExifForm, setShowExifForm] = useState<boolean>(false)
-    const { message, setMessage } = useMessage()
+    const [showCard, setShowCard] = useState<boolean>(false)
+    const { setMessage } = useMessage()
 
     useEffect(() => {
         pickImageAsync()
@@ -60,6 +61,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
             setExif(exifData)
             setImageUpload(image)
             setShowExifForm(true)
+            if (image) setShowCard(true)
         }
     }
 
@@ -132,8 +134,9 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
             { imageUpload && showExifForm &&
                 <ExifForm setExif={setExif} exif={exif} onSubmit={() => setShowExifForm(false)} onClose={() => setShowExifForm(false)} formMode={"Photo"} />
             }
-            { imageUpload && !showExifForm &&
-                <PhotoCardContent onClose={setShowUpload} photoSrc={imageUpload.uri} exif={exif} profile={null} userId={null}>
+            { imageUpload && showCard && !showExifForm &&
+                <PhotoCardContent onClose={setShowUpload} photoSrc={imageUpload.uri} exif={exif} profile={null}
+                                  userId={null} showCard={showCard}>
                     <View style={{ flexDirection: "row", gap: 15, alignItems: "center", justifyContent: "center" }}>
                         <AnimatedButton onClick={uploadBtnOnClick} defaultBgColor={'transparent'}>
                             <Text style={{ color: 'white', fontFamily: "SpaceMono-Regular" }}>Upload</Text>

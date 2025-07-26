@@ -1,4 +1,4 @@
-import {Animated, Pressable, PressableStateCallbackType, StyleProp, ViewStyle} from "react-native";
+import {Animated, Pressable, StyleProp, ViewStyle} from "react-native";
 import React, {useRef, useState} from "react";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

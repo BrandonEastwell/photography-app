@@ -11,7 +11,7 @@ export default function PhotoCard({ photo, userId } : {
     photo: Photo
     userId: number
 }) {
-    const [showPhotoPopup, setShowPhotoPopup] = useState<boolean>(false)
+    const [showCard, setShowCard] = useState<boolean>(false)
     const [exif, setExif] = useState<Partial<ExifData>>({})
     const [profile, setProfile] = useState<Partial<UserProfile> | null>(null)
 
@@ -55,9 +55,7 @@ export default function PhotoCard({ photo, userId } : {
         }
 
         setExif(exifData)
-        getUserDetails().then(() => {
-            setShowPhotoPopup(true)
-        })
+        getUserDetails().then(() => setShowCard(true))
     }
 
     const getUserDetails = async () => {
@@ -82,10 +80,10 @@ export default function PhotoCard({ photo, userId } : {
             <Pressable onPress={onClickPhoto} style={{ width: "32%", height: 200, margin: 2.5, zIndex: 50 }}>
                 <Image source={photo.image_url} style={{ width: "100%", height: "100%" }} />
             </Pressable>
-            { showPhotoPopup &&
+            { showCard &&
                 <PhotoModal>
-                    <PhotoCardContent onClose={setShowPhotoPopup} photoSrc={photo.image_url} exif={exif} children={undefined}
-                                      profile={profile} userId={userId}>
+                    <PhotoCardContent onClose={setShowCard} photoSrc={photo.image_url} exif={exif} children={undefined}
+                                      profile={profile} userId={userId} showCard={showCard}>
                     </PhotoCardContent>
                 </PhotoModal>
             }

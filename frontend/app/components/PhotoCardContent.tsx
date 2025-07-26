@@ -1,5 +1,5 @@
-import {Pressable, Text, View} from "react-native";
-import React from "react";
+import {Animated, Pressable, Text, View} from "react-native";
+import React, {useEffect, useRef} from "react";
 import {Image} from "expo-image";
 import PhotoTags from "@/app/components/PhotoTags";
 import {ExifData, UserProfile} from "@/app/lib/Types";
@@ -8,17 +8,19 @@ import {useAuth} from "@/app/lib/AuthContext";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
-export default function PhotoCardContent({ children, onClose, photoSrc, exif, profile, userId } : {
+export default function PhotoCardContent({ children, onClose, showCard, photoSrc, exif, profile, userId } : {
     children: React.ReactNode
     onClose: React.Dispatch<React.SetStateAction<boolean>>
     photoSrc: string
     exif: ExifData | null
     profile: Partial<UserProfile> | null
     userId: number | null
+    showCard: boolean
 }) {
     const { user } = useAuth()
     const router = useRouter();
     const isUserPhoto = user?.userId === userId && typeof (user?.userId + userId) === "number"
+    const scaleAnim = useRef(new Animated.Value(1.05)).current;
 
     const navigateToProfile = () => {
         if (profile?.username) {
@@ -31,8 +33,27 @@ export default function PhotoCardContent({ children, onClose, photoSrc, exif, pr
         }
     }
 
+    useEffect(() => {
+        if (showCard) {
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                friction: 10,
+                tension: 80,
+                useNativeDriver: true,
+            }).start();
+        }
+    }, [showCard]);
+
+    const closeCard = () => {
+        Animated.timing(scaleAnim, {
+            toValue: 0.95,
+            duration: 100,
+            useNativeDriver: true,
+        }).start(() => onClose(false));
+    }
+
     return (
-        <View style={{ flexDirection: "column", backgroundColor: "#181a1b", borderRadius: 15, maxWidth: 340, height: "auto" }}>
+        <Animated.View style={{ transform: [{ scale: scaleAnim }], flexDirection: "column", backgroundColor: '#121212', borderRadius: 15, maxWidth: 340, height: "auto" }}>
             <View style={{ padding: 10, borderRadius: 15, flexDirection: "row", zIndex: 100, width: "100%", justifyContent: "space-between"}}>
                 <View>
                     { profile && !isUserPhoto &&
@@ -51,13 +72,13 @@ export default function PhotoCardContent({ children, onClose, photoSrc, exif, pr
                         </Pressable>
                     }
                 </View>
-                <AntDesign style={{ alignSelf: "center" }} onPress={() => onClose(false)} name="close" size={20} color="white" />
+                <AntDesign style={{ alignSelf: "center" }} onPress={closeCard} name="close" size={20} color="white" />
             </View>
             <Image style={{ width: 340, height: 400 }} source={photoSrc}></Image>
             <View style={{ paddingHorizontal: 15, paddingVertical: 15 }}>
                 { exif && <PhotoTags exif={exif} /> }
                 { children }
             </View>
-        </View>
+        </Animated.View>
     )
 }

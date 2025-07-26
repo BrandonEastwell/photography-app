@@ -1,11 +1,11 @@
-import React from "react";
-import {Modal, View} from "react-native";
+import React, {useEffect, useRef} from "react";
+import {Animated, Modal, View} from "react-native";
 
-export default function PhotoModal({ children } : { children: React.ReactNode}) {
+export default function PhotoModal({ children } : { children: React.ReactNode }) {
 
     return (
         <Modal transparent>
-            <View style={{ backgroundColor: 'rgba(0,0,0,0.70)', height: "100%", flexDirection: "column", gap: 15, justifyContent: "center", alignItems: "center"}}>
+            <View style={{ height: "100%", flexDirection: "column", gap: 15, justifyContent: "center", alignItems: "center"}}>
                 { children }
             </View>
         </Modal>

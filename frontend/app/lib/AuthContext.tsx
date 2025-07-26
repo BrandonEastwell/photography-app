@@ -1,8 +1,6 @@
 import React, {createContext, useState, useEffect, useContext, PropsWithChildren} from 'react';
 import AuthService from "@/app/lib/AuthService";
 import Constants from "expo-constants";
-import {Platform} from "react-native";
-import * as SecureStore from "expo-secure-store";
 import {useRouter} from "expo-router";
 import {getReqHeaders} from "@/app/lib/Helpers";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
