@@ -65,7 +65,7 @@ export default function InputField({ placeholder, onChangeText, value, error, it
                 backgroundColor: 'rgb(227,227,227)',
                 borderRadius: 6
             }}>
-                <Animated.View style={{ paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%', borderWidth: 1, borderColor }}>
+                <Animated.View style={{ paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%', borderWidth: 2, borderColor }}>
                     { type === "Dropdown" &&
                         <TextInput
                             editable={editable}

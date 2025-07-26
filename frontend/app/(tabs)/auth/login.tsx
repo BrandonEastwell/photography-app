@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, TouchableOpacity, Platform} from "react-native";
+import {View, Text, StyleSheet, TouchableOpacity} from "react-native";
 import {useRouter} from "expo-router";
 import React, {useState} from 'react';
 import {Formik} from 'formik';
@@ -52,7 +52,12 @@ export default function Login() {
         login({ username: data.username, userId: data.user_id })
 
         setTimeout(() => {
-            router.replace('/profile')
+            return router.push({
+                pathname: `/[username]`,
+                params: {
+                    username: encodeURIComponent(data.username),
+                }
+            })
         }, 2000)
     }
 

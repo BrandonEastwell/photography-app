@@ -34,7 +34,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#f1f1f1',
         borderRadius: 6,
         paddingHorizontal: 10,
-        marginBottom: 15
+        marginBottom: 15,
+        outlineWidth: 0
     },
     input: {
         flex: 1,

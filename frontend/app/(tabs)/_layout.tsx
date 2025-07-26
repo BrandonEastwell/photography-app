@@ -17,7 +17,6 @@ export default function TabLayout() {
 
     const onProfileClick = async () => {
         const isUserAuthenticated = await isAuthenticated()
-        console.log(isUserAuthenticated)
         if (!isUserAuthenticated) return router.push("/auth/login")
         if (user && user.username) {
             return router.push({
