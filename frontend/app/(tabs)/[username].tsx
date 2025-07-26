@@ -9,14 +9,15 @@ import PhotoUpload from "@/app/components/PhotoUpload";
 import {Photo, UserProfile} from "@/app/lib/Types";
 
 import PhotoCard from "@/app/components/PhotoCard";
+import {useMessage} from "@/app/lib/MessagingContext";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Username() {
     const [photos, setPhotos] = useState<Photo[] | null>(null)
     const [profile, setProfile] = useState<UserProfile | null>(null)
-    const [error, setError] = useState(null)
     const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload()
     const { username } = useLocalSearchParams();
+    const { setMessage } = useMessage()
 
     useEffect(() => {
         const onLoad = async () => {
@@ -35,7 +36,7 @@ export default function Username() {
             })
 
             const data = await res.json()
-            if (!data.success) return setError(data.error)
+            if (!data.success) return setMessage({ message: data.error, error: true })
             const user = data.user
             setProfile({ username: user.username, description: user.description, image: user.image,
                 first_name: user.first_name, last_name: user.last_name, user_id: user.user_id })
@@ -84,10 +85,6 @@ export default function Username() {
 
             { showUploadScreen &&
                 <PhotoUpload setShowUpload={setShowUploadScreen} /> }
-
-            { !profile && error &&
-                <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
-            }
         </View>
     )
 }

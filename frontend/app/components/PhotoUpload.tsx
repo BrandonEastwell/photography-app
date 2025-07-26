@@ -11,6 +11,7 @@ import {router} from "expo-router";
 import PhotoCardContent from "@/app/components/PhotoCardContent";
 import PhotoModal from "@/app/components/PhotoModal";
 import AnimatedButton from "@/app/components/AnimatedButton";
+import {useMessage} from "@/app/lib/MessagingContext";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 const emptyExifData: ExifData = {
@@ -30,8 +31,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
     const [imageUpload, setImageUpload] = useState<ImagePickerAsset | undefined>(undefined);
     const [exif, setExif] = useState<ExifData>(emptyExifData);
     const [showExifForm, setShowExifForm] = useState<boolean>(false)
-    const [error, setError] = useState<string | undefined>(undefined)
-    const [message, setMessage] = useState<string | undefined>(undefined)
+    const { message, setMessage } = useMessage()
 
     useEffect(() => {
         pickImageAsync()
@@ -102,10 +102,10 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
 
                 if (!data.success) throw new Error("Upload failed after refresh");
             }
-            return setError(data.error)
+            return setMessage({ message: data.error, error: true })
         }
 
-        setMessage(data.message)
+        setMessage({ message: data.message, error: false })
         setTimeout(() => {
             setShowUpload(false)
         }, 2000)
@@ -142,12 +142,6 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                             <Text style={{ color: 'white', fontFamily: "SpaceMono-Regular" }}>Go Back</Text>
                         </AnimatedButton>
                     </View>
-                    {error && (
-                        <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 30, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
-                    )}
-                    {message && (
-                        <Text style={{ color: '#3091fc', alignSelf: 'center', marginBottom: 30, fontFamily: "SpaceMono-Regular" }}>{message}</Text>
-                    )}
                 </PhotoCardContent>
             }
         </PhotoModal>

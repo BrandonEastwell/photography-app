@@ -5,11 +5,11 @@ import { Formik } from 'formik';
 import * as yup from 'yup';
 import Constants from 'expo-constants';
 import FormInput from "@/app/components/FormInput";
+import {useMessage} from "@/app/lib/MessagingContext";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Register() {
-    const [error, setError] = useState(null)
-    const [message, setMessage] = useState(null)
+    const { message, setMessage } = useMessage()
     const router = useRouter()
 
     const loginValidationSchema = yup.object().shape({
@@ -48,11 +48,11 @@ export default function Register() {
 
         let data = await res.json()
         if (!data.success) {
-            setError(data.error)
+            setMessage({ message: data.error, error: true })
             return
         }
 
-        setMessage(data.message)
+        setMessage({ message: data.message, error: false })
         setTimeout(() => {
             router.replace('/auth/login')
         }, 2000)

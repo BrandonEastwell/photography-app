@@ -8,11 +8,11 @@ import Constants from 'expo-constants';
 import AuthService from "@/app/lib/AuthService";
 import FormInput from "@/app/components/FormInput";
 import {getReqHeaders} from "@/app/lib/Helpers";
+import {useMessage} from "@/app/lib/MessagingContext";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Login() {
-    const [error, setError] = useState(null)
-    const [message, setMessage] = useState(null)
+    const { message, setMessage } = useMessage()
     const { login } = useAuth()
     const router = useRouter()
 
@@ -41,12 +41,12 @@ export default function Login() {
 
         let data = await res.json()
         if (!data.success) {
-            setError(data.error)
+            setMessage({ message: data.error, error: true })
             if (data.error === "Session expired. Please try again.") await AuthService.createSession()
             return
         }
 
-        setMessage(data.message)
+        setMessage({ message: data.message, error: false })
         console.log(data.auth_token_exp)
         await AuthService.saveAuthToken(data.auth_token, data.auth_token_exp)
         login({ username: data.username, userId: data.user_id })

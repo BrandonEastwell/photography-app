@@ -8,7 +8,6 @@ import React, {useEffect, useRef, useState} from "react";
 import HeaderBar from "@/app/components/HeaderBar";
 import {useAuth} from "@/app/lib/AuthContext";
 import {useMessage} from "@/app/lib/MessagingContext";
-import AntDesign from "@expo/vector-icons/AntDesign";
 
 export default function TabLayout() {
     const [containerWidth, setContainerWidth] = useState(0);
@@ -19,7 +18,6 @@ export default function TabLayout() {
     const animatedMessage = useRef(new Animated.Value(0)).current;
 
     const onProfileClick = async () => {
-        setMessage({ message: "hi my name is brandon", error: false })
         const isUserAuthenticated = await isAuthenticated()
         if (!isUserAuthenticated) return router.push("/auth/login")
         if (user && user.username) {
@@ -30,7 +28,6 @@ export default function TabLayout() {
                 }
             })
         }
-
     }
 
     const onIndexClick = () => {
@@ -63,7 +60,7 @@ export default function TabLayout() {
             animateInMessage()
             setTimeout(() => {
                 animateOutMessage()
-            }, 5000);
+            }, 9000);
         }
     }, [message]);
 
@@ -84,6 +81,7 @@ export default function TabLayout() {
                         backgroundColor: 'rgba(56,52,52,0.86)',
                         borderRadius: 12,
                         zIndex: 999,
+                        maxWidth: 250,
                         borderBottomWidth: 1,
                         borderColor: message.error ? "red" : '#3091fc'
                     }}>
