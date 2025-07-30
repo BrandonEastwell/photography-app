@@ -7,6 +7,10 @@ import {useRouter} from "expo-router";
 import {useAuth} from "@/app/lib/AuthContext";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Constants from "expo-constants";
+import {getReqHeaders} from "@/app/lib/Helpers";
+import {useMessage} from "@/app/lib/MessagingContext";
+const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function PhotoCardContent({ children, onClose, showCard, photoSrc, exif, profile, userId } : {
     children: React.ReactNode
@@ -21,6 +25,7 @@ export default function PhotoCardContent({ children, onClose, showCard, photoSrc
     const router = useRouter();
     const isUserPhoto = user?.userId === userId && typeof (user?.userId + userId) === "number"
     const scaleAnim = useRef(new Animated.Value(1.05)).current;
+    const { setMessage } = useMessage()
 
     const navigateToProfile = () => {
         if (profile?.username) {
@@ -31,6 +36,28 @@ export default function PhotoCardContent({ children, onClose, showCard, photoSrc
                 }
             })
         }
+    }
+
+    const removePhotoFromProfile = async () => {
+        if (isUserPhoto) {
+            try {
+                const headers = await getReqHeaders()
+                let res = await fetch(`${apiUrl}/api/account/`, {
+                    method: "DELETE",
+                    headers,
+                    credentials: "include",
+                })
+
+                const data = await res.json()
+                if (!data.success) return setMessage({ message: data.error, error: true })
+                data.message ? setMessage({ message: data.message, error: false }) : null
+
+            } catch (e) {
+                console.error(e)
+                setMessage({ message: "Internal Server Error", error: true })
+            }
+        }
+
     }
 
     useEffect(() => {
@@ -67,7 +94,7 @@ export default function PhotoCardContent({ children, onClose, showCard, photoSrc
                         </Pressable>
                     }
                     { isUserPhoto &&
-                        <Pressable onPress={navigateToProfile} style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+                        <Pressable onPress={removePhotoFromProfile} style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
                             <MaterialCommunityIcons name="delete-outline" size={24} color="white" />
                         </Pressable>
                     }
