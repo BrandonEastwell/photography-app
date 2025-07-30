@@ -1,6 +1,6 @@
 import {View, Text, StyleSheet, TouchableOpacity, Platform} from "react-native";
 import {useRouter} from "expo-router";
-import React, {useState} from 'react';
+import React from 'react';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import Constants from 'expo-constants';
@@ -104,12 +104,6 @@ export default function Register() {
                             >
                                 <Text style={styles.buttonText}>Register</Text>
                             </TouchableOpacity>
-                            {error && !message && (
-                                <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
-                            )}
-                            {message && (
-                                <Text style={{ color: '#3091fc', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{message}</Text>
-                            )}
                             <TouchableOpacity onPress={() => router.push('/auth/login')}>
                                 <Text style={styles.signUp}>
                                     Already have an account? <Text style={styles.signUpLink}>Sign In</Text>

@@ -71,12 +71,17 @@ export default class AuthService {
 
     static async isTokenExpired() {
         let authTokenExp;
-        if (Platform.OS !== "web") authTokenExp = await SecureStore.getItemAsync("auth_token_exp")
-        else authTokenExp = await AsyncStorage.getItem("auth_token_exp")
-        if (!authTokenExp) return true
+        try {
+            if (Platform.OS !== "web") authTokenExp = await SecureStore.getItemAsync("auth_token_exp")
+            else authTokenExp = await AsyncStorage.getItem("auth_token_exp")
+            if (authTokenExp !== undefined) return true
 
-        const curTime = new Date()
-        const expiry = new Date(authTokenExp)
-        return curTime >= expiry;
+            const curTime = new Date()
+            const expiry = new Date(authTokenExp)
+            return curTime >= expiry;
+        } catch (error) {
+            console.error(error)
+            return true
+        }
     }
 }

@@ -89,7 +89,7 @@ export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData, so
                 </View>
             </View>
             { showExifForm &&
-                <PhotoModal>
+                <PhotoModal showModal={showExifForm}>
                     <ExifForm setExif={setExif} exif={exif} onSubmit={applyFilter} formMode={"Filtering"} onClose={() => setShowExifForm(false)} />
                 </PhotoModal>
             }

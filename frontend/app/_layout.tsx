@@ -1,7 +1,6 @@
 import { Stack } from "expo-router";
 import {AuthProvider} from "@/app/lib/AuthContext";
 import {useFonts} from "expo-font";
-import { View} from "react-native";
 import {MessageProvider} from "@/app/lib/MessagingContext";
 import {LoadingProvider} from "@/app/lib/LoadingContext";
 

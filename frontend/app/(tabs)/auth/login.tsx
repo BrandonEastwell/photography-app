@@ -1,6 +1,6 @@
 import {View, Text, StyleSheet, TouchableOpacity} from "react-native";
 import {useRouter} from "expo-router";
-import React, {useState} from 'react';
+import React from 'react';
 import {Formik} from 'formik';
 import * as yup from 'yup';
 import {useAuth} from "@/app/lib/AuthContext";
@@ -100,12 +100,6 @@ export default function Login() {
                             >
                                 <Text style={styles.buttonText}>Login</Text>
                             </TouchableOpacity>
-                            {error && !message && (
-                                <Text style={{ color: 'red', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{error}</Text>
-                            )}
-                            {message && (
-                                <Text style={{ color: '#3091fc', alignSelf: 'center', marginBottom: 20, fontFamily: "SpaceMono-Regular" }}>{message}</Text>
-                            )}
                             <TouchableOpacity onPress={() => router.push('/auth/register')}>
                                 <Text style={styles.signUp}>
                                     Don't have an account? <Text style={styles.signUpLink}>Sign Up</Text>
