@@ -45,10 +45,11 @@ const initExifFormFields: ExifFields = {
     ShutterSpeedValue: { editable: true,  type: "Text",  zIndex: 0, items: [], placeholder: "Shutter Speed" },
 }
 
-export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } : {
+export default function ExifForm({ setExif, exif, onSubmit, formMode, onClear, onClose } : {
     setExif: Dispatch<SetStateAction<ExifData>>;
     exif: ExifData;
-    onSubmit: () => void;
+    onSubmit: (exif?: ExifData) => Promise<void>;
+    onClear?: () => void;
     onClose: () => void;
     formMode: "Filtering" | "Photo"
 }) {
@@ -109,7 +110,7 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
     const onFormSubmit = async () => {
         try {
             await exifSchema.validate(exif)
-            onSubmit()
+            await onSubmit()
         } catch (error) {
             console.log(error)
         }
@@ -159,8 +160,8 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
                     }} defaultBgColor={"#ffffff"} hoverBgColor={"#ECECECD0"} hoverToPressedBgColor={"rgba(162,162,162,0.82)"}>
                         <Text style={{ color: 'black' }}>{ formMode === "Photo" ? "Preview Photo" : "Search Photos" }</Text>
                     </AnimatedButton>
-                    { formMode === "Filtering" &&
-                        <AnimatedButton onClick={() => setExif(EMPTY_EXIF_DATA)} styles={{
+                    { onClear &&
+                        <AnimatedButton onClick={onClear} styles={{
                             padding: 10,
                             paddingHorizontal: 20,
                             borderRadius: 15,

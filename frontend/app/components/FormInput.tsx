@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
+        outlineWidth: 0,
         height: '100%',
         fontFamily: "SpaceMono-Regular",
     }

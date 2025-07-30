@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
         color: '#1E90FF',
     },
     errorText: {
+        top: -10,
         color: 'red',
         alignSelf: 'flex-start',
         marginBottom: 10,

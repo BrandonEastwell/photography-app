@@ -27,7 +27,7 @@ const options: string[] = ["Today", "This Week", "This Month", "This Year"]
 
 export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData, sort_by_time: TimePeriodValue) => Promise<any> }) {
     const [exif, setExif] = useState<ExifData>(EMPTY_EXIF_DATA);
-    const [timePeriod, setTimePeriod] = useState<TimePeriodValue>("this_week")
+    const [timePeriod, setTimePeriod] = useState<TimePeriodValue>("this_month")
     const [showOptions, setShowOptions] = useState<boolean>(false)
     const [showExifForm, setShowExifForm] = useState<boolean>(false)
 
@@ -35,8 +35,15 @@ export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData, so
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status === "denied") return;
         const location = await Location.getCurrentPositionAsync();
-        setExif((prevState) => ({ ...prevState, GPSLatitude: location.coords.latitude,
-            GPSLongitude: location.coords.longitude }))
+        const newExif: ExifData = {...exif, GPSLatitude: location.coords.latitude,
+            GPSLongitude: location.coords.longitude }
+        setExif(newExif)
+        return newExif
+    }
+
+    const searchByLocation = async () => {
+        const exif = await getCurrentLocation()
+        if (exif) await onSearch(exif, timePeriod)
     }
 
     const timePeriodChange = async (option: TimePeriodValue) => {
@@ -44,8 +51,14 @@ export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData, so
         await onSearch(exif, option)
     }
 
-    const applyFilter = async () => {
+    const searchByFilter = async () => {
         await onSearch(exif, timePeriod)
+        setShowExifForm(false)
+    }
+
+    const onFormClear = async () => {
+        setExif(EMPTY_EXIF_DATA)
+        await onSearch(EMPTY_EXIF_DATA, timePeriod)
         setShowExifForm(false)
     }
 
@@ -69,7 +82,7 @@ export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData, so
                             </View> }
                     </View>
                     <View style={{ flexDirection: "row", gap: 10 }}>
-                        <AnimatedButton styles={{ marginVertical: "auto", minWidth: 50, justifyContent: "center" }} onClick={getCurrentLocation} defaultBgColor={'rgba(56,52,52,0.86)'}>
+                        <AnimatedButton styles={{ marginVertical: "auto", minWidth: 50, justifyContent: "center" }} onClick={searchByLocation} defaultBgColor={'rgba(56,52,52,0.86)'}>
                             <FontAwesome6 name="map-location-dot" size={18} color="white" />
                         </AnimatedButton>
                         <AnimatedButton styles={{ marginVertical: "auto", minWidth: 50, justifyContent: "center" }} onClick={() => setShowExifForm(true)} defaultBgColor={'rgba(56,52,52,0.86)'}>
@@ -80,7 +93,7 @@ export default function SearchBar({ onSearch } : { onSearch: (exif: ExifData, so
             </View>
             { showExifForm &&
                 <PhotoModal>
-                    <ExifForm setExif={setExif} exif={exif} onSubmit={applyFilter} formMode={"Filtering"} onClose={() => setShowExifForm(false)} />
+                    <ExifForm setExif={setExif} exif={exif} onSubmit={searchByFilter} onClear={onFormClear} formMode={"Filtering"} onClose={() => setShowExifForm(false)} />
                 </PhotoModal>
             }
         </>

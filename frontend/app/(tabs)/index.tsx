@@ -13,8 +13,9 @@ export default function Index() {
 
     async function searchPhotos(exif: ExifData | null = null, sort_by_time: TimePeriodValue = "this_year", sort_by_popularity = "relevance") {
         let params = new URLSearchParams()
-
-        if (exif) {
+        const hasFilters = exif ? Object.values(exif).some((value) => value !== undefined) : false
+        console.log(hasFilters)
+        if (hasFilters && exif) {
             const location = exif.GPSLatitude && exif.GPSLongitude ? exif.GPSLatitude + "," + exif.GPSLongitude : null
             location && params.set("location", location)
 
@@ -40,7 +41,7 @@ export default function Index() {
         if (!data.success) return setMessage({ message: data.error, error: true })
 
         setImages(data.results)
-        data.message ? setMessage({ message: data.message, error: false }) : null
+        data.message ? setMessage({ message: data.message, error: false }) : setMessage(null)
     }
 
     useEffect(() => {
@@ -55,7 +56,7 @@ export default function Index() {
 
     return (
         <View style={{position: "relative",  height: "100%", width: "100%", backgroundColor: "#181a1b" }}>
-            <SearchBar onSearch={(exif: ExifData | null, sort_by_time: TimePeriodValue) => searchPhotos(exif, sort_by_time)} />
+            <SearchBar onSearch={(exif: ExifData, sort_by_time: TimePeriodValue) => searchPhotos(exif, sort_by_time)} />
             { images &&
                 <FlatList columnWrapperStyle={{ justifyContent: 'space-evenly' }}
                           numColumns={3} keyExtractor={item => item.image_url} data={images}

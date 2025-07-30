@@ -67,13 +67,18 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         }
     }
 
+    const login = async (user: User) => {
+        setUser({ username: user.username, userId: user.userId})
+        setAuthenticated(true)
+    }
+
     return (
         <AuthContext.Provider value={{
             user,
             authenticated,
             isAuthenticated: async () => await isAuthenticated(),
             logout,
-            login: (user: User) => setUser({ username: user.username, userId: user.userId}),
+            login,
         }}>
             {children}
         </AuthContext.Provider>

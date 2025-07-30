@@ -81,11 +81,11 @@ export default function TabLayout() {
                         backgroundColor: 'rgba(56,52,52,0.86)',
                         borderRadius: 12,
                         zIndex: 999,
-                        maxWidth: 250,
+                        maxWidth: 275,
                         borderBottomWidth: 1,
                         borderColor: message.error ? "red" : '#3091fc'
                     }}>
-                        <Text style={{ paddingVertical: 10, paddingHorizontal: 20, fontSize: 14,
+                        <Text style={{ paddingVertical: 10, paddingHorizontal: 20, fontSize: 14, textAlign: "center",
                             fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)' }}>{ message.message }</Text>
                     </Animated.View>
                 }
