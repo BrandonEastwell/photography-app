@@ -32,16 +32,21 @@ export default function Index() {
         params.set("sort_by_time", sort_by_time)
         params.set("sort_by_popularity", sort_by_popularity)
 
-        let url = new URL(`${apiUrl}/api/media/photos?${params}`)
-        const res = await fetch(url, {
-            method: "GET"
-        })
+        try {
+            let url = new URL(`${apiUrl}/api/media/photos?${params}`)
+            const res = await fetch(url, {
+                method: "GET"
+            })
 
-        const data = await res.json()
-        if (!data.success) return setMessage({ message: data.error, error: true })
+            const data = await res.json()
+            if (!data.success) return setMessage({ message: data.error, error: true })
 
-        setImages(data.results)
-        data.message ? setMessage({ message: data.message, error: false }) : setMessage(null)
+            setImages(data.results)
+            data.message ? setMessage({ message: data.message, error: false }) : setMessage(null)
+        } catch (e) {
+            console.error(e)
+            setMessage({ message: "Internal Server Error", error: true })
+        }
     }
 
     useEffect(() => {

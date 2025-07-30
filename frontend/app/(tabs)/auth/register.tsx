@@ -37,25 +37,30 @@ export default function Register() {
         formData.append("username", values.username)
         formData.append("password", values.password)
 
-        let res = await fetch(`${apiUrl}/api/account/register`, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Platform": Platform.OS
-            },
-            body: formData
-        })
+        try {
+            let res = await fetch(`${apiUrl}/api/account/register`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Platform": Platform.OS
+                },
+                body: formData
+            })
 
-        let data = await res.json()
-        if (!data.success) {
-            setMessage({ message: data.error, error: true })
-            return
+            let data = await res.json()
+            if (!data.success) {
+                setMessage({ message: data.error, error: true })
+                return
+            }
+
+            setMessage({ message: data.message, error: false })
+            setTimeout(() => {
+                router.replace('/auth/login')
+            }, 2000)
+        } catch (e) {
+            console.error(e)
+            setMessage({ message: "Internal Server Error", error: true })
         }
-
-        setMessage({ message: data.message, error: false })
-        setTimeout(() => {
-            router.replace('/auth/login')
-        }, 2000)
     }
 
     return (

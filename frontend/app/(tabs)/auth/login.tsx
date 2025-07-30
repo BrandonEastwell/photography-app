@@ -12,7 +12,7 @@ import {useMessage} from "@/app/lib/MessagingContext";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Login() {
-    const { message, setMessage } = useMessage()
+    const {setMessage } = useMessage()
     const { login } = useAuth()
     const router = useRouter()
 
@@ -30,35 +30,41 @@ export default function Login() {
         const formData = new FormData()
         formData.append("username", values.username)
         formData.append("password", values.password)
-
-        const headers = await getReqHeaders()
-        let res = await fetch(`${apiUrl}/api/account/login`, {
-            method: "POST",
-            headers,
-            credentials: "include",
-            body: formData
-        })
-
-        let data = await res.json()
-        if (!data.success) {
-            setMessage({ message: data.error, error: true })
-            if (data.error === "Session expired. Please try again.") await AuthService.createSession()
-            return
-        }
-
-        setMessage({ message: data.message, error: false })
-        console.log(data.auth_token_exp)
-        await AuthService.saveAuthToken(data.auth_token, data.auth_token_exp)
-        login({ username: data.username, userId: data.user_id })
-
-        setTimeout(() => {
-            return router.push({
-                pathname: `/[username]`,
-                params: {
-                    username: encodeURIComponent(data.username),
-                }
+        try {
+            const headers = await getReqHeaders()
+            let res = await fetch(`${apiUrl}/api/account/login`, {
+                method: "POST",
+                headers,
+                credentials: "include",
+                body: formData
             })
-        }, 2000)
+
+
+            let data = await res.json()
+            if (!data.success) {
+                setMessage({ message: data.error, error: true })
+                if (data.error === "Session expired. Please try again.") await AuthService.createSession()
+                return
+            }
+
+            setMessage({ message: data.message, error: false })
+            console.log(data.auth_token_exp)
+            await AuthService.saveAuthToken(data.auth_token, data.auth_token_exp)
+            login({ username: data.username, userId: data.user_id })
+
+            setTimeout(() => {
+                return router.push({
+                    pathname: `/[username]`,
+                    params: {
+                        username: encodeURIComponent(data.username),
+                    }
+                })
+            }, 2000)
+
+        } catch (e) {
+            console.error(e)
+            setMessage({ message: "Internal Server Error", error: true })
+        }
     }
 
     return (

@@ -60,23 +60,27 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClear, o
 
     useEffect(() => {
         const getCameras = async () => {
-            const res = await fetch(`${apiUrl}/api/media/cameras`, {
-                method: "GET"
-            })
+            try {
+                const res = await fetch(`${apiUrl}/api/media/cameras`, {
+                    method: "GET"
+                })
 
-            const data = await res.json()
-            if (data.items && data.items > 0) {
-                const filtered = data.results.filter((item: { model: string; make: string; }) =>
-                    item.model !== "undefined" && item.make !== "undefined")
+                const data = await res.json()
+                if (data.items && data.items > 0) {
+                    const filtered = data.results.filter((item: { model: string; make: string; }) =>
+                        item.model !== "undefined" && item.make !== "undefined")
 
-                const cameraMakes = filtered.map((camera: { make: string; }) => camera.make)
-                const cameraModels = filtered.map((camera: { model: string; }) => camera.model)
+                    const cameraMakes = filtered.map((camera: { make: string; }) => camera.make)
+                    const cameraModels = filtered.map((camera: { model: string; }) => camera.model)
 
-                setExifFormFields(prev => ({
-                    ...prev,
-                    Make: { ...prev.Make, items: Array.from(new Set<string>(cameraMakes)) } as ExifFieldProperties,
-                    Model: { ...prev.Model, items: Array.from(new Set<string>(cameraModels)) } as ExifFieldProperties,
-                }))
+                    setExifFormFields(prev => ({
+                        ...prev,
+                        Make: { ...prev.Make, items: Array.from(new Set<string>(cameraMakes)) } as ExifFieldProperties,
+                        Model: { ...prev.Model, items: Array.from(new Set<string>(cameraModels)) } as ExifFieldProperties,
+                    }))
+                }
+            } catch (e) {
+                console.error(e)
             }
 
             setLoading(true)
