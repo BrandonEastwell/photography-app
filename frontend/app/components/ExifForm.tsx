@@ -1,4 +1,4 @@
-import {Pressable, Text, View} from "react-native";
+import {Text, View} from "react-native";
 import LocationInput from "@/app/components/LocationInput";
 import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
 import * as yup from "yup";
@@ -6,6 +6,8 @@ import {ExifData, ExifDataError, ExifFieldProperties, ExifFields} from "@/app/li
 import InputField from "@/app/components/InputField";
 import Constants from "expo-constants";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import AnimatedButton from "@/app/components/AnimatedButton";
+import {EMPTY_EXIF_DATA} from "@/app/lib/Constants";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 const exifSchema = yup.object().shape({
@@ -145,10 +147,32 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClose } 
                         }
                     })}
 
-                    <Pressable onPress={onFormSubmit} style={{ backgroundColor: "#ffffff", padding: 10, paddingHorizontal: 20,
-                        borderRadius: 15, flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", marginTop: 20}}>
+                    <AnimatedButton onClick={onFormSubmit} styles={{
+                        padding: 10,
+                        paddingHorizontal: 20,
+                        borderRadius: 15,
+                        flexDirection: "row",
+                        gap: 10,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginTop: 20
+                    }} defaultBgColor={"#ffffff"} hoverBgColor={"#ECECECD0"} hoverToPressedBgColor={"rgba(162,162,162,0.82)"}>
                         <Text style={{ color: 'black' }}>{ formMode === "Photo" ? "Preview Photo" : "Search Photos" }</Text>
-                    </Pressable>
+                    </AnimatedButton>
+                    { formMode === "Filtering" &&
+                        <AnimatedButton onClick={() => setExif(EMPTY_EXIF_DATA)} styles={{
+                            padding: 10,
+                            paddingHorizontal: 20,
+                            borderRadius: 15,
+                            flexDirection: "row",
+                            gap: 10,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            marginTop: 20
+                        }} defaultBgColor={"#ffffff"} hoverBgColor={"#ECECECD0"} hoverToPressedBgColor={"rgba(162,162,162,0.82)"}>
+                            <Text style={{ color: 'black' }}>Clear Filters</Text>
+                        </AnimatedButton>
+                    }
                 </View>
             </View>
         )

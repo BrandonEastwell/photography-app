@@ -3,9 +3,12 @@ import React, {useRef, useState} from "react";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export default function AnimatedButton({ children, onClick, defaultBgColor, styles } : {
+export default function AnimatedButton({ children, onClick, defaultBgColor, hoverBgColor, hoverToPressedBgColor, normalToPressedBgColor, styles } : {
     onClick: () => void
     defaultBgColor: string
+    hoverBgColor?: string
+    hoverToPressedBgColor?: string
+    normalToPressedBgColor?: string
     styles?: StyleProp<ViewStyle>
     children: React.ReactNode
 }) {
@@ -31,8 +34,8 @@ export default function AnimatedButton({ children, onClick, defaultBgColor, styl
     const backgroundColor = animation.interpolate({
         inputRange: [0, 1],
         outputRange: isHovered
-            ? ['#212121', '#000']  // hover-to-pressed
-            : [defaultBgColor, '#212121'], // normal-to-pressed
+            ? [hoverBgColor ?? '#212121', hoverToPressedBgColor ?? '#000']  // hover-to-pressed
+            : [defaultBgColor, normalToPressedBgColor ?? '#212121'], // normal-to-pressed
     });
 
     return (

@@ -5,7 +5,7 @@ import {useAuth} from "@/app/lib/AuthContext";
 
 export default function useUpload() {
     const [showUploadScreen, setShowUploadScreen] = useState<boolean>(false)
-    const { user, isAuthenticated } = useAuth();
+    const {isAuthenticated } = useAuth();
     const router = useRouter()
 
     const onUploadClick = async () => {
