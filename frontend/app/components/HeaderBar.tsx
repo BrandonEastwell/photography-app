@@ -3,6 +3,7 @@ import React, {useEffect, useRef, useState} from "react";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AnimatedButton from "@/app/components/AnimatedButton";
 import {useAuth} from "@/app/lib/AuthContext";
+import {router} from "expo-router";
 
 export default function HeaderBar({ containerWidth } : { containerWidth: number }) {
     const [showSidebar, setShowSidebar] = useState<boolean>(false)
@@ -106,7 +107,7 @@ export default function HeaderBar({ containerWidth } : { containerWidth: number 
         <>
             <View style={{ height: 40, flexDirection: "row", alignItems: "center", justifyContent: "flex-end", zIndex: 1001 }}>
                 <View style={{ position: "absolute", width: "100%", justifyContent: "center" }}>
-                    <Animated.Text style={{ fontSize: 20, fontFamily: "BethEllen-Regular", color: 'white',
+                    <Animated.Text onPress={() => router.push("/")} style={{ fontSize: 20, fontFamily: "BethEllen-Regular", color: 'white',
                         alignSelf: "center", marginHorizontal: "auto", transform: [{ translateX: titleSlide }] }}>Photography App</Animated.Text>
                 </View>
                 <Pressable onPress={() => showSidebar ? closeSidebar() : openSidebar()} style={{ alignSelf: "center",  padding: 15 }}>

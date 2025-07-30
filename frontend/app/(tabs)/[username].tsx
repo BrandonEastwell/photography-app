@@ -1,15 +1,14 @@
-import {View, Text, Platform, Pressable, Animated, FlatList} from "react-native";
+import {View, Text, Platform, Pressable, FlatList} from "react-native";
 import React, {useEffect, useState} from "react";
 import AuthService from "@/app/lib/AuthService";
 import {router, useLocalSearchParams} from "expo-router";
 import Constants from "expo-constants";
-import {Image} from "expo-image";
 import useUpload from "@/app/lib/useUpload";
 import PhotoUpload from "@/app/components/PhotoUpload";
 import {Photo, UserProfile} from "@/app/lib/Types";
-
 import PhotoCard from "@/app/components/PhotoCard";
 import {useMessage} from "@/app/lib/MessagingContext";
+import DefaultProfileIcon from "../../assets/images/account_circle.svg"
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function Username() {
@@ -53,8 +52,8 @@ export default function Username() {
             { profile &&
                 <View style={{ position: "relative", width: '100%', height: "100%" }}>
                     <View style={{ flexDirection: "row", alignSelf: "center", maxHeight: 200, minHeight: 150, gap: 10, padding: 30 }}>
-                        <View style={{ height: '100%', maxWidth: 128, maxHeight: 128, aspectRatio: 1, borderRadius: 9999, backgroundColor: "white"}}>
-                            { profile.image && <Image source={ profile.image } style={{  }} /> }
+                        <View style={{ height: '100%', maxWidth: 128, maxHeight: 128, aspectRatio: 1, borderRadius: 9999, backgroundColor: "transparent"}}>
+                            { !profile.image && <DefaultProfileIcon style={{ width: "100%", height: "100%" }} /> }
                         </View>
                         <View style={{ flex: 2, flexDirection: "column", padding: 10 }}>
                             <Text style={{ fontSize: 12, color: 'white', opacity: 0.5, fontFamily: "SpaceMono-Regular" }}>Portfolio</Text>
