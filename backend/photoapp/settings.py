@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 from pathlib import Path
 
+import dj_database_url
 import environ
 from corsheaders.defaults import default_headers
 
@@ -108,7 +109,7 @@ SESSION_COOKIE_AGE = 604800
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'default': dj_database_url.config(default=env('DATABASE_URL')) if env("PRODUCTION") is True else {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'photoapp_db',
         'USER': 'admin',
