@@ -63,7 +63,7 @@ export default function Index() {
         <View style={{position: "relative",  height: "100%", width: "100%", backgroundColor: "#181a1b" }}>
             <SearchBar onSearch={(exif: ExifData, sort_by_time: TimePeriodValue) => searchPhotos(exif, sort_by_time)} />
             { images &&
-                <FlatList columnWrapperStyle={{ justifyContent: 'space-evenly' }}
+                <FlatList columnWrapperStyle={{ justifyContent: 'flex-start' }}
                           numColumns={3} keyExtractor={item => item.image_url} data={images}
                           renderItem={(photo) => <Item photo={photo.item} />} /> }
         </View>

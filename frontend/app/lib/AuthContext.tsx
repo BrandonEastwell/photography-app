@@ -3,6 +3,7 @@ import AuthService from "@/app/lib/AuthService";
 import Constants from "expo-constants";
 import {useRouter} from "expo-router";
 import {getReqHeaders} from "@/app/lib/Helpers";
+import {Photo, UserProfile} from "@/app/lib/Types";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 type User = { username: string, userId: number };
@@ -10,27 +11,34 @@ type User = { username: string, userId: number };
 const AuthContext = createContext<{
     login: (user: User) => void;
     logout: () => void;
-    user: User | null;
-    authenticated: boolean
+    authUser: Partial<UserProfile> | null;
+    setAuthUser: React.Dispatch<React.SetStateAction<Partial<UserProfile> | null>>;
+    authUserPhotos: Photo[] | null;
+    setAuthUserPhotos: React.Dispatch<React.SetStateAction<Photo[] | null>>;
+    authenticated: boolean;
     isAuthenticated: () => Promise<boolean>;
 }>({
     login: () => null,
     logout: () => null,
-    user: null,
+    authUser: null,
+    setAuthUser: () => null,
+    authUserPhotos: null,
+    setAuthUserPhotos: () => null,
     authenticated: false,
     isAuthenticated: async () => false,
 });
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
-    const [user, setUser] = useState<User | null>(null)
+    const [profile, setProfile] = useState<Partial<UserProfile> | null>(null)
     const [authenticated, setAuthenticated] = useState<boolean>(false)
+    const [userPhotos, setUserPhotos] = useState<Photo[] | null>(null)
     const router = useRouter()
 
     useEffect(() => {
         const initializeSession = async () => {
             const user = await AuthService.createSession()
             if (user) {
-                setUser({ username: user.username, userId: user.userId })
+                setProfile({ username: user.username, user_id: user.userId })
                 setAuthenticated(true)
             }
         }
@@ -55,7 +63,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
             if (res.ok) {
                 await AuthService.deleteAuthToken()
-                setUser(null)
+                setProfile(null)
                 setAuthenticated(false)
 
                 setTimeout(() => {
@@ -68,13 +76,16 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     }
 
     const login = async (user: User) => {
-        setUser({ username: user.username, userId: user.userId})
+        setProfile({ username: user.username, user_id: user.userId})
         setAuthenticated(true)
     }
 
     return (
         <AuthContext.Provider value={{
-            user,
+            authUser: profile,
+            setAuthUser: setProfile,
+            authUserPhotos: userPhotos,
+            setAuthUserPhotos: setUserPhotos,
             authenticated,
             isAuthenticated: async () => await isAuthenticated(),
             logout,

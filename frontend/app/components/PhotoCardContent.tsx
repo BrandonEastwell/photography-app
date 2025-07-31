@@ -18,9 +18,9 @@ export default function PhotoCardContent({ children, onClose, showCard, photoSrc
     userId: number | null
     showCard: boolean
 }) {
-    const { user } = useAuth()
+    const { authUser } = useAuth()
     const router = useRouter();
-    const isUserPhoto = user?.userId === userId && typeof (user?.userId + userId) === "number"
+    const isUserPhoto = authUser?.userId === userId && typeof (authUser?.userId + userId) === "number"
     const scaleAnim = useRef(new Animated.Value(1.05)).current;
 
     const navigateToProfile = () => {

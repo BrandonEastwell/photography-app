@@ -48,7 +48,7 @@ const initExifFormFields: ExifFields = {
 export default function ExifForm({ setExif, exif, onSubmit, formMode, onClear, onClose } : {
     setExif: Dispatch<SetStateAction<ExifData>>;
     exif: ExifData;
-    onSubmit: (exif?: ExifData) => Promise<void>;
+    onSubmit: (exif?: ExifData) => void;
     onClear?: () => void;
     onClose: () => void;
     formMode: "Filtering" | "Photo"

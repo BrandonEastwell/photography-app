@@ -12,7 +12,7 @@ import {useMessage} from "@/app/lib/MessagingContext";
 export default function TabLayout() {
     const [containerWidth, setContainerWidth] = useState(0);
     const { onUploadClick, showUploadScreen, setShowUploadScreen } = useUpload();
-    const { user, isAuthenticated } = useAuth();
+    const { authUser, isAuthenticated } = useAuth();
     const { message, setMessage } = useMessage()
     const router = useRouter();
     const animatedMessage = useRef(new Animated.Value(0)).current;
@@ -20,11 +20,11 @@ export default function TabLayout() {
     const onProfileClick = async () => {
         const isUserAuthenticated = await isAuthenticated()
         if (!isUserAuthenticated) return router.push("/auth/login")
-        if (user && user.username) {
+        if (authUser && authUser.username) {
             return router.push({
                 pathname: `/[username]`,
                 params: {
-                    username: encodeURIComponent(user.username),
+                    username: encodeURIComponent(authUser.username),
                 }
             })
         }

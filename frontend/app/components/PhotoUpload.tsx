@@ -12,6 +12,7 @@ import PhotoCardContent from "@/app/components/PhotoCardContent";
 import PhotoModal from "@/app/components/PhotoModal";
 import AnimatedButton from "@/app/components/AnimatedButton";
 import {useMessage} from "@/app/lib/MessagingContext";
+import {useAuth} from "@/app/lib/AuthContext";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 const emptyExifData: ExifData = {
@@ -33,6 +34,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
     const [showExifForm, setShowExifForm] = useState<boolean>(false)
     const [showCard, setShowCard] = useState<boolean>(false)
     const { setMessage } = useMessage()
+    const { isAuthenticated } = useAuth()
 
     useEffect(() => {
         pickImageAsync()
@@ -46,10 +48,15 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
             quality: 1
         });
 
-        if (result.canceled) setShowUpload(false)
-        else {
+        if (result.canceled) {
+            setMessage({ message: "Upload cancelled", error: false })
+            setShowUpload(false)
+        } else {
             let image = result.assets[0]
-            if (!image.fileSize || image.fileSize > 1048576) return
+            if (!image.fileSize || image.fileSize > 10000000) {
+                setMessage({ message: "Photo over 10MB limit", error: true })
+                return setShowUpload(false)
+            }
             console.log('EXIF:', image.exif);
 
             const exifData = { Make: image.exif?.Make, Model: image.exif?.Model,
@@ -85,11 +92,8 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
     }
 
     const uploadPhoto = async (formData: FormData) => {
-        const isUserLoggedIn = await AuthService.isTokenExpired()
-        if (!isUserLoggedIn) {
-            const refreshed = await AuthService.refreshAuthToken()
-            if (!refreshed) return router.replace("/auth/login")
-        }
+        const isLoggedIn = await isAuthenticated()
+        if (!isLoggedIn) return router.push("/auth/login")
 
         let res = await postPhoto(formData)
         let data = await res.json()
@@ -102,15 +106,13 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                 res = await postPhoto(formData)
                 data = res.json()
 
-                if (!data.success) throw new Error("Upload failed after refresh");
+                if (data.success) return setMessage({ message: data.message, error: false })
             }
             return setMessage({ message: data.error, error: true })
         }
 
         setMessage({ message: data.message, error: false })
-        setTimeout(() => {
-            setShowUpload(false)
-        }, 2000)
+        setShowUpload(false)
     }
     
     async function postPhoto(formData: any) {
