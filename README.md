@@ -74,7 +74,7 @@ As a movie enthusiast and developer, I wanted a tool to streamline the search fo
  
 ## Todo
 > Feature list planned to be worked on in the future
-- **Liking Photos**: Upvote photos you like the vibe off to save them to a list
+- **Liking Photos**: Upvote photos you like the vibe of to save them to a list
 - **Save Portfolios**: Add portfolios you like to a list you can access
 - **Portfolio Customisation**: Profile icons, themes, drag reorder photos, create photo albums
 - **Account Management**: Forgotten password, change password, username
