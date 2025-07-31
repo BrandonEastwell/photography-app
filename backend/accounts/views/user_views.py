@@ -79,6 +79,7 @@ def get_user_profile(user_id):
             "image": user_profile.image.url if user_profile.image else None,
             "photos": [
                 {
+                    "image_id": image.id,
                     "image_url": image.image.url,
                     "latitude": image.location.y if not types.NoneType else None,
                     "longitude": image.location.x if not types.NoneType else None,
@@ -90,7 +91,7 @@ def get_user_profile(user_id):
                     "ISO": image.ISO if not None else None,
                     "shutter_speed": image.shutter_speed if not None else None,
                     "focal_length": image.focal_length if not None else None,
-                    "votes": image.total_votes
+                    "votes": image.total_votes,
                 }
                 for image in images
             ]

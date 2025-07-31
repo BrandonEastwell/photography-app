@@ -87,6 +87,7 @@ def image_search(req):
         images_serialized = [
             {
                 "user_id": image.user.id,
+                "image_id": image.id,
                 "relevance_score": image.relevance if hasattr(image, "relevance") else None,
                 "image_url": image.image.url,
                 "distance": str(image.distance) if hasattr(image, "distance") and image.distance is not None else None,
