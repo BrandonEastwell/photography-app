@@ -1,0 +1,9 @@
+photoapp-env/
+*.pyc
+*.pyo
+__pycache__/
+*.db
+.env
+.git
+*.sqlite3
+*.log

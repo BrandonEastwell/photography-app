@@ -10,9 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 from pathlib import Path
-from corsheaders.defaults import default_headers
 
 import environ
+from corsheaders.defaults import default_headers
 
 # from django.conf.global_settings import AUTH_USER_MODEL
 
@@ -23,8 +23,17 @@ environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal310.dll"
-GEOS_LIBRARY_PATH = r"C:\OSGeo4W\bin\geos_c.dll"
+import platform
+
+if platform.system() == "Windows":
+    # Windows local dev machine paths
+    GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal310.dll"
+    GEOS_LIBRARY_PATH = r"C:\OSGeo4W\bin\geos_c.dll"
+else:
+    # Linux container paths
+    GDAL_LIBRARY_PATH = "/usr/lib/x86_64-linux-gnu/libgdal.so"
+    GEOS_LIBRARY_PATH = "/usr/lib/x86_64-linux-gnu/libgeos_c.so.1"
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -32,10 +41,10 @@ GEOS_LIBRARY_PATH = r"C:\OSGeo4W\bin\geos_c.dll"
 SECRET_KEY = 'django-insecure-o5)9cyx=@62omlu&bp3=w8xo*jfy2m-a^og+8n&936-&$+^(*8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = []
-# Application definition
+DEBUG = env("DEBUG", default=True)
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost"])
 
+# Application definition
 INSTALLED_APPS = [
     "django_extensions",
     'corsheaders',
