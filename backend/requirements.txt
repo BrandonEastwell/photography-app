@@ -1,4 +1,4 @@
-Django==5.2.4
+Django==5.2.1
 django-extensions
 django-cors-headers
 django-storages
@@ -6,16 +6,6 @@ django_environ==0.12.0
 exifread==3.3.1
 PyJWT==2.10.1
 pillow==11.3.0
-regex==2023.12.25
-srsly==2.4.8
-sympy==1.12
-thinc==8.2.3
-threadpoolctl==3.3.0
-tokenizers==0.15.2
-typing_extensions==4.10.0
-urllib3==2.2.1
-wasabi==1.1.2
-weasel==0.3.4
 gunicorn
 boto3
 psycopg2-binary
