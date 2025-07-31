@@ -25,5 +25,5 @@ RUN pip install -r requirements.txt
 # Expose the port Render will use
 EXPOSE 8000
 
-# Start Gunicorn server
-CMD ["gunicorn", "photoapp.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Migrate Django Models && Start Gunicorn server
+CMD ["sh", "-c", "python manage.py migrate && gunicorn photoapp.wsgi:application --bind 0.0.0.0:8000"]
