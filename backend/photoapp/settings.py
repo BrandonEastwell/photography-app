@@ -43,6 +43,7 @@ SECRET_KEY = 'django-insecure-o5)9cyx=@62omlu&bp3=w8xo*jfy2m-a^og+8n&936-&$+^(*8
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG", default=True)
+PRODUCTION = env.bool("PRODUCTION", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost"])
 
 # Application definition
@@ -109,7 +110,7 @@ SESSION_COOKIE_AGE = 604800
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(default=env('DATABASE_URL')) if env("PRODUCTION") is True else {
+    'default': dj_database_url.config(default=env('DATABASE_URL')) if PRODUCTION is True else {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'photoapp_db',
         'USER': 'admin',
