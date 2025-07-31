@@ -34,7 +34,7 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
     const [showExifForm, setShowExifForm] = useState<boolean>(false)
     const [showCard, setShowCard] = useState<boolean>(false)
     const { setMessage } = useMessage()
-    const { isAuthenticated } = useAuth()
+    const { isAuthenticated, setAuthUserPhotos, authUserPhotos } = useAuth()
 
     useEffect(() => {
         pickImageAsync()
@@ -57,7 +57,6 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
                 setMessage({ message: "Photo over 10MB limit", error: true })
                 return setShowUpload(false)
             }
-            console.log('EXIF:', image.exif);
 
             const exifData = { Make: image.exif?.Make, Model: image.exif?.Model,
                 LensModel: image.exif?.LensModel, FocalLength: image.exif?.FocalLength, Flash: image.exif?.Flash,
@@ -111,6 +110,8 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
             return setMessage({ message: data.error, error: true })
         }
 
+        const newUserPhotos = authUserPhotos ? [ ...authUserPhotos, data.image] : [ data.image ]
+        setAuthUserPhotos(newUserPhotos)
         setMessage({ message: data.message, error: false })
         setShowUpload(false)
     }

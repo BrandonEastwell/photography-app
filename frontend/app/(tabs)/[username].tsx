@@ -61,6 +61,12 @@ export default function Username() {
         onLoad()
     }, []);
 
+    useEffect(() => {
+        if (authUser?.username === username) {
+            setPhotos(authUserPhotos)
+        }
+    }, [authUserPhotos]);
+
     const Item = ({ photo }: { photo: Photo }) =>
         <PhotoCard photo={photo}
                    userId={profile?.user_id ?? photo.user_id}
