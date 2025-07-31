@@ -93,8 +93,8 @@ def image_search(req):
                 "distance": str(image.distance) if hasattr(image, "distance") and image.distance is not None else None,
                 "latitude": image.location.y if not types.NoneType else None,
                 "longitude": image.location.x if not types.NoneType else None,
-                "camera_model": image.camera.model,
-                "camera_make": image.camera.make,
+                "camera_model": image.camera.model if not types.NoneType else None,
+                "camera_make": image.camera.make if not types.NoneType else None,
                 "flash": image.flash,
                 "f_stop": image.f_stop if not types.NoneType else None,
                 "lens": image.lens.model if not types.NoneType else None,
@@ -137,7 +137,7 @@ def image_upload(req):
         return JsonResponse({ "success": False, "error": "Please upload a photo" }, status=400)
 
     try:
-        required_tags = ["Make", "Model", "GPSLatitude", "GPSLongitude"]
+        # required_tags = ["Make", "Model", "GPSLatitude", "GPSLongitude"]
         image_tags = {
             "Make": None,
             "Model": None,
@@ -160,16 +160,18 @@ def image_upload(req):
             image_tags["GPSLongitude"] = _convert_to_degrees(image_tags["GPSLongitude"])
             image_tags["GPSLatitude"] = _convert_to_degrees(image_tags["GPSLatitude"])
 
-        missing_tags = []
-        for tag in required_tags:
-            if image_tags[tag] is None:
-                image_tags[tag] = req.POST.get(tag) if not None else missing_tags.append(tag)
+        # missing_tags = []
+        # for tag in required_tags:
+        #     if image_tags[tag] is None:
+        #         image_tags[tag] = req.POST.get(tag) if not None else missing_tags.append(tag)
+        #
+        #
+        # if len(missing_tags) > 0:
+        #     return JsonResponse( { "success": False, "missing_tags": missing_tags, "error": "Missing tags from image" }, status=400 )
 
-
-        if len(missing_tags) > 0:
-            return JsonResponse( { "success": False, "missing_tags": missing_tags, "error": "Missing tags from image" }, status=400 )
-
-        camera, _ = Camera.objects.get_or_create(model=image_tags["Model"], defaults={"make": image_tags["Make"]})
+        camera = None
+        if image_tags["Make"] and image_tags["Model"]:
+            camera, _ = Camera.objects.get_or_create(model=image_tags["Model"], defaults={"make": image_tags["Make"]})
 
         lens = None
         if image_tags["LensModel"]:
@@ -179,14 +181,40 @@ def image_upload(req):
         ext = str(image_file).split(".")[1]
         image_file.name = fr"{uuid.uuid4().hex}.{ext}"
 
-        Photo.objects.create(user_id=user.id, image=image_file, location=Point(float(image_tags["GPSLongitude"]), float(image_tags["GPSLatitude"]), srid=4326),
-                             camera=camera, lens=lens, f_stop=image_tags['FNumber'], flash=image_tags['Flash'] not in (0, None),
-                             focal_length = image_tags['FocalLength'], ISO = image_tags['ISOSpeedRatings'],
+        image = Photo.objects.create(user_id=user.id,
+                             image=image_file,
+                             location=Point(float(image_tags["GPSLongitude"]), float(image_tags["GPSLatitude"]), srid=4326)
+                             if image_tags["GPSLongitude"] and image_tags["GPSLongitude"] is not None else None,
+                             camera=camera,
+                             lens=lens,
+                             f_stop=image_tags['FNumber'],
+                             flash=image_tags['Flash'] not in (0, None),
+                             focal_length = image_tags['FocalLength'],
+                             ISO = image_tags['ISOSpeedRatings'],
                              taken_at = timezone.make_aware(datetime.strptime(str(image_tags['DateTimeOriginal']), "%Y:%m:%d %H:%M:%S"))
                              if image_tags['DateTimeOriginal'] is not None else None,
                              shutter_speed = image_tags['ShutterSpeedValue'])
 
-        return JsonResponse({ "success": True, "message": "Photo successfully uploaded" }, status=200)
+        image_serialized = {
+            "user_id": image.user.id,
+            "image_id": image.id,
+            "relevance_score": image.relevance if hasattr(image, "relevance") else None,
+            "image_url": image.image.url,
+            "distance": str(image.distance) if hasattr(image, "distance") and image.distance is not None else None,
+            "latitude": image.location.y if not types.NoneType else None,
+            "longitude": image.location.x if not types.NoneType else None,
+            "camera_model": image.camera.model if not types.NoneType else None,
+            "camera_make": image.camera.make if not types.NoneType else None,
+            "flash": image.flash,
+            "f_stop": image.f_stop if not types.NoneType else None,
+            "lens": image.lens.model if not types.NoneType else None,
+            "ISO": image.ISO if not None else None,
+            "shutter_speed": image.shutter_speed if not None else None,
+            "focal_length": image.focal_length if not None else None,
+            "votes": image.total_votes
+        }
+
+        return JsonResponse({ "success": True, "message": "Photo successfully uploaded", "image": image_serialized }, status=200)
     except Exception as e:
         logging.exception(e)
         return JsonResponse({ "success": False, "error": "Could not upload photo at this time." }, status=500)
