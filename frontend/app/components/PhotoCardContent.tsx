@@ -7,27 +7,21 @@ import {useRouter} from "expo-router";
 import {useAuth} from "@/app/lib/AuthContext";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import Constants from "expo-constants";
-import {getReqHeaders} from "@/app/lib/Helpers";
-import {useMessage} from "@/app/lib/MessagingContext";
-import AuthService from "@/app/lib/AuthService";
-const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
-export default function PhotoCardContent({ children, onClose, showCard, photoSrc, photoId, exif, profile, userId } : {
+export default function PhotoCardContent({ children, onClose, showCard, photoSrc, onDelete, exif, profile, userId } : {
     children: React.ReactNode
     onClose: React.Dispatch<React.SetStateAction<boolean>>
     photoSrc: string
-    photoId?: number
+    onDelete?: () => void
     exif: ExifData | null
     profile: Partial<UserProfile> | null
     userId: number | null
     showCard: boolean
 }) {
-    const { user, isAuthenticated } = useAuth()
+    const { user } = useAuth()
     const router = useRouter();
     const isUserPhoto = user?.userId === userId && typeof (user?.userId + userId) === "number"
     const scaleAnim = useRef(new Animated.Value(1.05)).current;
-    const { setMessage } = useMessage()
 
     const navigateToProfile = () => {
         if (profile?.username) {
@@ -37,33 +31,6 @@ export default function PhotoCardContent({ children, onClose, showCard, photoSrc
                     username: encodeURIComponent(profile.username)
                 }
             })
-        }
-    }
-
-    const removePhotoFromProfile = async () => {
-        if (isUserPhoto && photoId) {
-            const isUserAuthenticated = await isAuthenticated()
-            if (!isUserAuthenticated) {
-                let isAuthRefreshed: boolean = await AuthService.refreshAuthToken()
-                if (!isAuthRefreshed) return router.push("/auth/login")
-            }
-
-            try {
-                const headers = await getReqHeaders()
-                let res = await fetch(`${apiUrl}/api/media/photo/${photoId}`, {
-                    method: "DELETE",
-                    headers,
-                    credentials: "include",
-                })
-
-                const data = await res.json()
-                if (!data.success) return setMessage({ message: data.error, error: true })
-                data.message ? setMessage({ message: data.message, error: false }) : null
-
-            } catch (e) {
-                console.error(e)
-                setMessage({ message: "Internal Server Error", error: true })
-            }
         }
     }
 
@@ -100,8 +67,8 @@ export default function PhotoCardContent({ children, onClose, showCard, photoSrc
                             </View>
                         </Pressable>
                     }
-                    { isUserPhoto &&
-                        <Pressable onPress={removePhotoFromProfile} style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+                    { isUserPhoto && onDelete &&
+                        <Pressable onPress={onDelete} style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
                             <MaterialCommunityIcons name="delete-outline" size={24} color="white" />
                         </Pressable>
                     }

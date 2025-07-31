@@ -45,7 +45,7 @@ export default function Username() {
         onLoad()
     }, []);
 
-    const Item = ({ photo }: { photo: Photo }) => <PhotoCard photo={photo} userId={profile?.user_id ?? photo.user_id} />
+    const Item = ({ photo }: { photo: Photo }) => <PhotoCard photo={photo} userId={profile?.user_id ?? photo.user_id} removePhoto={(id: number) => setPhotos((prevPhotos) => (prevPhotos ?? []).filter((p) => p.image_id !== id))} />
 
     return (
         <View style={{ width: '100%', height: "100%", backgroundColor: "#181a1b", alignItems: "center" }}>

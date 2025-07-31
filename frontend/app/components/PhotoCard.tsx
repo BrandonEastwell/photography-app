@@ -5,15 +5,23 @@ import {ExifData, Photo, photoKeyToExifKeyMap, UserProfile} from "@/app/lib/Type
 import PhotoCardContent from "@/app/components/PhotoCardContent";
 import PhotoModal from "@/app/components/PhotoModal";
 import Constants from 'expo-constants';
+import AuthService from "@/app/lib/AuthService";
+import {getReqHeaders} from "@/app/lib/Helpers";
+import {useMessage} from "@/app/lib/MessagingContext";
+import {useAuth} from "@/app/lib/AuthContext";
+import {router} from "expo-router";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
-export default function PhotoCard({ photo, userId } : {
+export default function PhotoCard({ photo, userId, removePhoto } : {
     photo: Photo
     userId: number
+    removePhoto?: (id: number) => void
 }) {
     const [showCard, setShowCard] = useState<boolean>(false)
     const [exif, setExif] = useState<Partial<ExifData>>({})
     const [profile, setProfile] = useState<Partial<UserProfile> | null>(null)
+    const { setMessage } = useMessage()
+    const { isAuthenticated } = useAuth()
 
     const onClickPhoto = () => {
         const exifData: Partial<ExifData> = {}
@@ -75,6 +83,33 @@ export default function PhotoCard({ photo, userId } : {
         }
     }
 
+    const deletePhoto = async () => {
+        if (removePhoto && photo.image_id) {
+            const isUserAuthenticated = await isAuthenticated()
+            if (!isUserAuthenticated) {
+                let isAuthRefreshed: boolean = await AuthService.refreshAuthToken()
+                if (!isAuthRefreshed) return router.push("/auth/login")
+            }
+
+            try {
+                const headers = await getReqHeaders()
+                let res = await fetch(`${apiUrl}/api/media/photo/${photo.image_id}`, {
+                    method: "DELETE",
+                    headers,
+                    credentials: "include",
+                })
+
+                const data = await res.json()
+                if (!data.success) return setMessage({ message: data.error, error: true })
+                data.message ? setMessage({ message: data.message, error: false }) : null
+                removePhoto(photo.image_id)
+            } catch (e) {
+                console.error(e)
+                setMessage({ message: "Could not delete photo right now", error: true })
+            }
+        }
+    }
+
     return (
         <>
             <Pressable onPress={onClickPhoto} style={{ width: "32%", height: 200, margin: 2.5, zIndex: 50 }}>
@@ -83,7 +118,7 @@ export default function PhotoCard({ photo, userId } : {
             { showCard &&
                 <PhotoModal>
                     <PhotoCardContent onClose={setShowCard} photoSrc={photo.image_url} exif={exif} children={undefined}
-                                      profile={profile} userId={userId} showCard={showCard} photoId={photo.image_id}>
+                                      profile={profile} userId={userId} showCard={showCard} onDelete={deletePhoto}>
                     </PhotoCardContent>
                 </PhotoModal>
             }
