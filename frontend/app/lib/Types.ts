@@ -34,6 +34,7 @@ export interface Photo {
     shutter_speed?: number
     user_id: number
     votes?: number
+    image_id: number
 }
 
 export const photoKeyToExifKeyMap: {

@@ -10,18 +10,20 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Constants from "expo-constants";
 import {getReqHeaders} from "@/app/lib/Helpers";
 import {useMessage} from "@/app/lib/MessagingContext";
+import AuthService from "@/app/lib/AuthService";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
-export default function PhotoCardContent({ children, onClose, showCard, photoSrc, exif, profile, userId } : {
+export default function PhotoCardContent({ children, onClose, showCard, photoSrc, photoId, exif, profile, userId } : {
     children: React.ReactNode
     onClose: React.Dispatch<React.SetStateAction<boolean>>
     photoSrc: string
+    photoId?: number
     exif: ExifData | null
     profile: Partial<UserProfile> | null
     userId: number | null
     showCard: boolean
 }) {
-    const { user } = useAuth()
+    const { user, isAuthenticated } = useAuth()
     const router = useRouter();
     const isUserPhoto = user?.userId === userId && typeof (user?.userId + userId) === "number"
     const scaleAnim = useRef(new Animated.Value(1.05)).current;
@@ -39,10 +41,16 @@ export default function PhotoCardContent({ children, onClose, showCard, photoSrc
     }
 
     const removePhotoFromProfile = async () => {
-        if (isUserPhoto) {
+        if (isUserPhoto && photoId) {
+            const isUserAuthenticated = await isAuthenticated()
+            if (!isUserAuthenticated) {
+                let isAuthRefreshed: boolean = await AuthService.refreshAuthToken()
+                if (!isAuthRefreshed) return router.push("/auth/login")
+            }
+
             try {
                 const headers = await getReqHeaders()
-                let res = await fetch(`${apiUrl}/api/account/`, {
+                let res = await fetch(`${apiUrl}/api/media/photo/${photoId}`, {
                     method: "DELETE",
                     headers,
                     credentials: "include",
@@ -57,7 +65,6 @@ export default function PhotoCardContent({ children, onClose, showCard, photoSrc
                 setMessage({ message: "Internal Server Error", error: true })
             }
         }
-
     }
 
     useEffect(() => {

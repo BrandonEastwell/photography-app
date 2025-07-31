@@ -83,7 +83,7 @@ export default function PhotoCard({ photo, userId } : {
             { showCard &&
                 <PhotoModal>
                     <PhotoCardContent onClose={setShowCard} photoSrc={photo.image_url} exif={exif} children={undefined}
-                                      profile={profile} userId={userId} showCard={showCard}>
+                                      profile={profile} userId={userId} showCard={showCard} photoId={photo.image_id}>
                     </PhotoCardContent>
                 </PhotoModal>
             }
