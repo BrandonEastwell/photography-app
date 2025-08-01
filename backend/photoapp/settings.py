@@ -110,7 +110,17 @@ SESSION_COOKIE_AGE = 604800
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(default=env('DATABASE_URL')) if PRODUCTION is True else {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT', '5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        }
+    } if PRODUCTION is True else {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'photoapp_db',
         'USER': 'admin',
