@@ -112,6 +112,9 @@ const styles = StyleSheet.create({
         flex: 1,
         height: '100%',
         fontFamily: "SpaceMono-Regular",
-        outlineWidth: 0
+        color: "black",
+        outlineWidth: 0,
+        paddingVertical: 0,
+        textAlignVertical: "center"
     }
 });
