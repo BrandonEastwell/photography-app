@@ -54,8 +54,8 @@ export default function PhotoCardContent({ children, onClose, showCard, photoSrc
     }
 
     return (
-        <Animated.View style={{ transform: [{ scale: scaleAnim }], flexDirection: "column", backgroundColor: '#121212', borderRadius: 15, maxWidth: 340, height: "auto" }}>
-            <View style={{ padding: 10, borderRadius: 15, flexDirection: "row", zIndex: 100, width: "100%", justifyContent: "space-between"}}>
+        <Animated.View style={{ transform: [{ scale: scaleAnim }], flexDirection: "column", backgroundColor: '#121212', borderRadius: 15, maxWidth: 340 }}>
+            <View style={{ padding: 10, borderRadius: 15, flexDirection: "row", zIndex: 100, width: "100%", maxHeight: 50, justifyContent: "space-between"}}>
                 <View>
                     { profile && !isUserPhoto &&
                         <Pressable onPress={navigateToProfile} style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>

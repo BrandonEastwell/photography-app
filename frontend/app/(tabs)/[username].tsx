@@ -75,15 +75,17 @@ export default function Username() {
     return (
         <View style={{ width: '100%', height: "100%", backgroundColor: "#181a1b", alignItems: "center" }}>
             { profile &&
-                <View style={{ position: "relative", width: '100%', height: "100%" }}>
-                    <View style={{ flexDirection: "row", alignSelf: "center", maxHeight: 200, minHeight: 150, gap: 10, padding: 30 }}>
-                        <View style={{ height: '100%', maxWidth: 128, maxHeight: 128, aspectRatio: 1, borderRadius: 9999, backgroundColor: "transparent"}}>
-                            { !profile.image && <DefaultProfileIcon style={{ width: "100%", height: "100%" }} /> }
-                        </View>
-                        <View style={{ flex: 2, flexDirection: "column", padding: 10 }}>
-                            <Text style={{ fontSize: 12, color: 'white', opacity: 0.5, fontFamily: "SpaceMono-Regular" }}>Portfolio</Text>
-                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 24, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.username }</Text>
-                            <Text style={{ flex: 1, flexShrink: 1, fontSize: 12, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.first_name + ' ' + profile.last_name }</Text>
+                <View style={{ width: '100%', height: "100%" }}>
+                    <View style={{ flexDirection: "column", alignItems: "center" }}>
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", maxHeight: 200, minHeight: 150, gap: 10, padding: 30 }}>
+                            <View style={{ height: '100%', flexDirection: "column", justifyContent: "center", maxWidth: 128, maxHeight: 128, borderRadius: 9999, backgroundColor: "transparent"}}>
+                                { !profile.image && <DefaultProfileIcon style={{ width: "100%", height: "100%" }} /> }
+                            </View>
+                            <View style={{ flex: 2, flexDirection: "column", padding: 10 }}>
+                                <Text style={{ fontSize: 12, color: 'white', opacity: 0.5, fontFamily: "SpaceMono-Regular" }}>Portfolio</Text>
+                                <Text style={{ flex: 1, flexShrink: 1, fontSize: 16, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.username }</Text>
+                                <Text style={{ flex: 1, flexShrink: 1, fontSize: 12, color: 'white', fontFamily: "SpaceMono-Regular" }}>{ profile.first_name + ' ' + profile.last_name }</Text>
+                            </View>
                         </View>
                     </View>
 

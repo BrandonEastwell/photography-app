@@ -1,13 +1,14 @@
 import {Tabs, useRouter} from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import PhotoUpload from '../components/PhotoUpload'
-import {Pressable, View, Text, Animated} from "react-native";
+import {Pressable, View, Text, Animated } from "react-native";
 import {Entypo} from "@expo/vector-icons";
 import useUpload from "@/app/lib/useUpload";
 import React, {useEffect, useRef, useState} from "react";
 import HeaderBar from "@/app/components/HeaderBar";
 import {useAuth} from "@/app/lib/AuthContext";
 import {useMessage} from "@/app/lib/MessagingContext";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 export default function TabLayout() {
     const [containerWidth, setContainerWidth] = useState(0);
@@ -65,7 +66,7 @@ export default function TabLayout() {
     }, [message]);
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#181a1b', width: "100%", alignItems: "center" }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#181a1b', width: "100%", alignItems: "center" }}>
             <View style={{ flex: 1, maxWidth: 800, width: "100%", overflow: "hidden" }}
                   onLayout={(event) => {
                       const { width } = event.nativeEvent.layout;
@@ -138,6 +139,6 @@ export default function TabLayout() {
                 </Tabs>
                 { showUploadScreen && <PhotoUpload setShowUpload={setShowUploadScreen} /> }
             </View>
-        </View>
+        </SafeAreaView>
     );
 }

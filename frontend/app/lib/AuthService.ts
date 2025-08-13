@@ -17,7 +17,7 @@ export default class AuthService {
 
         const { success, session_id, user } = await res.json()
         if (success) {
-            if (Platform.OS !== "web") await SecureStore.setItemAsync("session_id", session_id)
+            if (Platform.OS !== "web") await SecureStore.setItemAsync("session_id", String(JSON.stringify(session_id)))
             if (user) return { username: user.username, userId: user.user_id }
         }
     }
@@ -33,7 +33,7 @@ export default class AuthService {
 
             let data = await res.json()
             if (data.success) {
-                await this.saveAuthToken(data.auth_token, data.auth_token_exp)
+                await this.saveAuthToken(JSON.stringify(data.auth_token), JSON.stringify(data.auth_token_exp))
             }
 
             return data.success
@@ -42,12 +42,12 @@ export default class AuthService {
         }
     }
 
-    static async saveAuthToken(authToken: string, authTokenExp: string) {
+    static async saveAuthToken(authToken: string | number, authTokenExp: string | number) {
         if (Platform.OS !== "web") {
-            await SecureStore.setItemAsync("auth_token", authToken)
-            await SecureStore.setItemAsync("auth_token_exp", authTokenExp)
+            await SecureStore.setItemAsync("auth_token", String(authToken))
+            await SecureStore.setItemAsync("auth_token_exp", String(authTokenExp))
         }  else {
-            await AsyncStorage.setItem("auth_token_exp", authTokenExp)
+            await AsyncStorage.setItem("auth_token_exp", String(authTokenExp))
         }
     }
 
