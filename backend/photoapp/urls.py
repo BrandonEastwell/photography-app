@@ -21,6 +21,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("csrf", views.csrf),
+    path("ping", views.ping),
     path("refresh-token", views.refresh_token),
     path("session", views.session),
     path("api/account/", include('accounts.account_urls')),

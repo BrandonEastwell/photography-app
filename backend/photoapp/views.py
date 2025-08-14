@@ -2,7 +2,7 @@ import logging
 
 import environ
 from accounts.models import Session
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.middleware.csrf import get_token
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -11,6 +11,9 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 env = environ.Env()
+
+def ping(req):
+    return HttpResponse(status=200)
 
 def csrf(req):
     return JsonResponse({"csrfToken": get_token(req)})
