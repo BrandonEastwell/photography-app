@@ -4,7 +4,10 @@ import * as Location from "expo-location";
 import {ExifData} from "@/app/lib/Types";
 import LocationPicker from "@/components/LocationPicker";
 
-export default function LocationInput({ setExif } : { setExif: React.Dispatch<React.SetStateAction<ExifData>> }) {
+export default function LocationInput({ setExif, exif } : {
+    setExif: React.Dispatch<React.SetStateAction<ExifData>>
+    exif: ExifData;
+}) {
     const [showMap, setShowMap] = useState<boolean>(false);
 
     const getCurrentLocation = async () => {
@@ -23,17 +26,18 @@ export default function LocationInput({ setExif } : { setExif: React.Dispatch<Re
                     justifyContent: "center", alignItems: "center"}}>
                     <Text style={{ color: 'black' }}>Use current location</Text>
                 </Pressable>
-                <Pressable onPress={() => setShowMap(true)} style={{ backgroundColor: "#ffffff",
-                    padding: 10, paddingHorizontal: 20, borderRadius: 15, flexDirection: "row", gap: 10,
-                    justifyContent: "center", alignItems: "center"}}>
-                    <Text style={{ color: 'black' }}>Select location</Text>
-                </Pressable>
+                {/*<Pressable onPress={() => setShowMap(true)} style={{ backgroundColor: "#ffffff",*/}
+                {/*    padding: 10, paddingHorizontal: 20, borderRadius: 15, flexDirection: "row", gap: 10,*/}
+                {/*    justifyContent: "center", alignItems: "center"}}>*/}
+                {/*    <Text style={{ color: 'black' }}>Select location</Text>*/}
+                {/*</Pressable>*/}
             </View>
-            <Pressable onPress={getCurrentLocation} style={{ backgroundColor: "rgba(12,12,12, 1)",
-                padding: 10, paddingHorizontal: 20, borderRadius: 15, justifyContent: "center", alignItems: "center"}}>
-                <Text style={{ fontSize: 14, fontFamily: "SpaceMono-Regular",
-                    color: 'rgba(229,229,229,0.97)'}}>No location set</Text>
-            </Pressable>
+            <View style={{ backgroundColor: "rgba(12,12,12, 1)", padding: 10, paddingHorizontal: 20, borderRadius: 15,
+                justifyContent: "center", alignItems: "center" }}>
+                <Text style={{ fontSize: 14, fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)'}}>
+                    {exif.GPSLatitude === undefined && exif.GPSLongitude === undefined ? "No location set" : `${exif.GPSLatitude}, ${exif.GPSLongitude}`}
+                </Text>
+            </View>
             { showMap && <LocationPicker /> }
         </View>
     )

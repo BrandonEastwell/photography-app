@@ -56,7 +56,7 @@ export default function InputField({ placeholder, onChangeText, value, error, it
     });
 
     return (
-        <View style={{ position: "relative", zIndex: zIndex, marginBottom: 20 }}>
+        <View style={{ position: "relative", zIndex: zIndex, marginBottom: 20, elevation: zIndex }}>
             <View style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -90,7 +90,7 @@ export default function InputField({ placeholder, onChangeText, value, error, it
             </View>
             { showOptions &&
                 <ScrollView style={{ position: "absolute", paddingTop: 10, maxHeight: 250, width: '100%', top: 40,
-                    borderRadius: 6, backgroundColor: 'black', zIndex: zIndex }}>
+                    borderRadius: 6, backgroundColor: 'black', zIndex: zIndex, elevation: zIndex }}>
                     { options.map((option) => (
                         <Pressable key={option} onPress={() => onChange(option)} style={{ flexDirection: "row",
                             paddingHorizontal: 10, borderRadius: 6, height: 40, width: '100%', justifyContent: "center"}}>

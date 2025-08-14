@@ -126,8 +126,7 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClear, o
                 <View style={{ width: "100%", height: "100%", maxWidth: 430, padding: 30, flexDirection: "column", justifyContent: "center", marginHorizontal: "auto" }}>
                     <View style={{ marginBottom: 20 }}>
                         <View style={{ padding: 7.5, borderRadius: 15, flexDirection: "row", gap: 10, zIndex: 100, width: "100%", justifyContent: "flex-end" }}>
-                            <AntDesign hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
-                                       onPress={onClose} name="close" size={24} color="white" />
+                            <AntDesign onPress={onClose} name="close" size={24} color="white" />
                         </View>
                         <Text style={{ fontSize: 24, marginBottom: 10, fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)'}}>
                             { formMode === "Photo" ? "Add Missing Attributes" : "Search Filters" }</Text>
@@ -135,7 +134,7 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClear, o
                             color: 'rgba(229,229,229,0.97)'}}>These attributes help your photo appear in more search results.</Text> }
                     </View>
 
-                    {/*<LocationInput setExif={setExif}></LocationInput>*/}
+                    <LocationInput setExif={setExif} exif={exif}></LocationInput>
 
                     { Object.entries(exif).map(([field]) => {
                         if (field in exifFormFields) {
@@ -152,21 +151,8 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClear, o
                             />
                         }
                     })}
-
-                    <AnimatedButton onClick={onFormSubmit} styles={{
-                        padding: 10,
-                        paddingHorizontal: 20,
-                        borderRadius: 15,
-                        flexDirection: "row",
-                        gap: 10,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginTop: 20
-                    }} defaultBgColor={"#ffffff"} hoverBgColor={"#ECECECD0"} hoverToPressedBgColor={"rgba(162,162,162,0.82)"}>
-                        <Text style={{ color: 'black' }}>{ formMode === "Photo" ? "Preview Photo" : "Search Photos" }</Text>
-                    </AnimatedButton>
-                    { onClear &&
-                        <AnimatedButton onClick={onClear} styles={{
+                    <View style={{ flexDirection: "row", justifyContent: "center", gap: 10 }}>
+                        <AnimatedButton onClick={onFormSubmit} styles={{
                             padding: 10,
                             paddingHorizontal: 20,
                             borderRadius: 15,
@@ -176,9 +162,23 @@ export default function ExifForm({ setExif, exif, onSubmit, formMode, onClear, o
                             alignItems: "center",
                             marginTop: 20
                         }} defaultBgColor={"#ffffff"} hoverBgColor={"#ECECECD0"} hoverToPressedBgColor={"rgba(162,162,162,0.82)"}>
-                            <Text style={{ color: 'black' }}>Clear Filters</Text>
+                            <Text style={{ color: 'black' }}>{ formMode === "Photo" ? "Preview Photo" : "Search Photos" }</Text>
                         </AnimatedButton>
-                    }
+                        { onClear &&
+                            <AnimatedButton onClick={onClear} styles={{
+                                padding: 10,
+                                paddingHorizontal: 20,
+                                borderRadius: 15,
+                                flexDirection: "row",
+                                gap: 10,
+                                justifyContent: "center",
+                                alignItems: "center",
+                                marginTop: 20
+                            }} defaultBgColor={"#ffffff"} hoverBgColor={"#ECECECD0"} hoverToPressedBgColor={"rgba(162,162,162,0.82)"}>
+                                <Text style={{ color: 'black' }}>Clear Filters</Text>
+                            </AnimatedButton>
+                        }
+                    </View>
                 </View>
             </View>
         )
