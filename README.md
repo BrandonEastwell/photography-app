@@ -32,7 +32,7 @@ As a movie enthusiast and developer, I wanted a tool to streamline the search fo
 ### Account Creation
 
 <p style="align-self: center">
-  <img src="./img/signup-demo.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
+  <img src="./img/photoapp-login-signup.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
 </p>
 
 ---
@@ -40,7 +40,7 @@ As a movie enthusiast and developer, I wanted a tool to streamline the search fo
 ### Upload Your Photo
 
 <p style="align-self: center">
-  <img src="./img/favourite-demo.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
+  <img src="./img/photoapp-upload.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
 </p>
 
 ---
@@ -56,7 +56,15 @@ As a movie enthusiast and developer, I wanted a tool to streamline the search fo
 ### Advanced Camera Based Filtering
 
 <p style="align-self: center">
-  <img src="./img/watchlist-page-demo.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
+  <img src="./img/photoapp-search.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
+</p>
+
+---
+
+### Portfolio Profile Page
+
+<p style="align-self: center">
+  <img src="./img/photoapp-portfolio.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
 </p>
 
 ---
