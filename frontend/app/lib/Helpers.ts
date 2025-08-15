@@ -14,10 +14,12 @@ async function fetchRequest(resource: string , data: any, headers: Record<string
 }
 
 export async function getReqHeaders() {
-    const headers: Record<string, string> = {"Platform": Platform.OS}
+    const headers: Record<string, string> = { "Platform": Platform.OS }
     if (Platform.OS !== "web") {
         const sessionId = await SecureStore.getItemAsync('session_id');
-        if (sessionId) headers["Session"] = sessionId
+        if (sessionId) headers["Session"] = sessionId;
+        const token = await SecureStore.getItemAsync("auth_token") as string;
+        if (token) headers['Authorization'] = `Bearer ${token}`;
     }
     return headers
 }

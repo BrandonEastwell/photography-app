@@ -9,26 +9,22 @@ import {View, Text} from "react-native";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 export default function RootLayout() {
-    const [loaded, error] = useFonts({
+    const [loaded] = useFonts({
         'BethEllen-Regular': require("../assets/fonts/BethEllen-Regular.ttf"),
         'SpaceMono-Regular': require("../assets/fonts/SpaceMono-Regular.ttf"),
     });
     const [serverAwake, setServerAwake] = useState<boolean | null>(null)
     const [message, setMessage] = useState<string | null>(null)
 
-    if (!loaded) {
-        return null;
-    }
-
     useEffect(() => {
         const pingServer = async () => {
-            let warningTimer = setTimeout(() => {
+            const warningTimer = setTimeout(() => {
                 setServerAwake(false)
                 setMessage("Backend is inactive, spinning up (may take a minute)")
-            }, 2000);
+            }, 3000);
 
             try {
-                await fetch(`${apiUrl}/api/ping`)
+                await fetch(`${apiUrl}/ping`)
             } catch (e) {
                 console.error(e)
                 setMessage("Backend API is down or unavailable (free hosting issues)")
@@ -41,26 +37,27 @@ export default function RootLayout() {
         pingServer()
     }, []);
 
-    if (serverAwake) {
-        return (
-            <LoadingProvider>
-                <MessageProvider>
-                    <AuthProvider>
+    if (!loaded) return null;
+
+    return (
+        <LoadingProvider>
+            <MessageProvider>
+                <AuthProvider>
+                    {serverAwake === true && (
                         <Stack>
                             <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
                         </Stack>
-                    </AuthProvider>
-                </MessageProvider>
-            </LoadingProvider>
-        )
-    }
+                    )}
 
-    if (!serverAwake) {
-        return (
-            <View style={{ width: "100%", height: "100%", backgroundColor: '#181a1b', flexDirection: "row", justifyContent: "center" }}>
-                <Text style={{ paddingVertical: 10, paddingHorizontal: 20, fontSize: 24, textAlign: "center",
-                    fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)' }}>{ message }</Text>
-            </View>
-        )
-    }
+                    {serverAwake === false && (
+                        <View style={{ width: "100%", height: "100%", backgroundColor: '#181a1b', flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                            <Text style={{ paddingVertical: 10, paddingHorizontal: 20, fontSize: 24, textAlign: "center",
+                                fontFamily: "SpaceMono-Regular", color: 'rgba(229,229,229,0.97)' }}>{ message }</Text>
+                        </View>
+                    )}
+                </AuthProvider>
+            </MessageProvider>
+        </LoadingProvider>
+    )
 }
+

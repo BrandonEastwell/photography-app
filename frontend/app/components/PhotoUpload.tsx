@@ -1,11 +1,10 @@
-import {Modal, Pressable, View, Text, Platform} from "react-native";
+import {View, Text, Platform} from "react-native";
 import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
 import * as ImagePicker from 'expo-image-picker';
 import {ImagePickerAsset} from "expo-image-picker";
 import {ExifData} from "@/app/lib/Types";
 import ExifForm from "@/app/components/ExifForm";
 import Constants from 'expo-constants';
-import * as SecureStore from "expo-secure-store";
 import AuthService from "@/app/lib/AuthService";
 import {router} from "expo-router";
 import PhotoCardContent from "@/app/components/PhotoCardContent";
@@ -13,6 +12,8 @@ import PhotoModal from "@/app/components/PhotoModal";
 import AnimatedButton from "@/app/components/AnimatedButton";
 import {useMessage} from "@/app/lib/MessagingContext";
 import {useAuth} from "@/app/lib/AuthContext";
+import * as FileSystem from 'expo-file-system';
+import {getReqHeaders} from "@/app/lib/Helpers";
 const apiUrl = Constants.expoConfig?.extra?.API_URL;
 
 const emptyExifData: ExifData = {
@@ -53,8 +54,8 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
             setShowUpload(false)
         } else {
             let image = result.assets[0]
-            if (!image.fileSize || image.fileSize > 10000000) {
-                setMessage({ message: "Photo over 10MB limit", error: true })
+            if (!image.fileSize || image.fileSize > 50000000) {
+                setMessage({ message: "Photo over 50MB limit", error: true })
                 return setShowUpload(false)
             }
 
@@ -78,15 +79,25 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
         if (Platform.OS === "web" && imageUpload.file) {
             formData.append("image", imageUpload.file, imageUpload.file.name);
         } else {
-            // @ts-ignore
-            formData.append('image', {
+            const fileName =
+                imageUpload.fileName ||
+                imageUpload.uri.split("/").pop() ||
+                `upload_${Date.now()}.jpg`;
+
+            formData.append("image", {
                 uri: imageUpload.uri,
-                name: imageUpload.fileName,
-                type: imageUpload.type
-            })
+                name: fileName,
+                type: imageUpload.fileName?.endsWith('.png') ? 'image/png' : 'image/jpeg'
+            } as any);
         }
 
-        if (exif) Object.entries(exif).map(([key, value]) => formData.append(key, value))
+        if (exif) {
+            Object.entries(exif).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    formData.append(key, String(value));
+                }
+            });
+        }
         await uploadPhoto(formData)
     }
 
@@ -116,19 +127,21 @@ export default function PhotoUpload({ setShowUpload } : { setShowUpload: Dispatc
         setShowUpload(false)
     }
     
-    async function postPhoto(formData: any) {
-        const headers: Record<string, string> = {"Platform": Platform.OS}
-
-        if (Platform.OS !== "web") {
-            const token = await SecureStore.getItemAsync("auth_token") as string
-            headers['Authorization'] = `Bearer ${token}`
+    async function postPhoto(formData: FormData) {
+        const headers = await getReqHeaders()
+        if (Platform.OS === "web") {
+            return await fetch(`${apiUrl}/api/media/photos`, {
+                method: "POST",
+                body: formData,
+                headers,
+                credentials: "include",
+            })
         }
 
         return await fetch(`${apiUrl}/api/media/photos`, {
             method: "POST",
             body: formData,
-            headers,
-            credentials: "include",
+            headers
         })
     }
 
