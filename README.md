@@ -23,7 +23,7 @@ As a movie enthusiast and developer, I wanted a tool to streamline the search fo
 
 - **Local Photo Search Filtering:** Instantly find photos taken around you to inspire your own creativity.
 - **Advanced Search Filters:** Search for photos by camera, lens and camera settings such as ISO, shutter speed, aperture and more.
-- **Personal Portfolio:** Add the photos you take to your own personal portfolio and show it off.
+- **Personal Portfolio:** Upload the photos you take to your own personal portfolio and show it off.
 
 ## Demonstration
 
@@ -32,7 +32,7 @@ As a movie enthusiast and developer, I wanted a tool to streamline the search fo
 ### Account Creation
 
 <p style="align-self: center">
-  <img src="./img/photoapp-login-signup.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
+  <img src="./img/signup-demo.gif" alt="Photoapp Demo" style="width:100%; max-width:600px;" />
 </p>
 
 ---
@@ -40,7 +40,7 @@ As a movie enthusiast and developer, I wanted a tool to streamline the search fo
 ### Upload Your Photo
 
 <p style="align-self: center">
-  <img src="./img/photoapp-upload.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
+  <img src="./img/favourite-demo.gif" alt="Photoapp Demo" style="width:100%; max-width:600px;" />
 </p>
 
 ---
@@ -48,7 +48,7 @@ As a movie enthusiast and developer, I wanted a tool to streamline the search fo
 ### Proximity Based Search
 
 <p style="align-self: center">
-  <img src="./img/watchlist-demo.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
+  Not working as intended at the moment
 </p>
 
 ---
@@ -56,18 +56,8 @@ As a movie enthusiast and developer, I wanted a tool to streamline the search fo
 ### Advanced Camera Based Filtering
 
 <p style="align-self: center">
-  <img src="./img/photoapp-search.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
+  <img src="./img/watchlist-page-demo.gif" alt="Photoapp Demo" style="width:100%; max-width:600px;" />
 </p>
-
----
-
-### Portfolio Profile Page
-
-<p style="align-self: center">
-  <img src="./img/photoapp-portfolio.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
-</p>
-
----
 
 ## Technical Stack
 - **Frameworks**: Expo
@@ -79,6 +69,9 @@ As a movie enthusiast and developer, I wanted a tool to streamline the search fo
 
 ## Known Issues
 - Some page load animation issues
+- IOS is untested
+- Android photo upload is broken
+- Proximity photo filtering does not apply distance rankings (no change)
  
 ## Todo
 > Feature list planned to be worked on in the future
