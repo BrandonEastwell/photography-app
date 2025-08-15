@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
-from django.db.models import When, Q, Value, Sum, IntegerField, Case
+from django.db.models import When, Q, Value, Sum, IntegerField, Case, ExpressionWrapper
 from django.utils import timezone
 
 
@@ -64,7 +64,16 @@ class PhotoService:
             )]
 
         if conditions:
-            print(conditions)
-            qs = qs.annotate(relevance=sum(conditions))
-            return qs.order_by("-relevance")
+            # combine all Case expressions by adding them
+            total_relevance = conditions[0]
+            for cond in conditions[1:]:
+                 total_relevance = ExpressionWrapper(total_relevance + cond, output_field=IntegerField())
+
+            qs = qs.annotate(relevance=total_relevance).order_by('-relevance')
+
+        # if conditions:
+        #     print(conditions)
+        #     qs = qs.annotate(relevance=sum(conditions))
+        #     return qs.order_by("-relevance")
+
         return qs
