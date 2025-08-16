@@ -12,6 +12,9 @@ export default {
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     extra: {
+      eas: {
+        "projectId": "8cc1741c-72ff-4705-8194-c2835dacaa45"
+      },
       API_URL: process.env.API_URL,
     },
     ios: {
@@ -26,7 +29,7 @@ export default {
     },
     web: {
       bundler: "metro",
-      output: "static",
+      output: "single",
       favicon: ""
     },
     splash: {
