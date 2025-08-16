@@ -3,7 +3,7 @@
 This photography app is a photo local searching and portfolio web app built on the Expo framework that is cross compatible on web and mobile using React Native, aiming to provide a way to showcase professional photography and get local inspiration.
 
 <p style="align-self: center">
-  <img src="./img/landing-demo.gif" alt="Sivter Landing Demo" style="width:100%; max-width:800px;" />
+  <img src="./img/photoapp-cover.gif" alt="Photoapp Landing Demo" style="width:100%; max-width:600px;" />
 </p>
 
 # Contents
