@@ -1,6 +1,7 @@
 .idea
 frontend/node_modules
 backend/.virtualenvs/
+frontend/.env
 
 # Django stuff:
 *.log
@@ -11,3 +12,4 @@ backend/photoapp/.env
 __pycache__/
 *.py[cod]
 *$py.class
+

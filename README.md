@@ -17,7 +17,7 @@ This photography app is a photo local searching and portfolio web app built on t
 
 ## Why?
 
-As a movie enthusiast and developer, I wanted a tool to streamline the search for the next movie to watch without having to hop between streaming platforms. This project helped me explore server side rendering, restful APIs, JWT authentication and database design to enable CRUD operations.
+As a photography enthusiast and developer, I wanted a platform that not only lets me showcase my own work but also helps me discover photography around me for inspiration. Existing apps felt either too generic or too locked into social media ecosystems, so I set out to build a tool tailored for photographers. This project gave me the chance to explore geolocation-based search, metadata extraction & filtering, and image uploads while diving deeper into Django, REST APIs, React Native and cross-platform mobile & web development with Expo.
 
 ## Features
 
