@@ -122,8 +122,8 @@ DATABASES = {
         }
     } if PRODUCTION is True else {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'photoapp_db',
-        'USER': 'admin',
+        'NAME': 'photoapp',
+        'USER': 'photoapp_user',
         'PASSWORD': 'password',
         'HOST': 'localhost',
         'PORT': '5432',
