@@ -1,0 +1,17 @@
+name: Django Backend Startup
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Docker Build
+        run: docker compose build

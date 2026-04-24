@@ -27,7 +27,7 @@ export default function RootLayout() {
                 await fetch(`${apiUrl}/ping`)
             } catch (e) {
                 console.error(e)
-                setMessage("Backend API is down or unavailable (free hosting issues)")
+                setMessage("Backend API is down or unavailable (free hosting services)")
             } finally {
                 clearTimeout(warningTimer)
                 setServerAwake(true)
